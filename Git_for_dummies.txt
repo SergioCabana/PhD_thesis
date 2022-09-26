@@ -123,4 +123,7 @@ Naturalmente la cosa se complica al meter ramas
 
 
 Puede haber problemas al usar la identificacion con claves ssh. Por ejemplo, los nodos del igfae generan claves con protocolo RSA usando SHA-1,
-desfasado con GitHub (pide SHA-2). Solucion, generar claves con otros protocolos (ECDSA por ejemplo) y guardar esas claves en github
+desfasado con GitHub (pide SHA-2). Solucion, generar claves con otros protocolos (ECDSA por ejemplo) y guardar esas claves en github. 
+Para esto ultimo (https://stackoverflow.com/questions/71500791/eclipse-git-youre-using-an-rsa-key-with-sha-1-which-is-no-longer-allowed-pl):
+
+>> ssh-keygen -t ecdsa -b 521 -C "your_email@example.com"
