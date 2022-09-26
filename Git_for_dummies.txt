@@ -1,0 +1,126 @@
+=============================== GIT PARA TONTOS (PENSANDO EN EL AUTOR) =============================================
+
+Objetivo: Uso basico de Git/GitHub sin ir muy lejos. Crear carpetas con git, crear repositorios,
+	sincronizacion, trabajo en repos desde distintos equipos, etc.
+
+DISCLAIMER: Esto esta pensado para un uso INDIVIDUAL de Git/GitHub. Si hay alguna colaboracion con mas gente, cierra este documento ya
+
+====================================== INSTALACION ====================================================
+
+Linux            : sudo apt-get install git (si no esta instalado ya, extraño en linux)
+
+Mac OSX, Windows : Vete a la pagina web https://git-scm.com/download/
+
+Interesante disponer de GitHub desktop, mas visual para ver el status de los archivos https://desktop.github.com/
+No es necesario, en UNIX puede hacerse todo si estas dispuesto a escribir un numero irrisoriamente grande de comandos por terminal
+
+==================================== INICIALIZACION EN LOCAL ===========================================
+
+Lo primero, una serie de ajustes globales:
+
+>> git config --global user.name "Ronaldinho Gaucho"
+>> git config --global user.email ronaldinhogaucho9@terra.es
+>> git config --global branch.autosetuprebase always           (lo que diga Hector Alvarez, autor de las diapos que estoy mirando)
+>> git config --global core.ignorecase false
+>> git config --global core.editor emacs                       (al gusto del consumidor)
+
+Todo lo anterior puede consultarse. Por ejemplo:
+>> git config user.name
+Ronaldinho Gaucho
+
+Para inicializar el control con git (crea un fichero .git):
+>> cd carpeta    #vamos al directorio que queremos controlar 
+>> git init
+
+A partir de ahora todos los archivos del directorio quedan bajo el control de git. Para guardar cambios:
+
+>> git add <files>                                        # pasar ficheros a stage (paso intermedio)
+>> git commit -m 'Mensaje para identificar el commit'     # actualiza los archivos. El mensaje es clave para recuperar este estado concreto en un futuro
+
+Podemos consultar estado actual e historial de commits con (respectivamente):
+
+>> git status        # ficheros modificados y staged, commits pendientes 
+>> git log           # historial de commits, identificados por el mensaje y hash
+>> git diff          # cambios desde el ultimo commit en archivos fuera del stage
+>> git diff --staged # cambios desde el ultimo commit en archivos en stage
+
+Cada commit va identificado por un hash (un string de caracteres mu largo). Ese hash identifica cada sucesivo estado del repo. 
+Pueden revertirse en cualquier momento los cambios de cierto commit:
+>> git revert <commit_ID>
+
+Tambien pueden deshacerse todos los cambios a partir de cierto commit:ç
+>> git reset <commit_ID>
+
+=============================================== REPOSITORIO REMOTO A PARTIR DE DIRECTORIO LOCAL ====================================
+
+Ya tenemos un directorio en nuestro ordenador controlado por Git. Queremos crear un repositorio en linea sincronizado con este directorio
+
+Primer paso: Abrirse una cuenta en GitHub https://github.com/
+
+Vamos a Repositorios -> New. Le ponemos un nombre (recomendable que sea el del directorio local) y le damos a crear
+
+La opcion de crear un archivo README.md puede no marcarse. Siempre recomendable tener un README, pero puede hacerse despues
+
+Una vez tenemos nuestro repositorio en remoto, sincronizamos con local
+
+>> git remote add origin https://github.com/UserNameInGitHub/RepoName.git
+>> git branch -M main
+>> git push -u origin main
+
+Ya tenemos el directorio sincronizado. Podemos seguir usando git en local como antes.
+Cuando queramos actualizar el repositorio en remoto, usamos:
+
+>> git push -u origin main
+
+Para comprobar status del repositorio remoto:
+
+>> git remote show origin
+
+=========================================== CLONAR UN REPOSITORIO EXISTENTE ===============================================
+
+Nuestro repositorio en linea ya existe, y queremos trabajar sobre el en local, por ejemplo, en otro equipo.
+
+Lo primero que tendremos que hacer es identificar que el nuevo equipo es nuestro. Usamos claves ssh (GitHub abandono contraseñas en 2021)
+Debemos comenzar generando y obteniendo la clave publica SSH del nuevo equipo que queremos sincronizar:
+
+>> cd ~/.ssh                            #para escribir virgulilla: altgr+4 y luego espacio (WINDOWS), altgr+ñ (LINUX-UBUNTU)
+>> ssh-keygen                           #Presionamos Enter hasta que acabe, y ya hemos generado la clave ssh
+
+>> cat ~/.ssh/id_rsa.pub
+
+Copiamos la clave que aparecera, incluyendo el 'ssh-rsa' pero excluyendo el nombre del ordenador al final (i.e. 'ssh-rsa <char_string>').cd 
+Vamos a https://github.com/settings/profile -> SSH and GPG keys -> New SSH key. Copiamos la clave. Con esto identificamos el nuevo equipo.
+ 
+Ahora, usamos el comando clone en la ruta donde queremos añadir nuestra carpeta de git.
+La ruta ssh del repo puede sacarse desde github, clickando en 'code'
+
+>> git clone git@github.com:UserNameInGitHub/RepoName.git
+
+Comprobamos, en el directorio creado, que la ruta del repo es correcta
+
+>> git remote -v
+
+Con esto, y al haber identificado el equipo con la clave ssh, podemos trabajar desde varios equipos a la vez, sincronizando todo.
+Una vez trabajamos con esta configuracion, es importante que la primero al empezar a trabajar sea:
+
+>> git pull (ponemos el local al dia con el repo)
+
+y lo ultimo:
+
+>> git push (subimos los cambios de la sesion de trabajo al repo)
+
+Seguramente hay una manera de no tener que hacer esto y trabajar de manera mas eficiente, cambiando lo necesario y sin pull-push
+Recomendacion de novato (yo): hacer varios repos si te hace falta
+
+El pull es una combinacion de dos comandos: fetch+merge. Fetch trae los archivos desde el remoto y los coloca en una rama oculta,
+merge une la rama oculta con main (o algo asi era). Estos comandos pueden usarse para ganar control, si se sabe usarlos.
+
+
+======================================== ALGUNOS DISCLAIMERS ======================================================
+
+Todo lo anterior se ha hecho en base a un unico repo en remoto (por defecto, origin) con una unica rama (por defecto main)
+Naturalmente la cosa se complica al meter ramas
+
+
+Puede haber problemas al usar la identificacion con claves ssh. Por ejemplo, los nodos del igfae generan claves con protocolo RSA usando SHA-1,
+desfasado con GitHub (pide SHA-2). Solucion, generar claves con otros protocolos (ECDSA por ejemplo) y guardar esas claves en github
