@@ -1,0 +1,288 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[spanish]{babel}         
+\usepackage[utf8]{inputenc}           
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{tikz}
+\usepackage{anysize}
+\usepackage{multicol}
+\usepackage{bm}
+\usepackage{textcomp}
+\usepackage{eurosym}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{lineno}
+\usepackage{epstopdf}
+\usepackage{fancyhdr}
+\usepackage{subfigure}
+\usepackage{float}
+\usepackage[square, numbers]{natbib}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[linkcolor=blue,colorlinks,]{hyperref}
+\usepackage[all]{hypcap}
+%\usepackage{lipsum}
+\usepackage{mathdots}
+\usepackage{yhmath}
+\usepackage{cancel}
+%\usepackage{siunitx}
+\usepackage{gensymb}
+\usepackage{booktabs}
+
+\usetikzlibrary{fadings}
+\usetikzlibrary{patterns}
+
+\marginsize{1.5cm}{1.5cm}{2cm}{2cm} % MÁRGENES: Izq, Der, Sup, Inf.
+\parindent=0mm                        % Sangría por defecto. 
+\parskip=3mm                          % Espacio entre párrafos por defecto.
+\renewcommand{\baselinestretch}{1}    % Interlineado.
+
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\spanishtablename}{Tabla} %Denominacion para tablas
+\renewcommand{\spanishabstractname}{} %Denominacion para el abstract
+\renewcommand{\spanishrefname}{} %Denominacion para las referencias
+\renewcommand{\spanishfigurename}{Figura} %Denominacion para imagenes
+\renewcommand{\spanishchaptername}{} %Denominacion para capitulos
+\renewcommand{\spanishcontentsname}{Índice} %Denominacion para el indice
+
+\fancyhead[LE,RO]{} %Cabecera a la izquierda  
+\fancyhead[RE,LO]{} %Cabecera a la derecha
+\fancyfoot[LE,RO]{} %Abajo a la izquierda
+\fancyfoot[RE,LO]{} %Abajo a la derecha    %Creo que al reves en clase article
+\fancyfoot[C]{} %En el centro
+\pagestyle{fancy}
+
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+%opening
+\title{\textbf{AIRES, ZHAireS y RASPASS: Cuentas y plantillas}}
+\author{Sergio Cabana Freire}
+\date{\today} 
+
+
+\begin{document}   
+	
+	\maketitle
+	\begin{abstract}
+		Voy a recoger aquí las cuentas que vaya haciendo sobre la geometría de los programas. También incluiré algunas plantillas para input files y las normas que se me ocurran para nombrar ficheros de manera eficiente. Lo que sigue está pensado para AIRES 19.04.08 (22/Oct/2021) con la extensión ZHAireS 1.0.30a (30/Jun/2022), que incluye RASPASS\footnote{ \textit{Raspass is an Aires Special Primary for Atmospheric Skimming Showers}. Primera sigla recursiva observada en la naturaleza.}. Las diferencias con versiones anteriores estarán en la geometría (aunque los cálculos podrán adaptarse, simplemente fijando algunos parámetros que en RASPASS son libres) y en alguna tabla o instrucción IDL nueva, nada más.
+		
+		
+		\vspace{10mm}
+		Referencias importantes:
+		
+		\href{http://aires.fisica.unlp.edu.ar/}{Página web de AIRES / ZHAireS. Documentación actualizada}
+		
+		\href{https://indico.cern.ch/event/826366/contributions/4881703/attachments/2459764/4218361/Tueros-%20ARENA%2020222%20-%20RASPASS%20Showers.pdf}{Presentación de RASPASS. Matías Tueros, ARENA 2022}
+	\end{abstract}
+	\tableofcontents
+	\newpage
+	
+	\section{Geometría en RASPASS}
+	\tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+	\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+
+		%uncomment if require: \path (0,458); %set diagram left start at 0, and has height of 458
+		
+		%Straight Lines [id:da24054111542845868] 
+		\draw    (357.8,23) -- (357.3,441) ;
+		\draw [shift={(357.8,20)}, rotate = 90.07] [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.08]  [draw opacity=0] (8.93,-4.29) -- (0,0) -- (8.93,4.29) -- cycle    ;
+		%Straight Lines [id:da7710588561097498] 
+		\draw    (40,202) -- (357.8,143) ;
+		\draw [shift={(357.8,143)}, rotate = 349.48] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
+		\draw [shift={(40,202)}, rotate = 349.48] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
+		%Straight Lines [id:da8825568085983706] 
+		\draw  [dash pattern={on 4.5pt off 4.5pt}]  (357.8,143) -- (574.85,101.56) ;
+		\draw [shift={(577.8,101)}, rotate = 169.19] [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.08]  [draw opacity=0] (8.93,-4.29) -- (0,0) -- (8.93,4.29) -- cycle    ;
+		%Straight Lines [id:da09435750281004718] 
+		\draw    (357.3,181) -- (490.8,181.98) ;
+		\draw [shift={(493.8,182)}, rotate = 180.42] [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.08]  [draw opacity=0] (8.93,-4.29) -- (0,0) -- (8.93,4.29) -- cycle    ;
+		%Straight Lines [id:da2786415192647693] 
+		\draw    (40,202) -- (357.3,441) ;
+		%Straight Lines [id:da05933265632010665] 
+		\draw  [dash pattern={on 4.5pt off 4.5pt}]  (9.79,206.84) -- (40,202) ;
+		\draw [shift={(10.77,206.68)}, rotate = 170.9] [fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.08]  [draw opacity=0] (8.93,-4.29) -- (0,0) -- (8.93,4.29) -- cycle    ;
+		%Curve Lines [id:da9168852208815295] 
+		\draw [color={rgb, 255:red, 248; green, 231; blue, 28 }  ,draw opacity=1 ][line width=1.5]    (333.8,147) .. controls (332.8,131) and (336.8,122) .. (357.8,116) ;
+		%Curve Lines [id:da23814962464976852] 
+		\draw    (344,146) .. controls (343.8,153) and (348.8,157) .. (356.8,156) ;
+		%Straight Lines [id:da8178069675474764] 
+		\draw [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (30.95,137.46) -- (344.85,79.54) ;
+		\draw [shift={(347.8,79)}, rotate = 169.55] [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (14.21,-6.37) .. controls (9.04,-2.99) and (4.3,-0.87) .. (0,0) .. controls (4.3,0.87) and (9.04,2.99) .. (14.21,6.37)   ;
+		\draw [shift={(28,138)}, rotate = 349.55] [color={rgb, 255:red, 208; green, 2; blue, 27 }  ,draw opacity=1 ][line width=1.5]    (14.21,-6.37) .. controls (9.04,-2.99) and (4.3,-0.87) .. (0,0) .. controls (4.3,0.87) and (9.04,2.99) .. (14.21,6.37)   ;
+		%Straight Lines [id:da10918348040808445] 
+		\draw [color={rgb, 255:red, 189; green, 16; blue, 224 }  ,draw opacity=1 ][line width=1.5]    (368.07,178) -- (368.73,148) ;
+		\draw [shift={(368.8,145)}, rotate = 91.27] [color={rgb, 255:red, 189; green, 16; blue, 224 }  ,draw opacity=1 ][line width=1.5]    (14.21,-6.37) .. controls (9.04,-2.99) and (4.3,-0.87) .. (0,0) .. controls (4.3,0.87) and (9.04,2.99) .. (14.21,6.37)   ;
+		\draw [shift={(368,181)}, rotate = 271.27] [color={rgb, 255:red, 189; green, 16; blue, 224 }  ,draw opacity=1 ][line width=1.5]    (14.21,-6.37) .. controls (9.04,-2.99) and (4.3,-0.87) .. (0,0) .. controls (4.3,0.87) and (9.04,2.99) .. (14.21,6.37)   ;
+		%Straight Lines [id:da33357063373554574] 
+		\draw    (29.62,218.17) -- (119.18,282.83) ;
+		\draw [shift={(120.8,284)}, rotate = 215.83] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-4.9) .. controls (6.95,-2.3) and (3.31,-0.67) .. (0,0) .. controls (3.31,0.67) and (6.95,2.3) .. (10.93,4.9)   ;
+		\draw [shift={(28,217)}, rotate = 35.83] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-4.9) .. controls (6.95,-2.3) and (3.31,-0.67) .. (0,0) .. controls (3.31,0.67) and (6.95,2.3) .. (10.93,4.9)   ;
+		%Straight Lines [id:da5898839119963639] 
+		\draw    (128.62,288.18) -- (348.18,447.62) ;
+		\draw [shift={(349.8,448.8)}, rotate = 215.99] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-4.9) .. controls (6.95,-2.3) and (3.31,-0.67) .. (0,0) .. controls (3.31,0.67) and (6.95,2.3) .. (10.93,4.9)   ;
+		\draw [shift={(127,287)}, rotate = 35.99] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-4.9) .. controls (6.95,-2.3) and (3.31,-0.67) .. (0,0) .. controls (3.31,0.67) and (6.95,2.3) .. (10.93,4.9)   ;
+		%Straight Lines [id:da739942628197686] 
+		\draw    (371.97,187) -- (367.83,436.8) ;
+		\draw [shift={(367.8,438.8)}, rotate = 270.95] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-4.9) .. controls (6.95,-2.3) and (3.31,-0.67) .. (0,0) .. controls (3.31,0.67) and (6.95,2.3) .. (10.93,4.9)   ;
+		\draw [shift={(372,185)}, rotate = 90.95] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-4.9) .. controls (6.95,-2.3) and (3.31,-0.67) .. (0,0) .. controls (3.31,0.67) and (6.95,2.3) .. (10.93,4.9)   ;
+		%Straight Lines [id:da7919092562367724] 
+		\draw    (629.38,212.4) -- (577.42,263.6) ;
+		\draw [shift={(576,265)}, rotate = 315.42] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-4.9) .. controls (6.95,-2.3) and (3.31,-0.67) .. (0,0) .. controls (3.31,0.67) and (6.95,2.3) .. (10.93,4.9)   ;
+		\draw [shift={(630.8,211)}, rotate = 135.42] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-4.9) .. controls (6.95,-2.3) and (3.31,-0.67) .. (0,0) .. controls (3.31,0.67) and (6.95,2.3) .. (10.93,4.9)   ;
+		%Curve Lines [id:da3011792723205482] 
+		\draw [line width=3]    (108,302) .. controls (234.8,143) and (477.8,138) .. (605.8,300) ;
+		%Curve Lines [id:da11287344757921924] 
+		\draw [line width=3]    (15,300) .. controls (121.8,84) and (469.8,13) .. (660.8,240) ;
+		
+		% Text Node
+		\draw (359.8,17) node [anchor=south west] [inner sep=0.75pt]   [align=left] {$\displaystyle z$};
+		% Text Node
+		\draw (495.8,182) node [anchor=west] [inner sep=0.75pt]   [align=left] {$\displaystyle x$};
+		% Text Node
+		\draw (169,80) node [anchor=north west][inner sep=0.75pt]  [font=\large,color={rgb, 255:red, 208; green, 2; blue, 27 }  ,opacity=1 ] [align=left] {$\displaystyle d$};
+		% Text Node
+		\draw (378,151) node [anchor=north west][inner sep=0.75pt]  [font=\large,color={rgb, 255:red, 144; green, 19; blue, 254 }  ,opacity=1 ] [align=left] {$\displaystyle h$};
+		% Text Node
+		\draw (317,113) node [anchor=north west][inner sep=0.75pt]  [font=\large,color={rgb, 255:red, 248; green, 231; blue, 28 }  ,opacity=1 ] [align=left] {$\displaystyle \theta $};
+		% Text Node
+		\draw (379,290) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle R_{T}$};
+		% Text Node
+		\draw (202,363) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle R_{T}$};
+		% Text Node
+		\draw (63,252) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle v$};
+		% Text Node
+		\draw (30,176) node [anchor=north west][inner sep=0.75pt]   [align=left] {IP};
+		% Text Node
+		\draw (471,78) node [anchor=north west][inner sep=0.75pt]   [align=left] {Eje de la cascada};
+		% Text Node
+		\draw (605.4,241) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle l_{atm}$};
+		% Text Node
+		\draw (482,265) node [anchor=north west][inner sep=0.75pt]   [align=left] {Tierra};
+		
+	\end{tikzpicture}
+		\caption{Esquema de la geometría en RASPASS}
+		\label{fig11}
+		\end{figure}
+	
+	Tenemos tres parámetros para determinar la geometría en RASPASS:
+	\begin{itemize}
+		\item RASPASSDistance, $d$. Distancia a lo largo del eje desde el punto de inyección (IP) hasta la intersección con la vertical del observador.
+		\item RASPASSHeight,  $h$. Altura a la que pasa el eje de la cascada sobre la vertical del observador.
+		\item PrimaryZenAngle, $\theta$. Ángulo entre el eje de la cascada y la vertical del observador.
+	\end{itemize}
+Esta geometría puede reducirse a casos más sencillos:
+\begin{itemize}
+	\item Cascadas hacia abajo (normales): $h = 0$, $\theta<90^\circ$.
+	\item Cascadas hacia arriba: $h = 0$, $d \leq 0$, $\theta >90^\circ$ (Inyección a nivel del suelo o por encima)
+\end{itemize}
+Todo lo que sigue es trigonometría sencilla\footnote{$\sin(\pi-x)=\sin{x}$ ; $\cos(\pi-x)=-\cos{x}$}:
+\begin{equation}
+	(R_T+v)^2=(R_T+h)^2+d^2+2d(R_T+h)\cos\theta
+	\label{ec11}
+\end{equation}
+\newpage
+\subsection{Altura del punto de inyección}
+Despejando de \eqref{ec11}:
+\begin{equation}
+	v = \sqrt{(R_T+h)^2+d^2+2d(R_T+h)\cos\theta}-R_T
+	\label{ec12}
+\end{equation}
+\subsection{Valor de $d$ en función de $v$ (y demás parámetros RASPASS)}
+La ecuación \eqref{ec11} es una cuadrática en d:
+\begin{equation}
+	d=-(R_T+h)\cos\theta+\sqrt{(R_T+h)^2\cos^2\theta-\left[h^2-v^2+2R_T(h-v)\right]}
+	\label{ec13}
+\end{equation}
+\subsection{Altura en la atmósfera, $H$, en función de distancia recorrida a lo largo del eje desde IP}
+\begin{figure}[H]
+	\centering
+\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+	%uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+	
+	%Straight Lines [id:da5554117546302768] 
+	\draw    (90,80.78) -- (473.23,268) ;
+	%Straight Lines [id:da38790146210321685] 
+	\draw    (90,80.78) -- (520.8,44) ;
+	\draw [shift={(90,80.78)}, rotate = 355.12] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][fill={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]      (0, 0) circle [x radius= 3.35, y radius= 3.35]   ;
+	%Straight Lines [id:da42930679641114566] 
+	\draw    (473.23,268) -- (520.8,44) ;
+	%Straight Lines [id:da02718269904522752] 
+	\draw    (269,66) -- (473.23,268) ;
+	%Straight Lines [id:da2933478969179921] 
+	\draw    (83.99,51.82) -- (507.81,13.18) ;
+	\draw [shift={(509.8,13)}, rotate = 174.79] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+	\draw [shift={(82,52)}, rotate = 354.79] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+	%Straight Lines [id:da43176526833890105] 
+	\draw    (191,58) -- (256.81,51.21) ;
+	\draw [shift={(258.8,51)}, rotate = 174.11] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+	%Straight Lines [id:da6310470056534143] 
+	\draw    (163,61) -- (90.79,67.81) ;
+	\draw [shift={(88.8,68)}, rotate = 354.61] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+	
+	% Text Node
+	\draw (355.33,112.11) node [anchor=north west][inner sep=0.75pt]  [rotate=-44.67] [align=left] {$\displaystyle R_{T} +H$};
+	% Text Node
+	\draw (254.99,166.91) node [anchor=north west][inner sep=0.75pt]  [rotate=-27.01] [align=left] {$\displaystyle R_{T} +v$};
+	% Text Node
+	\draw (500.31,176.61) node [anchor=north west][inner sep=0.75pt]  [rotate=-281.5] [align=left] {$\displaystyle R_{T} +h$};
+	% Text Node
+	\draw (466,59) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle \pi -\theta $};
+	% Text Node
+	\draw (129,83) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle \alpha $};
+	% Text Node
+	\draw (173,49) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle L$};
+	% Text Node
+	\draw (284,9) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle d$};
+	% Text Node
+	\draw (67,83) node [anchor=north west][inner sep=0.75pt]   [align=left] {IP};
+	% Text Node
+	\draw (293,67) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle \alpha ^{*}$};
+	
+	
+\end{tikzpicture}
+
+\caption{Detalle del triángulo en la Fig. \ref{fig11}.}
+\label{fig12}
+\end{figure}
+Aplicando el teorema del coseno:
+\begin{equation}
+	(R_T+H)^2=(R_T+v)^2+L^2-2L(R_T+v)\cos{\alpha}
+	\label{ec14}
+\end{equation}
+\begin{equation}
+	H=\sqrt{(R_T+v)^2+L^2-2L(R_T+v)\cos{\alpha}}-R_T\label{ec15}
+\end{equation}
+$v$ puede obtenerse de los inputs de RASPASS \eqref{ec12}. Falta calcular $\cos\alpha$. Aplicamos el teorema del seno y elevamos al cuadrado:
+\begin{equation}
+	\frac{(R_T+h)^2}{1-\cos^2{\alpha}}=\frac{(R_T+v)^2}{\sin^2(\pi-\theta)}=\frac{(R_T+v)^2}{\sin^2\theta}\label{ec16}
+\end{equation}
+\begin{equation}
+	\cos{\alpha}=\sqrt{1-\left(\frac{R_T+h}{R_T+v}\right)^2\sin^2\theta}\label{ec17}
+\end{equation}
+Las ecuaciones \eqref{ec15} y \eqref{ec17} forman el resultado.
+\subsection{Materia atravesada en función de distancia recorrida a lo largo del eje desde IP}
+La cantidad de materia atravesada es:
+\begin{equation}
+	X(L)\,\left[\mathrm{g/cm^2}\right]=\int_{0}^L\rho(H(l))dl\label{ec18}
+\end{equation}
+donde $dl$ es el elemento de línea a lo largo del eje. Es fácil ver que, al avanzar a lo largo del eje una distancia $dl$, la altura cambia en:
+\begin{equation}
+	dH = \pm dl \cos{\alpha(H)^*} = \mathrm{sgn}\left(\frac{\delta H}{\delta l}\right) dl \cos{\alpha(H)^*}\label{ec19}
+\end{equation}
+donde $\alpha^*$ es el ángulo cenital \textit{local}, i.e., entre una distancia recorrida $L$ y $L+dl$ (Fig. \ref{fig12}). El signo depende de si la altura aumenta o disminuye según avanzamos. Planteando el teorema del seno como en \eqref{ec16}, es inmediato llegar a que\footnote{ Ojo, el cambio de variable va con el \textit{valor absoluto} del determinante jacobiano en la integral. El hecho de meter el signo se debe a que $X$ debe ser una magnitud estrictamente positiva.}:
+\begin{equation}
+	X(L) = \int_{v}^{H(L)}\mathrm{sgn}\left(\frac{\delta H'}{\delta l}\right)\rho(H')\frac{dH'}{\sqrt{1-\left(\frac{R_T+h}{R_T+H'}\right)^2\sin^2\theta}}\label{ec110}
+\end{equation}
+Puede que haya que tener cuidado con el hecho de que $H(L)$ decrece y luego vuelve a crecer en cascadas estratosféricas, y el signo cambia. En ese caso:
+\begin{equation}
+	X(L) = \int_{H_{min}}^{v}\rho(H')\frac{H'}{\cos\alpha(H')^*}+\int_{H_{min}}^{H(L)}\rho(H')\frac{dH'}{\cos\alpha(H')^*}\label{ec111}
+\end{equation}
+\end{document}
