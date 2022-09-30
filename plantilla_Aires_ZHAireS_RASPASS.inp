@@ -1,19 +1,19 @@
-################################################ GENERAL MODEL FOR AIRES / ZHAIRES / RASPASS INPUT FILES ##################################################################################################
+################################################ GENERAL MODEL FOR AIRES / ZHAIRES / RASPASS INPUT FILES ##########################################################################################
 
-####################################################### PUT HERE COMMENTS ABOUT THE SIMULATION ############################################################################################################
+####################################################### PUT HERE COMMENTS ABOUT THE SIMULATION ####################################################################################################
 #
 #
 #
 #
 #
-###########################################################################################################################################################################################################
+###################################################################################################################################################################################################
 
 TaskName Name_of_the_Task
 
 #AddSpecialParticle SpecPart ./SpecPrim Part     # SpecPrim is the executable that generates special particles, must be in the same directory as this .inp when running
 
 
-########################################################## INITIAL SETUP: CONDITIONS ######################################################################################################################
+########################################################## INITIAL SETUP: CONDITIONS ##############################################################################################################
 
 PrimaryParticle Particle
 PrimaryEnergy 1e+18 eV
@@ -24,7 +24,7 @@ PrimaryAzimAngle 0 deg Magnetic                 # Or Geographic, as you like
 
 
 GeomagneticField On # Off
-#GeomagneticField 50 uT 0 deg 0 deg              # Also supports direct specification of magnitude, inclination and azimuth
+#GeomagneticField 50 uT 0 deg 0 deg              # Also supports direct specification of strength, inclination and declination
 
 #Atmosphere Linsley                              # Specification of atmospheric models
 GroundAltitude 0 m
@@ -41,9 +41,9 @@ PropagatePrimary Off # On                       # Forces primary particle to int
 
 #Date 2010 7 11                                  # Date (Y/M/D). Important for evaluating Geomagnetic field (if not set explicitly)
 
-###########################################################################################################################################################################################################
+###################################################################################################################################################################################################
 
-############################################################# RASPASS PRIMARIES ###########################################################################################################################
+############################################################# RASPASS PRIMARIES ###################################################################################################################
 
 # RASPASS injects a primary particle that will cross the AIRES coordinate system Z axis at a height specified (in meters) by the global directive
 #
@@ -78,9 +78,9 @@ PropagatePrimary Off # On                       # Forces primary particle to int
 #PrimaryAzimAngle 0.00 deg
 
 
-###########################################################################################################################################################################################################
+##################################################################################################################################################################################################
 
-################################################# STEERING THE SIMULATIONS AND PREPARING OUTPUTS ##########################################################################################################
+################################################# STEERING THE SIMULATIONS AND PREPARING OUTPUTS #################################################################################################
 
 TotalShowers 1			                # Number of showers to simulate
 RunsPerProcess Infinite                         # Runs of the simulations per process. This is just the default specification
@@ -122,7 +122,7 @@ SaveInFile lgtpcles None                        # all, mu+ mu-, ...        File 
 
 #SpecialParticLog 2                              # Will give full info of the special primary
 
-################################################################ ZHAIRES ##################################################################################################################################
+################################################################ ZHAIRES ########################################################################################################################
 
 # Electromagnetic emission calculation with the ZHS algorithm. Caveats and limitations:
 #      Only one shower per task (Make sure to set 'TotalShowers 1')
@@ -166,9 +166,9 @@ ZHAireS Off # On
 #ReducedDATOutput Off # On                       # Only stores in output .dat files the antenna number, time and electric field value
 #RemoveZeroOutput Off # On                       # Remove time bins where signal is zero from the .dat outputs
 
-############################################################################################################################################################################################3##############
+################################################################################################################################################################################################
 
-############################################################## OUTPUTS ####################################################################################################################################
+############################################################## OUTPUTS #########################################################################################################################
 
 PerShowerData Full                              # Directive to control the amount of data to be stored after eachs shower is simulated
 
@@ -191,7 +191,7 @@ ExportPerShower Off # On                        # When On, the program will outp
 # r/a       : express atmospheric depth as vertical (slant) depth
 # K,M,G,T,E : express energies in keV, ..., EeV
 
-################################################# MOST TYPICAL TABLES (SEE AIRES DOCUMENTATION FOR A FULL LIST) ###########################################################################################
+################################################# MOST TYPICAL TABLES (SEE AIRES DOCUMENTATION FOR A FULL LIST) ###############################################################################
 
 #ExportTables 0100                               # Atmospheric profile
 #ExportTables 5501                               # Xmax and Nmax (charged pcles.) vs shower number
@@ -293,6 +293,6 @@ ExportPerShower Off # On                        # When On, the program will outp
 #ExportTables 7992                               # All neutral pcles.
 #ExportTables 7993                               # All pcles.
 
-###########################################################################################################################################################################################################
+################################################################################################################################################################################################
 
 End	
