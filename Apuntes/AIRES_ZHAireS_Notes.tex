@@ -60,6 +60,7 @@
 
 \numberwithin{equation}{section}
 \numberwithin{figure}{section}
+\setcounter{tocdepth}{1}
 %opening
 \title{\textbf{AIRES, ZHAireS y RASPASS: Cuentas y plantillas}}
 \author{Sergio Cabana Freire}
@@ -79,6 +80,8 @@
 		\href{http://aires.fisica.unlp.edu.ar/}{Página web de AIRES / ZHAireS. Documentación actualizada}
 		
 		\href{https://indico.cern.ch/event/826366/contributions/4881703/attachments/2459764/4218361/Tueros-%20ARENA%2020222%20-%20RASPASS%20Showers.pdf}{Presentación de RASPASS. Matías Tueros, ARENA 2022}
+		
+		\href{https://github.com/SergioCabana/PhD_thesis}{Repositorio GitHub (con algunas plantillas y códigos que pueden ser útiles)}
 	\end{abstract}
 	\tableofcontents
 	\newpage
@@ -285,4 +288,82 @@ Puede que haya que tener cuidado con el hecho de que $H(L)$ decrece y luego vuel
 \begin{equation}
 	X(L) = \int_{H_{min}}^{v}\rho(H')\frac{H'}{\cos\alpha(H')^*}+\int_{H_{min}}^{H(L)}\rho(H')\frac{dH'}{\cos\alpha(H')^*}\label{ec111}
 \end{equation}
+
+\section{Normas para nombrar \textit{Tasks} en AIRES}
+Los archivos .inp y outputs de AIRES pueden dar lugar a bastantes dolores de cabeza, a la hora de identificar qué archivos son los correspondientes a qué simulación y viceversa. Se me han ocurrido unas normas para poner nombres a los \textit{Tasks} en AIRES de manera sistemática. La idea es que viendo el nombre de un archivo podamos identificar inmediatamente la simulación en cuestión y sus parámetros claves, además de poder hacer de manera más sencilla gráficas y análisis posteriores (ya que teniendo unas normas para los nombres de archivos, podremos simplemente escribir un código que haga el trabajo de buscar los ficheros de datos necesarios para la gráfica que queremos, por ejemplo).
+
+El formato típico para un \textit{task} será:
+
+\begin{verbatim}
+	(SpecialParticleCode_)Primary_Energy_TrajectoryParams_ExtraComments
+\end{verbatim}
+Es decir, indicaremos:
+\begin{itemize}
+	\item Indicador de partícula especial: Si hemos usado una primaria introducida mediante la instrucción \verb|AddSpecialParticle| y un código \textit{externo} a AIRES. Los códigos más habituales (en mi caso) serían:
+	\verb|uprimary_...| , \verb|RAS_...| (para RASPASS)
+	\item Partícula primaria: Siempre con dos caracteres o más.
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		No válido &\verb|p_|... , \verb|e_|...                                              \\ \hline
+		Válido    & \verb|prot_|...   ,    \verb|elec_|...   ,   \verb|gamma_|...   ,    \verb|iron_|... \\ \hline
+	\end{tabular}
+\end{table}
+
+La norma general para las partículas comunes será usar \verb|prot|, \verb|elec|, \verb|neut|. Para las demás partículas y núcleos, siempre el nombre completo: \verb|muon|, \verb|pion|, \verb|kaon|, \verb|lead|, ...
+
+\item Energía de la partícula primaria: En $\mathrm{eV}$ con formato exponencial. Por ejemplo, ...\verb|_1e18eV_|..., ...\verb|_5.7e15eV_|... 
+\item Trayectoria: Depende del tipo de partícula, ya que añadir primarios especiales normalmente implica cambiar los parámetros que definen la trayectoria. En cualquier caso, los ángulos se indicarán en grados y las distancias en $\mathrm{km}$ (con las unidades explícitas). Todos los parámetros se indicarán con  al menos dos cifras numéricas y se separarán con \verb|_|. En los casos habituales:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{c|c|}
+		\cline{2-2}
+		\multicolumn{1}{l|}{}                & Norma                                                                     \\ \hline
+		\multicolumn{1}{|c|}{AIRES (normal)} & ...\verb|_InjectionAltitude_Zenith_Azimuth_|...                                \\ \hline
+		\multicolumn{1}{|c|}{uprimary}       & ...\verb|_ALTITUDE_Zenith_Azimuth_|...                                         \\ \hline
+		\multicolumn{1}{|c|}{RASPASS}        & ...\verb|_RASPASSDistance_RASPASSHeight_RASPASSTimeShift_Zenith_Azimuth_|... \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{c|c|}
+		\cline{2-2}
+		& Ejemplo                                  \\ \hline
+		\multicolumn{1}{|c|}{AIRES (normal)} & ...\verb|_100km_65deg_00deg_|...              \\ \hline
+		\multicolumn{1}{|c|}{uprimary}       & ...\verb|_00km_95deg_00deg_|...                 \\ \hline
+		\multicolumn{1}{|c|}{RASPASS}        & ...\verb|1500km_35km_00ns_93.5deg_00deg_|... \\ \hline
+	\end{tabular}
+\end{table}
+Las cascadas hacia arriba tendrán un ángulo cenital $>90^\circ$ por convenio. Por defecto, suponemos que el azimut es magnético (si fuera geográfico, añadimos una \verb|G| a las unidades.)
+Como norma general para otros casos, deben indicarse todos los parámetros que describan las trayectorias.
+\item Comentarios extra: Para incluir cualquier información relevante para identificar la simulación y sus condiciones. Algunos ejemplos pueden ser:
+\begin{enumerate}
+	\item \textit{La simulación incluye cálculo de emisión electromagnética}: ...\verb|_ZHAireS|
+	\item \textit{Índice de refracción fijado}: ...\verb|nconst|
+	\item \textit{Se ha fijado un campo magnético constante}: ...\verb|B50uT-I00deg-D00deg| (indicamos \textit{strength}, inclinación y declinación con sus unidades)
+	\item \textit{Se promedian 5 cascadas}: ...\verb|_05show|
+	\item \textit{La cascada se simula en Malargüe}: ...\verb|_SiteMalargue|
+	\item \textit{Se utiliza el modelo de atmósfera 3}: ...\verb|_Atmos3|
+	\item \textit{El suelo está a $35\,\mathrm{m}$ a.s.l.}: ...\verb|_grd35m|
+\end{enumerate}
+Como recomendación, está bien usar más de dos cifras para cualquier magnitud numérica.
+\end{itemize} 
+Algunos ejemplos pueden ser:
+\begin{itemize}
+	\item Cascada iniciada por un protón de $100\,\mathrm{TeV}$, inyectado a $100\,\mathrm{km}$ de altura con ángulos $\theta=65^\circ$, $\varphi=0^\circ$, con el suelo a $100\,\mathrm{m}$ a.s.l.
+	\begin{verbatim}
+		prot_1e17eV_100km_65deg_00deg_grd100m
+	\end{verbatim}
+	\item Cascada hacia arriba iniciada por un electrón de $1,5\,\mathrm{EeV}$, interaccionando a $1,\mathrm{km}$ del suelo, con ángulos $\theta = 95^\circ$, $\varphi=65^\circ$ (geográfico), calculando emisión en radio con índice de refracción constante:
+	\begin{verbatim}
+		uprimary_elec_1e18eV_01km_95deg_65degG_ZHAireS_nconst
+	\end{verbatim}
+\item Cascada estratosférica iniciada por un protón (RASPASS) de $1\,\mathrm{EeV}$, a ángulo cenital $93,25^\circ$ y azimut $0^\circ$. La trayectoria cruza la vertical del observador a $35\,\mathrm{km}$ de altura (RASPASSHeight) y el primario se inyecta a $2000\,\mathrm{km}$ de dicho cruce (RASPASSDistance). No se impone TimeShift, se calcula emisión en radio con un campo magnético fijado de $50\,\mathrm{\mu T}$, $I=35^\circ$, $D=0^\circ$
+\begin{verbatim}
+	RAS_prot_1e18eV_2000km_35km_00ns_93.25deg_00deg_ZHAireS_B50uT-I35deg-D00deg
+\end{verbatim}
+\end{itemize}
 \end{document}
