@@ -1,6 +1,6 @@
 # PhD_thesis
 
-## Table of Contents
+## Contenidos
 * [Información general](#Información-general)
 * [Apuntes](#Apuntes)
 * [Códigos](#Códigos)
