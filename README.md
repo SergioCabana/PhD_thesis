@@ -1,13 +1,13 @@
 # PhD_thesis
 
 ## Table of Contents
-* [Información general](#Información general)
+* [Información general](#Información-general)
 * [Apuntes](#Apuntes)
 * [Códigos](#Códigos)
 * [Tests_RASPASS](#Tests_RASPASS)
-* [Otros archivos](#Otros archivos)
+* [Otros archivos](#Otros-archivos)
 
-## Información general
+## Información-general
 
 * Título del proyecto: 'Caracterización y detección de radiación a frecuencias de radio en cascadas iniciadas por Rayos Cósmicos y Neutrinos de muy altas energías'
 * Autor : Sergio Cabana Freire
@@ -27,7 +27,7 @@ Programas para procesado de datos simulados.
 
 Resultados de primeras simulaciones de ZHAireS 1.0.30a con RASPASS (desarrollado por Matías Tueros)
 
-## Otros archivos
+## Otros-archivos
 
 * El manual de AIRES ([página web](http://aires.fisica.unlp.edu.ar/))
 * Git_for_dummies : Un repaso de lo fundamental para usar Git individualmente
