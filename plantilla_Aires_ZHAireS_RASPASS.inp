@@ -100,12 +100,12 @@ ElectronCutEnergy 80 keV                        # Lower limit for e+e- kinetic e
 ElectronRoughCut 80 keV                         # Lower limit for e+e- kinetic energy to be followed in detail 
                                                 # (Some processes are neglected below this level, e.g., Coulomb scattering)
 GammaCutEnergy 80 keV
-GammaRoughEnergy 80 keV
+GammaRoughCut 80 keV
 #NuclCutEnergy 150 MeV
 #MesonCutEnergy 1.5 MeV
 #MuonCutEnergy 1 MeV 
 
-ThinningFactor 1.e-6 Relative                   # Things about the thinning algorithm (see manual). Small thinning means great precission but large computing times
+ThinningEnergy 1.e-6 Relative                   # Things about the thinning algorithm (see manual). Small thinning means great precission but large computing times
 ThinningWFactor 0.06
 
 SaveInFile grdpcles None                        # all, mu+ mu-, gamma, ... File with positions of particles at ground level
