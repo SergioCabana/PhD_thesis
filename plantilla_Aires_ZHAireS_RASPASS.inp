@@ -39,7 +39,7 @@ PropagatePrimary Off # On                       # Forces primary particle to int
 
 #Site SouthPole                                  # Location. See Aires manual (default: Site00, crossing of equator and Greenwich)
 
-#Date 2010 7 11                                  # Date (Y/M/D). Important for evaluating Geomagnetic field (if not set explicitly)
+Date 2010 7 11                                  # Date (Y/M/D). Important for evaluating Geomagnetic field (if not set explicitly)
 
 ###################################################################################################################################################################################################
 
