@@ -1,11 +1,11 @@
 # PhD_thesis
 
 ## Table of Contents
-*[Información general](#Información general)
-*[Apuntes](#Apuntes)
-*[Códigos](#Códigos)
-*[Tests_RASPASS](#Tests_RASPASS)
-*[Otros archivos](#Otros archivos)
+* [Información general](#Información general)
+* [Apuntes](#Apuntes)
+* [Códigos](#Códigos)
+* [Tests_RASPASS](#Tests_RASPASS)
+* [Otros archivos](#Otros archivos)
 
 ## Información general
 
