@@ -137,9 +137,9 @@ SaveInFile lgtpcles None                        # all, mu+ mu-, ...        File 
 
 ZHAireS Off # On 
 
-#FreqFresnel On # Off                            # Performs calculations in the frequency domain, under Fresnel aproximation
+#FresnelFreq On # Off                            # Performs calculations in the frequency domain, under Fresnel aproximation
 
-#TimeFresnel On # Off                            # Performs calculations in the time domain, under Fresnel aproximation
+#FresnelTime On # Off                            # Performs calculations in the time domain, under Fresnel aproximation
 
 #RefractionIndex 1.000325                        # Refraction index at sea level. Default 1.000325, exponentially decreasing with height
 #ConstRefrIndex Off # On                         # Fixes the refraction index
