@@ -341,9 +341,9 @@ Las cascadas hacia arriba tendrán un ángulo cenital $>90^\circ$ por convenio. 
 Como norma general para otros casos, deben indicarse todos los parámetros que describan las trayectorias.
 \item Comentarios extra: Para incluir cualquier información relevante para identificar la simulación y sus condiciones. Algunos ejemplos pueden ser:
 \begin{enumerate}
-	\item \textit{La simulación incluye cálculo de emisión electromagnética}: ...\verb|_ZHAireS|
+	\item \textit{La simulación incluye cálculo de emisión electromagnética (en tiempo, frecuencias o ambos)}: ...\verb|_ZHS(tfb)|
 	\item \textit{Índice de refracción fijado}: ...\verb|nconst|
-	\item \textit{Se ha fijado un campo magnético constante}: ...\verb|B50uT-I00deg-D00deg| (indicamos \textit{strength}, inclinación y declinación con sus unidades)
+	\item \textit{Se ha fijado un campo magnético constante}: ...\verb|fixB|
 	\item \textit{Se promedian 5 cascadas}: ...\verb|_05show|
 	\item \textit{La cascada se simula en Malargüe}: ...\verb|_SiteMalargue|
 	\item \textit{Se utiliza el modelo de atmósfera 3}: ...\verb|_Atmos3|
@@ -357,13 +357,14 @@ Algunos ejemplos pueden ser:
 	\begin{verbatim}
 		prot_1e17eV_100km_65deg_00deg_grd100m
 	\end{verbatim}
-	\item Cascada hacia arriba iniciada por un electrón de $1,5\,\mathrm{EeV}$, interaccionando a $1,\mathrm{km}$ del suelo, con ángulos $\theta = 95^\circ$, $\varphi=65^\circ$ (geográfico), calculando emisión en radio con índice de refracción constante:
+	\item Cascada hacia arriba iniciada por un electrón de $1,5\,\mathrm{EeV}$, interaccionando a $1,\mathrm{km}$ del suelo, con ángulos $\theta = 95^\circ$, $\varphi=65^\circ$ (geográfico), calculando emisión en radio en dominio temporal con índice de refracción constante:
 	\begin{verbatim}
-		uprimary_elec_1e18eV_01km_95deg_65degG_ZHAireS_nconst
+		uprimary_elec_1e18eV_01km_95deg_65degG_ZHSt_nconst
 	\end{verbatim}
-\item Cascada estratosférica iniciada por un protón (RASPASS) de $1\,\mathrm{EeV}$, a ángulo cenital $93,25^\circ$ y azimut $0^\circ$. La trayectoria cruza la vertical del observador a $35\,\mathrm{km}$ de altura (RASPASSHeight) y el primario se inyecta a $2000\,\mathrm{km}$ de dicho cruce (RASPASSDistance). No se impone TimeShift, se calcula emisión en radio con un campo magnético fijado de $50\,\mathrm{\mu T}$, $I=35^\circ$, $D=0^\circ$
+\item Cascada estratosférica iniciada por un protón (RASPASS) de $1\,\mathrm{EeV}$, a ángulo cenital $93,25^\circ$ y azimut $0^\circ$. La trayectoria cruza la vertical del observador a $35\,\mathrm{km}$ de altura (RASPASSHeight) y el primario se inyecta a $2000\,\mathrm{km}$ de dicho cruce (RASPASSDistance). No se impone TimeShift, se calcula emisión en radio en ambos dominios con un campo magnético fijado.
 \begin{verbatim}
-	RAS_prot_1e18eV_2000km_35km_00ns_93.25deg_00deg_ZHAireS_B50uT-I35deg-D00deg
+	RAS_prot_1e18eV_2000km_35km_00ns_93.25deg_00deg_ZHSb_fixB
 \end{verbatim}
 \end{itemize}
+
 \end{document}
