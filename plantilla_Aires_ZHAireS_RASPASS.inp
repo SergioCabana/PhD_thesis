@@ -67,6 +67,9 @@ PropagatePrimary Off # On                       # Forces primary particle to int
 
 #AddSpecialParticle RASPASSProton ./RASPASSprimary Proton
 
+#PrimaryParticle RASPASSProton
+#PrimaryEnergy 1e+18 eV
+
 #SetGlobal RASPASSHeight 38000.00    
 
 #SetGlobal RASPASSDistance 200000.00
