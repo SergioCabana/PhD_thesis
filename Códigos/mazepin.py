@@ -194,3 +194,116 @@ def CherenkovRing(Xmax, ground, theta, UseSlant = True):
     print('D (m): %.4f'%d)
     print('4,5 * r2 (m) = %.4f'%(4.5*r2))
     
+def table_finder(tab, part):
+    ''' Returns the extension corresponding to each table and particle
+    
+        tab: type of table (from 0 to 15)
+        
+        0 : Longitudinal development
+        
+        1 : Unweighted longitudinal development
+        
+        2 : Energy longitudinal development
+        
+        3 : Lateral distribution
+        
+        4 : Unweighted lateral distribution
+        
+        5 : Energy distribution at ground
+        
+        6 : Unweighted energy distribution
+        
+        7 : Mean arrival time distribution
+        
+        8 : Number and energy of particles vs shower number
+        
+        9 : Number of created particles
+        
+        10: Number of created entries
+        
+        11: Energy of created particles
+        
+        12: Longitudinal development of low energy particles
+        
+        13: Unweighted longitudinal development of low energy particles
+        
+        14: Energy longitudinal development of low energy particles
+        
+        15: Longitudinal development of deposited energy
+        
+        part: type of particle (from 0 to 22)
+        
+        0 : gammas
+        
+        1 : electrons
+        
+        2 : positrons
+        
+        3 : muons (+)
+        
+        4 : muons (-)
+        
+        5 : pions (+)
+        
+        6 : pions (-)
+        
+        7 : kaons (+)
+        
+        8 : kaons (-)
+        
+        9 : neutrons
+        
+        10: protons
+        
+        11: antiprotons
+        
+        12: nuclei
+        
+        13: Other charged particles (excluding p and antip)
+        
+        14: Other neutral particles (excluding neutrons)
+        
+        15: e+e-
+        
+        16: mu+mu-
+        
+        17: pi+pi-
+        
+        18: K+K-
+        
+        19: All charged particles
+        
+        20: All neutral particles
+        
+        21: All particles
+        
+        22: All neutrinos
+        
+        You need the file 'AIRES_table_index.txt'. You can generate it with 
+        the script 'Tabe_index_creator.py', uploaded in the GitHub repo
+        
+        There are some special tables, these are:
+        
+        0100 : Atmospheric profile
+        
+        5501 : Xmax and Nmax (charged particles) vs shower number
+        
+        5511 : First interaction depth and primary energy vs shower number
+        
+        5513 : Zenith and azimuth vs shower number
+    '''
+    
+    if tab not in range(0,16,1):
+        raise TypeError('Please introduce a valid table id between 0 and 15')
+    if part not in range(0,23,1):
+        raise TypeError('Please introduce a valid particle id between 0 and 22')
+        
+    table = np.loadtxt('AIRES_table_index.txt')[part,tab]
+    
+    if table == 9999:
+        raise TypeError('Table is not available in AIRES 19.04.08')
+        
+    return int(table)
+    
+    
+    
