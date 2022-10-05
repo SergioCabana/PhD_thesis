@@ -105,7 +105,7 @@ GammaRoughCut 80 keV
 #MesonCutEnergy 1.5 MeV
 #MuonCutEnergy 1 MeV 
 
-ThinningEnergy 1.e-6 Relative                   # Things about the thinning algorithm (see manual). Small thinning means great precission but large computing times
+ThinningEnergy 1.e-4 Relative                   # Things about the thinning algorithm (see manual). Small thinning means great precission but large computing times
 ThinningWFactor 0.06
 
 SaveInFile grdpcles None                        # all, mu+ mu-, gamma, ... File with positions of particles at ground level
