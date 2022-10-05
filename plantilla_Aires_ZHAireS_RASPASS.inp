@@ -106,7 +106,7 @@ GammaRoughCut 80 keV
 #MuonCutEnergy 1 MeV 
 
 ThinningEnergy 1.e-6 Relative                   # Things about the thinning algorithm (see manual). Small thinning means great precission but large computing times
-ThinningWFactor 0.06
+ThinningWFactor 0.06                            # Recomendation for ZHAireS simulation: do not go below ThinningEnergy 1.e-4 Relative
 
 SaveInFile grdpcles None                        # all, mu+ mu-, gamma, ... File with positions of particles at ground level
 SaveInFile lgtpcles None                        # all, mu+ mu-, ...        File with position of particles at observing levels (longitudinal development)
@@ -211,7 +211,7 @@ ExportPerShower Off # On                        # When On, the program will outp
 #ExportTables 1213                               # K+K-
 #ExportTables 1291                               # All charged pcles.
 #ExportTables 1292                               # All neutral pcles.
-#ExportTables 1293 # All pcles.
+#ExportTables 1293                               # All pcles.
 
 # Energy Longitudinal developments
 
