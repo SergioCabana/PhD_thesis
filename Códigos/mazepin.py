@@ -20,7 +20,11 @@
     a collection of notes with some of the rules that I will be using to name
     tasks in AIRES and ZHAireS
     
-    Sergio Cabana Freire. 05/11/2022
+    Sergio Cabana Freire. 05/11/2022.
+    
+    P.S.: Replacing a more reasonable 'Y' with an 'I' in MAZEPIN is 
+    absolutely necessary for the joke, though it might go unnoticed if you are 
+    not into F1.
 '''
 
 # Importing some modules and functions
