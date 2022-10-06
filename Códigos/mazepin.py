@@ -1,4 +1,4 @@
-############################## MAZEPIN v1.0.0 #################################
+############################## MAZEPIN v0.1.1 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -34,15 +34,13 @@ import matplotlib        as mpl
 import pandas            as pd
 import os
 
-from scipy.fftpack       import fft, fftfreq, fftshift
+from   scipy.fftpack     import fft, fftfreq, fftshift
+from   mazepin_aux       import *
 
 # I will define a sequence of 10 colors that I can distinguish without many
 # problems. If you are not color-blind, you can comment or ignore the following
 # lines and go to the definition of functions
 
-colors = ['k', 'royalblue', 'r', 'gold', 'limegreen', 'navy', 'crimson', \
-           'turquoise', 'darkorange', 'darkgreen']
-    
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=colors)
 
 def gcm2toh(t):
@@ -123,7 +121,7 @@ def htogcm2(h):
     else:
         return t1(h, params[0])
     
-def CherenkovRing(Xmax, ground, theta, UseSlant = True):
+def CerenkovRing(Xmax, ground, theta, UseSlant = True):
     ''' Returns parameters of the Cerenkov elipse at ground level
         Xmax -> Depth of the shower maximum in g/cm2
                 UseSlant True  -> Value measured along shower axis
@@ -194,7 +192,7 @@ def CherenkovRing(Xmax, ground, theta, UseSlant = True):
     print('D (m): %.4f'%d)
     print('4,5 * r2 (m) = %.4f'%(4.5*r2))
     
-def table_finder(tab, part):
+def table_finder(tab, part, verbose = False):
     ''' Returns the extension corresponding to each table and particle
     
         tab: type of table (from 0 to 15)
@@ -215,7 +213,7 @@ def table_finder(tab, part):
         
         7 : Mean arrival time distribution
         
-        8 : Number and energy of particles vs shower number
+        8 : Number and energy of particles at ground vs shower number
         
         9 : Number of created particles
         
@@ -278,10 +276,7 @@ def table_finder(tab, part):
         21: All particles
         
         22: All neutrinos
-        
-        You need the file 'AIRES_table_index.txt'. You can generate it with 
-        the script 'Tabe_index_creator.py', uploaded in the GitHub repo
-        
+
         There are some special tables, these are:
         
         0100 : Atmospheric profile
@@ -298,12 +293,74 @@ def table_finder(tab, part):
     if part not in range(0,23,1):
         raise TypeError('Please introduce a valid particle id between 0 and 22')
         
-    table = np.loadtxt('AIRES_table_index.txt')[part,tab]
+    table = tables[part,tab]
     
     if table == 9999:
         raise TypeError('Table is not available in AIRES 19.04.08')
+    
+    if verbose:
+        print('Requested table: '+dict_tab[str(tab)]+', for '+dict_part[str(part)])
         
     return int(table)
+
+def find_path(rootdir, tab, part, sim = [''], sep = [''], verbose = False):
+    ''' Returns the list of paths inside rootdir corresponding to the requested
+        tables (only one type of table per request).
+        
+        tab (int): type of table. See mazepin_aux.
+        
+        part (list of int): types of particles. See mazepin_aux
+        
+        sim (list of str): constraints for file names (all selected files must 
+        these strings). Default '', all files with the right extension are kept.
+        I am using my rules for naming files (see notes at GitHub repo). 
+        
+        sep (list of str): Special distinctions. Output will indicate which files
+        contain these special strings. Default '', all files with the right 
+        extension are kept
+        
+        Output (with separators sep = [sep1, sep2]):
+            
+        [[part1, sep1, path1], [part1, sep2, path2], [part2, sep1, path3], ...]
+        
+        ** sorry for the spaghetti **
+    '''
+    paths = []
+    for subdir, dirs, files in os.walk(rootdir):
+        for s in sep:          # loop over distinctions
+            for file in files: # loop over files n rootdir
+                for p in part: # loop over requested particles
+            
+                    table_ext = '.t'+str(tables[p,tab]) 
+                    # extension of table tab, particle p
+                
+                    if file.endswith(table_ext) and all([c in file for c in sim]):
+                    # if our file has the right extension and all constraints
+                        if s == '' or s in file: #we take into account distinctions
+                            paths.append([str(p), s, subdir + os.sep + file])
     
-    
-    
+    if len(sep) > 1 and len(paths) != len(part) * len(sep):
+        raise TypeError('Some tables are not available inside the main directory')
+
+    if verbose:
+        print('Requested table: '+dict_tab[str(tab)]+'\n')
+        print('--------------------------\n')
+        print('Requested particles: \n')
+        for p in part:
+            print(dict_part[str(p)]+'\n')
+        print('--------------------------\n')
+        print('Constraints: \n')
+        for c in sim:
+            print(c+'\n')
+        print('--------------------------\n')
+        print('Separations: \n')
+        for s in sep:
+            print(s+'\n')
+        print('--------------------------\n')
+        for r in paths:
+            print(dict_part[r[0]]+', '+r[1]+': \n'+r[2]+'\n')
+        
+    return paths
+            
+
+
