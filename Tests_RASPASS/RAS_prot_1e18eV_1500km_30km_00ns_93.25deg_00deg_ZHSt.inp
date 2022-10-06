@@ -146,7 +146,7 @@ FresnelTime On # Off                            # Performs calculations in the t
 
 #TimeDomainBin 0.5 ns                            # Size of time steps for time domain calculations
 
-AddAntenna 0 0 30000                                # Adds an antenna at position X Y Z [m] (AIRES coordinate system)
+AddAntenna 1 0 0 30000                                # Adds an antenna at position X Y Z [m] (AIRES coordinate system)
                                                 # IMPORTANT: the output files will contain the antenna coordinates with the ZHS coordinate system,
                                                 # i.e., with the z axis starting at 100km and pointing towards ground
 	          					
