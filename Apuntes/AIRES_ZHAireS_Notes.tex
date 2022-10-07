@@ -286,7 +286,7 @@ donde $\alpha^*$ es el ángulo cenital \textit{local}, i.e., entre una distancia
 \end{equation}
 Puede que haya que tener cuidado con el hecho de que $H(L)$ decrece y luego vuelve a crecer en cascadas estratosféricas, y el signo cambia. En ese caso:
 \begin{equation}
-	X(L) = \int_{H_{min}}^{v}\rho(H')\frac{H'}{\cos\alpha(H')^*}+\int_{H_{min}}^{H(L)}\rho(H')\frac{dH'}{\cos\alpha(H')^*}\label{ec111}
+	X(L) = \int_{H_{min}}^{v}\rho(H')\frac{dH'}{\cos\alpha(H')^*}+\int_{H_{min}}^{H(L)}\rho(H')\frac{dH'}{\cos\alpha(H')^*}\label{ec111}
 \end{equation}
 
 \section{Normas para nombrar \textit{Tasks} en AIRES}
@@ -346,7 +346,7 @@ Como norma general para otros casos, deben indicarse todos los parámetros que d
 	\item \textit{Se ha fijado un campo magnético constante}: ...\verb|fixB|
 	\item \textit{Se promedian 5 cascadas}: ...\verb|_05show|
 	\item \textit{La cascada se simula en Malargüe}: ...\verb|_SiteMalargue|
-	\item \textit{Se utiliza el modelo de atmósfera 3}: ...\verb|_Atmos3|
+	\item \textit{Se utiliza el modelo de atmósfera 3}: ...\verb|_Atmos03|
 	\item \textit{El suelo está a $35\,\mathrm{m}$ a.s.l.}: ...\verb|_grd35m|
 \end{enumerate}
 Como recomendación, está bien usar más de dos cifras para cualquier magnitud numérica.
