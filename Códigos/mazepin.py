@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.1.1 #################################
+############################## MAZEPIN v0.2.1 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -32,6 +32,7 @@ import numpy             as np
 import matplotlib.pyplot as plt
 import matplotlib        as mpl
 import pandas            as pd
+import scipy.integrate   as sci
 import os
 
 from   scipy.fftpack     import fft, fftfreq, fftshift
@@ -192,6 +193,96 @@ def CerenkovRing(Xmax, ground, theta, UseSlant = True):
     print('D (m): %.4f'%d)
     print('4,5 * r2 (m) = %.4f'%(4.5*r2))
     
+def cos_localtheta(h, theta, RASPASSHeight = 0.):
+    ''' Cosine of trajectory's local zenith angle at height h [km]
+    
+        theta is PrimaryZenAngle in AIRES (deg)
+        
+        Accepts RASPASS trajectories
+    '''
+    
+    thetarad = theta *np.pi/180.
+    RT = 6370.
+    
+    return np.sqrt(1.-((RT+RASPASSHeight)/(RT+h)*np.sin(thetarad))**2)
+
+def h_IP(RD, RH, theta):
+    ''' Returns height of injection point [km] in a RASPASS trajectory
+    
+        RD: RASPASSDistance [km]
+        
+        RH: RASSPASSHeight  [km]
+        
+        theta: PrimaryZenAngle (deg)
+    '''
+        
+    thetarad = theta *np.pi/180.
+    RT = 6370.
+    
+    return np.sqrt((RT+RH)**2+RD**2+2*RD*(RT+RH)*np.cos(thetarad))-RT
+
+def h_RAS(L, RD, RH, theta):
+    ''' Returns height in the atmosphere [km] of the point of the shower axis
+        that is a distance L [km] away from the IP (converts traversed 
+        distance to height)
+        
+        L: traversed distance from IP [km]
+        
+        RD: RASPASSDistance [km]
+        
+        RH: RASPASSHeight [km]
+        
+        theta: PrimaryZenAngle [deg]
+    '''
+    RT = 6370.
+    
+    v = h_IP(RD, RH, theta)
+    c = cos_localtheta(v, theta, RASPASSHeight = RH)
+    
+    return np.sqrt((RT+v)**2+L**2-2*L*(RT+v)*c)-RT
+
+def Xs_to_dist(X, RD, RH, theta, prec = .01):
+    ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
+        for a RASPASS trajectory. Approximate result (numerical integration)
+    
+        X: value of slanted depth [km]
+        
+        RD: RASPASSDistance [km]
+    
+        RH: RASPASSHeight [km]
+    
+        theta: PrimaryZenAngle [deg]
+    
+        prec: precission for the result
+        
+        Uses exponential model for atmosphere (for the moment). My plan is to 
+        add the Linsley model.
+    '''
+    
+    RT = 6370
+    thetarad = theta *np.pi/180.
+    
+    def rho(h):
+        return 1.23e-3 * np.exp(-h/8.13)
+    
+    def integrand(h):
+        return rho(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
+    
+    Xint = 0.
+    L    = 0.
+    
+    v    = h_IP(RD, RH, theta)
+    c    = cos_localtheta(v, theta, RASPASSHeight = RH)
+    hmin = (RT+v)*np.sqrt(1-c*c)-RT
+    
+    hmin = hmin if hmin >= 0 else 0
+    
+    while Xint < X:
+        Xint   = sci.quad(integrand, h_RAS(L+prec, RD, RH, theta), v)[0]*1e5
+        L += prec
+        
+    return L, Xint
+    
 def table_finder(tab, part, verbose = False):
     ''' Returns the extension corresponding to each table and particle
     
@@ -303,7 +394,7 @@ def table_finder(tab, part, verbose = False):
         
     return int(table)
 
-def find_path(rootdir, tab, part, sim = [''], sep = [''], verbose = False):
+def pathfinder(rootdir, tab, part, sim = [''], sep = [''], verbose = False):
     ''' Returns the list of paths inside rootdir corresponding to the requested
         tables (only one type of table per request).
         

@@ -150,9 +150,9 @@
 		% Text Node
 		\draw (495.8,182) node [anchor=west] [inner sep=0.75pt]   [align=left] {$\displaystyle x$};
 		% Text Node
-		\draw (169,80) node [anchor=north west][inner sep=0.75pt]  [font=\large,color={rgb, 255:red, 208; green, 2; blue, 27 }  ,opacity=1 ] [align=left] {$\displaystyle d$};
+		\draw (169,80) node [anchor=north west][inner sep=0.75pt]  [font=\large,color={rgb, 255:red, 208; green, 2; blue, 27 }  ,opacity=1 ] [align=left] {$\displaystyle D$};
 		% Text Node
-		\draw (378,151) node [anchor=north west][inner sep=0.75pt]  [font=\large,color={rgb, 255:red, 144; green, 19; blue, 254 }  ,opacity=1 ] [align=left] {$\displaystyle h$};
+		\draw (378,151) node [anchor=north west][inner sep=0.75pt]  [font=\large,color={rgb, 255:red, 144; green, 19; blue, 254 }  ,opacity=1 ] [align=left] {$\displaystyle H$};
 		% Text Node
 		\draw (317,113) node [anchor=north west][inner sep=0.75pt]  [font=\large,color={rgb, 255:red, 248; green, 231; blue, 28 }  ,opacity=1 ] [align=left] {$\displaystyle \theta $};
 		% Text Node
@@ -177,34 +177,34 @@
 	
 	Tenemos tres parámetros para determinar la geometría en RASPASS:
 	\begin{itemize}
-		\item RASPASSDistance, $d$. Distancia a lo largo del eje desde el punto de inyección (IP) hasta la intersección con la vertical del observador.
-		\item RASPASSHeight,  $h$. Altura a la que pasa el eje de la cascada sobre la vertical del observador.
+		\item RASPASSDistance, $D$. Distancia a lo largo del eje desde el punto de inyección (IP) hasta la intersección con la vertical del observador.
+		\item RASPASSHeight,  $H$. Altura a la que pasa el eje de la cascada sobre la vertical del observador.
 		\item PrimaryZenAngle, $\theta$. Ángulo entre el eje de la cascada y la vertical del observador.
 	\end{itemize}
 Esta geometría puede reducirse a casos más sencillos:
 \begin{itemize}
-	\item Cascadas hacia abajo (normales): $h = 0$, $\theta<90^\circ$.
-	\item Cascadas hacia arriba: $h = 0$, $d \leq 0$, $\theta >90^\circ$ (Inyección a nivel del suelo o por encima)
+	\item Cascadas hacia abajo (normales): $H = 0$, $\theta<90^\circ$.
+	\item Cascadas hacia arriba: $H = 0$, $D \leq 0$, $\theta >90^\circ$ (Inyección a nivel del suelo o por encima)
 \end{itemize}
 Todo lo que sigue es trigonometría sencilla\footnote{$\sin(\pi-x)=\sin{x}$ ; $\cos(\pi-x)=-\cos{x}$}:
 \begin{equation}
-	(R_T+v)^2=(R_T+h)^2+d^2+2d(R_T+h)\cos\theta
+	(R_T+v)^2=(R_T+H)^2+D^2+2D(R_T+H)\cos\theta
 	\label{ec11}
 \end{equation}
 \newpage
 \subsection{Altura del punto de inyección}
 Despejando de \eqref{ec11}:
 \begin{equation}
-	v = \sqrt{(R_T+h)^2+d^2+2d(R_T+h)\cos\theta}-R_T
+	v = \sqrt{(R_T+H)^2+D^2+2D(R_T+H)\cos\theta}-R_T
 	\label{ec12}
 \end{equation}
-\subsection{Valor de $d$ en función de $v$ (y demás parámetros RASPASS)}
+\subsection{Valor de $D$ en función de $v$ (y demás parámetros RASPASS)}
 La ecuación \eqref{ec11} es una cuadrática en d:
 \begin{equation}
-	d=-(R_T+h)\cos\theta+\sqrt{(R_T+h)^2\cos^2\theta-\left[h^2-v^2+2R_T(h-v)\right]}
+	d=-(R_T+H)\cos\theta+\sqrt{(R_T+H)^2\cos^2\theta-\left[H^2-v^2+2R_T(H-v)\right]}
 	\label{ec13}
 \end{equation}
-\subsection{Altura en la atmósfera, $H$, en función de distancia recorrida a lo largo del eje desde IP}
+\subsection{Altura en la atmósfera, $h$, en función de distancia recorrida a lo largo del eje desde IP, $L$}
 \begin{figure}[H]
 	\centering
 \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
@@ -231,11 +231,11 @@ La ecuación \eqref{ec11} es una cuadrática en d:
 	\draw [shift={(88.8,68)}, rotate = 354.61] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
 	
 	% Text Node
-	\draw (355.33,112.11) node [anchor=north west][inner sep=0.75pt]  [rotate=-44.67] [align=left] {$\displaystyle R_{T} +H$};
+	\draw (355.33,112.11) node [anchor=north west][inner sep=0.75pt]  [rotate=-44.67] [align=left] {$\displaystyle R_{T} +h$};
 	% Text Node
 	\draw (254.99,166.91) node [anchor=north west][inner sep=0.75pt]  [rotate=-27.01] [align=left] {$\displaystyle R_{T} +v$};
 	% Text Node
-	\draw (500.31,176.61) node [anchor=north west][inner sep=0.75pt]  [rotate=-281.5] [align=left] {$\displaystyle R_{T} +h$};
+	\draw (500.31,176.61) node [anchor=north west][inner sep=0.75pt]  [rotate=-281.5] [align=left] {$\displaystyle R_{T} +H$};
 	% Text Node
 	\draw (466,59) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle \pi -\theta $};
 	% Text Node
@@ -243,7 +243,7 @@ La ecuación \eqref{ec11} es una cuadrática en d:
 	% Text Node
 	\draw (173,49) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle L$};
 	% Text Node
-	\draw (284,9) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle d$};
+	\draw (284,9) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle D$};
 	% Text Node
 	\draw (67,83) node [anchor=north west][inner sep=0.75pt]   [align=left] {IP};
 	% Text Node
@@ -257,36 +257,32 @@ La ecuación \eqref{ec11} es una cuadrática en d:
 \end{figure}
 Aplicando el teorema del coseno:
 \begin{equation}
-	(R_T+H)^2=(R_T+v)^2+L^2-2L(R_T+v)\cos{\alpha}
+	(R_T+h)^2=(R_T+v)^2+L^2-2L(R_T+v)\cos{\alpha}
 	\label{ec14}
 \end{equation}
 \begin{equation}
-	H=\sqrt{(R_T+v)^2+L^2-2L(R_T+v)\cos{\alpha}}-R_T\label{ec15}
+	h=\sqrt{(R_T+v)^2+L^2-2L(R_T+v)\cos{\alpha}}-R_T\label{ec15}
 \end{equation}
 $v$ puede obtenerse de los inputs de RASPASS \eqref{ec12}. Falta calcular $\cos\alpha$. Aplicamos el teorema del seno y elevamos al cuadrado:
 \begin{equation}
-	\frac{(R_T+h)^2}{1-\cos^2{\alpha}}=\frac{(R_T+v)^2}{\sin^2(\pi-\theta)}=\frac{(R_T+v)^2}{\sin^2\theta}\label{ec16}
+	\frac{(R_T+H)^2}{1-\cos^2{\alpha}}=\frac{(R_T+v)^2}{\sin^2(\pi-\theta)}=\frac{(R_T+v)^2}{\sin^2\theta}\label{ec16}
 \end{equation}
 \begin{equation}
-	\cos{\alpha}=\sqrt{1-\left(\frac{R_T+h}{R_T+v}\right)^2\sin^2\theta}\label{ec17}
+	\cos{\alpha}=\sqrt{1-\left(\frac{R_T+H}{R_T+v}\right)^2\sin^2\theta}\label{ec17}
 \end{equation}
 Las ecuaciones \eqref{ec15} y \eqref{ec17} forman el resultado.
 \subsection{Materia atravesada en función de distancia recorrida a lo largo del eje desde IP}
 La cantidad de materia atravesada es:
 \begin{equation}
-	X(L)\,\left[\mathrm{g/cm^2}\right]=\int_{0}^L\rho(H(l))dl\label{ec18}
+	X(L)\,\left[\mathrm{g/cm^2}\right]=\int_{0}^L\rho(h(l))dl\label{ec18}
 \end{equation}
 donde $dl$ es el elemento de línea a lo largo del eje. Es fácil ver que, al avanzar a lo largo del eje una distancia $dl$, la altura cambia en:
 \begin{equation}
-	dH = \pm dl \cos{\alpha(H)^*} = \mathrm{sgn}\left(\frac{\delta H}{\delta l}\right) dl \cos{\alpha(H)^*}\label{ec19}
+	dh = dl \cos{\alpha^*(h)}\label{ec19}
 \end{equation}
-donde $\alpha^*$ es el ángulo cenital \textit{local}, i.e., entre una distancia recorrida $L$ y $L+dl$ (Fig. \ref{fig12}). El signo depende de si la altura aumenta o disminuye según avanzamos. Planteando el teorema del seno como en \eqref{ec16}, es inmediato llegar a que\footnote{ Ojo, el cambio de variable va con el \textit{valor absoluto} del determinante jacobiano en la integral. El hecho de meter el signo se debe a que $X$ debe ser una magnitud estrictamente positiva.}:
+donde $\alpha^*$ es el ángulo cenital \textit{local}, i.e., entre una distancia recorrida $L$ y $L+dl$ (Fig. \ref{fig12}). Planteando el teorema del seno como en \eqref{ec16}, es inmediato llegar a que:
 \begin{equation}
-	X(L) = \int_{v}^{H(L)}\mathrm{sgn}\left(\frac{\delta H'}{\delta l}\right)\rho(H')\frac{dH'}{\sqrt{1-\left(\frac{R_T+h}{R_T+H'}\right)^2\sin^2\theta}}\label{ec110}
-\end{equation}
-Puede que haya que tener cuidado con el hecho de que $H(L)$ decrece y luego vuelve a crecer en cascadas estratosféricas, y el signo cambia. En ese caso:
-\begin{equation}
-	X(L) = \int_{H_{min}}^{v}\rho(H')\frac{dH'}{\cos\alpha(H')^*}+\int_{H_{min}}^{H(L)}\rho(H')\frac{dH'}{\cos\alpha(H')^*}\label{ec111}
+	X(L) = \int_{h(L)}^{v}\rho(h')\frac{dh'}{\sqrt{1-\left(\frac{R_T+H}{R_T+h'}\right)^2\sin^2\theta}}\label{ec110}
 \end{equation}
 
 \section{Normas para nombrar \textit{Tasks} en AIRES}
