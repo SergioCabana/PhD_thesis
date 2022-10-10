@@ -26,7 +26,7 @@ dict_tab = {'0' : 'Longitudinal development',
             '12': 'Longitudinal development of low energy particles',
             '13': 'Unweighted longitudinal development of low energy particles',
             '14': 'Energy longitudinal development of low energy particles',
-            '15': 'Longitudinal development of deposited energy',}
+            '15': 'Longitudinal development of deposited energy'}
 
 # dictionary of particles in AIRES 19.04.08
 
