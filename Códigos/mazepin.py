@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.2.3 #################################
+############################## MAZEPIN v0.2.4 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -241,7 +241,7 @@ def h_RAS(L, RD, RH, theta):
     
     return np.sqrt((RT+v)**2+L**2-2*L*(RT+v)*c)-RT
 
-def Xs_to_dist(X, RD, RH, theta, prec = .1):
+def Xs_to_dist(X, RD, RH, theta, prec = .05):
     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
         for a RASPASS trajectory. VERY approximate result 
         (rough and easy numerical integration)
@@ -254,7 +254,7 @@ def Xs_to_dist(X, RD, RH, theta, prec = .1):
     
         theta: PrimaryZenAngle [deg]
     
-        prec: precission for the result. Default 100m
+        prec: precission for the result. Default 50m
         
         Uses exponential model for atmosphere (for the moment). My plan is to 
         add the Linsley model.
@@ -272,6 +272,9 @@ def Xs_to_dist(X, RD, RH, theta, prec = .1):
     X      = np.sort(X)    # we sort values (just in case)
     X_last = max(X)        # last value, will be the highest
     
+    hmin   = (RT+RH)*np.sin(thetarad) - RT
+    hmin   = hmin if hmin > 0 else 0  #minimum height in atmosphere
+    
     x      = 0.
     L      = 0.
     
@@ -281,14 +284,19 @@ def Xs_to_dist(X, RD, RH, theta, prec = .1):
     while x < X_last:
         h1    = h_RAS(L, RD, RH, theta)
         h2    = h_RAS(L+prec, RD, RH, theta)
-        hmean = .5*(h1+h2)
         
-        delta_x = abs(integrand(hmean)*(h2-h1))*1e5
+        if hmin < h1 or hmin > h2:
+            delta_x = abs(integrand(.5*(h1+h2))*(h2-h1))*1e5
+        else:
+            delta_x = abs(integrand(.5*(hmin+h1))*(hmin-h1))*1e5 + \
+                      abs(integrand(.5*(h2+hmin))*(h2-hmin))*1e5
         
         # we find matter traversed when we move a distance prec
         # absolute value to deal with increasing/decreasing heights
+        # take into account interval where height starts increasing
         
         x_new = x + delta_x
+
         if x_new > X[index]: 
             # X[index] is between x and x_new = x+delta_x
             # we use a linear interpolation between the last two values
