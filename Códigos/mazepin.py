@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.2.2 #################################
+############################## MAZEPIN v0.2.3 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -241,9 +241,10 @@ def h_RAS(L, RD, RH, theta):
     
     return np.sqrt((RT+v)**2+L**2-2*L*(RT+v)*c)-RT
 
-def Xs_to_dist(X, RD, RH, theta, prec = .01):
+def Xs_to_dist(X, RD, RH, theta, prec = .1):
     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
-        for a RASPASS trajectory. Approximate result (numerical integration)
+        for a RASPASS trajectory. VERY approximate result 
+        (rough and easy numerical integration)
     
         X: values of slanted depth [km] (numpy.ndarray)
         
@@ -253,7 +254,7 @@ def Xs_to_dist(X, RD, RH, theta, prec = .01):
     
         theta: PrimaryZenAngle [deg]
     
-        prec: precission for the result
+        prec: precission for the result. Default 100m
         
         Uses exponential model for atmosphere (for the moment). My plan is to 
         add the Linsley model.
@@ -271,12 +272,6 @@ def Xs_to_dist(X, RD, RH, theta, prec = .01):
     X      = np.sort(X)    # we sort values (just in case)
     X_last = max(X)        # last value, will be the highest
     
-    v      = h_IP(RD, RH, theta) # height of injection point
-    c      = cos_localtheta(v, theta, RASPASSHeight = RH)
-    hmin   = (RT+v)*np.sqrt(1-c*c)-RT # minimum height
-    
-    hmin   = hmin if hmin >= 0 else 0
-    
     x      = 0.
     L      = 0.
     
@@ -284,11 +279,16 @@ def Xs_to_dist(X, RD, RH, theta, prec = .01):
     index  = 0
     
     while x < X_last:
-        delta_x = sci.quad(integrand, h_RAS(L+prec, RD, RH, theta), \
-                           h_RAS(L, RD, RH, theta))[0]*1e5
-        # we find matter traversed when we move a distance prec
-        x_new   = x + delta_x
+        h1    = h_RAS(L, RD, RH, theta)
+        h2    = h_RAS(L+prec, RD, RH, theta)
+        hmean = .5*(h1+h2)
         
+        delta_x = abs(integrand(hmean)*(h2-h1))*1e5
+        
+        # we find matter traversed when we move a distance prec
+        # absolute value to deal with increasing/decreasing heights
+        
+        x_new = x + delta_x
         if x_new > X[index]: 
             # X[index] is between x and x_new = x+delta_x
             # we use a linear interpolation between the last two values
