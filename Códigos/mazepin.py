@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.2.1 #################################
+############################## MAZEPIN v0.2.2 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -245,7 +245,7 @@ def Xs_to_dist(X, RD, RH, theta, prec = .01):
     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
         for a RASPASS trajectory. Approximate result (numerical integration)
     
-        X: value of slanted depth [km]
+        X: values of slanted depth [km] (numpy.ndarray)
         
         RD: RASPASSDistance [km]
     
@@ -259,7 +259,7 @@ def Xs_to_dist(X, RD, RH, theta, prec = .01):
         add the Linsley model.
     '''
     
-    RT = 6370
+    RT = 6370.
     thetarad = theta *np.pi/180.
     
     def rho(h):
@@ -268,20 +268,39 @@ def Xs_to_dist(X, RD, RH, theta, prec = .01):
     def integrand(h):
         return rho(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
     
-    Xint = 0.
-    L    = 0.
+    X      = np.sort(X)    # we sort values (just in case)
+    X_last = max(X)        # last value, will be the highest
     
-    v    = h_IP(RD, RH, theta)
-    c    = cos_localtheta(v, theta, RASPASSHeight = RH)
-    hmin = (RT+v)*np.sqrt(1-c*c)-RT
+    v      = h_IP(RD, RH, theta) # height of injection point
+    c      = cos_localtheta(v, theta, RASPASSHeight = RH)
+    hmin   = (RT+v)*np.sqrt(1-c*c)-RT # minimum height
     
-    hmin = hmin if hmin >= 0 else 0
+    hmin   = hmin if hmin >= 0 else 0
     
-    while Xint < X:
-        Xint   = sci.quad(integrand, h_RAS(L+prec, RD, RH, theta), v)[0]*1e5
+    x      = 0.
+    L      = 0.
+    
+    dist   = []
+    index  = 0
+    
+    while x < X_last:
+        delta_x = sci.quad(integrand, h_RAS(L+prec, RD, RH, theta), \
+                           h_RAS(L, RD, RH, theta))[0]*1e5
+        # we find matter traversed when we move a distance prec
+        x_new   = x + delta_x
+        
+        if x_new > X[index]: 
+            # X[index] is between x and x_new = x+delta_x
+            # we use a linear interpolation between the last two values
+            
+            distance = L + prec/delta_x * (X[index]-x)
+            index   += 1
+            dist.append(distance)
+        
+        x  = x_new
         L += prec
         
-    return L, Xint
+    return np.array(dist)
     
 def table_finder(tab, part, verbose = False):
     ''' Returns the extension corresponding to each table and particle
