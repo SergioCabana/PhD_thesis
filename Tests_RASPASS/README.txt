@@ -8,4 +8,4 @@ Calculo en frecuencias: Cruz de antenas (plano yz) centrada en (0,0,RASPASSHeigh
 Altitud del suelo fijada a 0m (Site00), 350 Observing Levels, Saco desarrollo longitudinal de numero y energia de electrones y muones
 
 Directorio en los nodos (input files, outputs):
-/home2/sergio.cabana/Test_RASPASS_ARENA
+/home2/sergio.cabana/Test_RASPASS_ARENA22
