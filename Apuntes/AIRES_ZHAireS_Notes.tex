@@ -270,19 +270,27 @@ $v$ puede obtenerse de los inputs de RASPASS \eqref{ec12}. Falta calcular $\cos\
 \begin{equation}
 	\cos{\alpha}=\sqrt{1-\left(\frac{R_T+H}{R_T+v}\right)^2\sin^2\theta}\label{ec17}
 \end{equation}
-Las ecuaciones \eqref{ec15} y \eqref{ec17} forman el resultado.
+Las ecuaciones \eqref{ec15} y \eqref{ec17} forman el resultado. La altura $h$ \eqref{ec15} presenta un mínimo cuando:
+\begin{equation}
+	\frac{dh}{dL}=0\implies L_{min}=(R_T+v)\cos\alpha\label{ec18}
+\end{equation}
+Es trivial comprobar que el valor mínimo de la altura es:
+\begin{equation}
+	h_{min}=(R_T+v)\sin\alpha-R_T=(R_T+H)\sin\theta-R_T\label{ec19}
+\end{equation}
+La interpretación para los casos en que la expresión anterior devuelve valores negativos es que, simplemente, la trayectoria \textit{cruza} la superficie de la Tierra. En esos casos, el valor físico es $h_{min}=0$  
 \subsection{Materia atravesada en función de distancia recorrida a lo largo del eje desde IP}
 La cantidad de materia atravesada es:
 \begin{equation}
-	X(L)\,\left[\mathrm{g/cm^2}\right]=\int_{0}^L\rho(h(l))dl\label{ec18}
+	X(L)\,\left[\mathrm{g/cm^2}\right]=\int_{0}^L\rho(h(l))dl\label{ec110}
 \end{equation}
 donde $dl$ es el elemento de línea a lo largo del eje. Es fácil ver que, al avanzar a lo largo del eje una distancia $dl$, la altura cambia en:
 \begin{equation}
-	dh = dl \cos{\alpha^*(h)}\label{ec19}
+	dh = dl \cos{\alpha^*(h)}\label{ec111}
 \end{equation}
 donde $\alpha^*$ es el ángulo cenital \textit{local}, i.e., entre una distancia recorrida $L$ y $L+dl$ (Fig. \ref{fig12}). Planteando el teorema del seno como en \eqref{ec16}, es inmediato llegar a que:
 \begin{equation}
-	X(L) = \int_{h(L)}^{v}\rho(h')\frac{dh'}{\sqrt{1-\left(\frac{R_T+H}{R_T+h'}\right)^2\sin^2\theta}}\label{ec110}
+	X(L) = \int_{h(L)}^{v}\rho(h')\frac{dh'}{\sqrt{1-\left(\frac{R_T+H}{R_T+h'}\right)^2\sin^2\theta}}\label{ec112}
 \end{equation}
 
 \section{Normas para nombrar \textit{Tasks} en AIRES}
