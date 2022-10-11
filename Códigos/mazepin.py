@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.3.2 #################################
+############################## MAZEPIN v0.3.3 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -209,14 +209,14 @@ def cos_localtheta(h, theta, RASPASSHeight = 0.):
 def RAS_Dist(h, theta, RH = 0):
     ''' Returns the appropriate RASPASSDistance for a shower
         with injecton height h [km] and zenith theta [deg]
-        In normal cases, RASPASSHeight = 0, but you can set it
-        to whichever value you need
+        In normal cases, RASPASSHeight = 0 km, but you can set it
+        to whichever value you need [km]
     '''
     
     RT = 6370
     c  = np.cos( theta *np.pi/180 )
      
-    return -(RT+RH)*c + np.sqrt((RT+RH)**2*c**2 - (RH**2-h**2+2*RT*(RH-v)))
+    return -(RT+RH)*c + np.sqrt((RT+RH)**2*c**2 - (RH**2-h**2+2*RT*(RH-h)))
 
 def h_IP(RD, RH, theta):
     ''' Returns height of injection point [km] in a RASPASS trajectory
