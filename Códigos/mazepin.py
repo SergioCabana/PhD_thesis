@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.3.4 #################################
+############################## MAZEPIN v0.3.5 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -433,13 +433,13 @@ def table_finder(tab, part, verbose = False):
         
     return int(table)
 
-def pathfinder(rootdir, tab, part, sim = [''], sep = [''], verbose = False):
+def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
     ''' Returns the list of paths inside rootdir corresponding to the requested
-        tables (only one type of table per request).
+        tables.
         
-        tab (int): type of table. See mazepin_aux.
+        tabs (list of int): types of tables. See mazepin.table_finder() .
         
-        part (list of int): types of particles. See mazepin_aux
+        part (list of int): types of particles. See mazepin.table_finder() .
         
         sim (list of str): constraints for file names (all selected files must 
         these strings). Default '', all files with the right extension are kept.
@@ -451,29 +451,34 @@ def pathfinder(rootdir, tab, part, sim = [''], sep = [''], verbose = False):
         
         Output (with separators sep = [sep1, sep2]):
             
-        [[part1, sep1, path1], [part1, sep2, path2], [part2, sep1, path3], ...]
+        [[tab1, part1, sep1, path1], [tab1, part1, sep2, path2], 
+         [tab1, part2, sep1, path3], [tab1, part2, sep2, path4],
+         [tab2, part1, sep1, path5], ...]
         
         ** sorry for the spaghetti **
     '''
     paths = []
     for subdir, dirs, files in os.walk(rootdir):
-        for file in files: # loop over files in rootdir
-            for p in part: # loop over requested particles
-        
-                table_ext = '.t'+str(tables[p,tab]) 
-                # extension of table tab, particle p
+        for file in files:     # loop over files in rootdir
+            for tab in tabs:   # loop over requested tables
+                for p in part: # loop over requested particles
             
-                if file.endswith(table_ext) and all([c in file for c in sim]):
-                # if our file has the right extension and all constraints
-                    for s in sep: # loop over separations
-                        if s == '' or s in file: #we take into account distinctions
-                            paths.append([str(p), s, subdir + os.sep + file])
+                    table_ext = '.t'+str(tables[p,tab]) 
+                    # extension of table tab, particle p
+                
+                    if file.endswith(table_ext) and all([c in file for c in sim]):
+                    # if our file has the right extension and all constraints
+                        for s in sep: # loop over separations
+                            if s == '' or s in file: #we take into account distinctions
+                                paths.append([str(tab), str(p), s, subdir + os.sep + file])
     
-    if len(sep) > 1 and len(paths) != len(part) * len(sep):
+    if len(sep) > 1 and len(paths) != len(part) * len(sep) * len(tabs):
         raise TypeError('Some tables are not available inside the main directory')
 
     if verbose:
-        print('Requested table: '+dict_tab[str(tab)]+'\n')
+        print('Requested tables: \n')
+        for t in tabs:
+            print(dict_tab[str(t)]+'\n')
         print('--------------------------\n')
         print('Requested particles: \n')
         for p in part:
@@ -488,7 +493,7 @@ def pathfinder(rootdir, tab, part, sim = [''], sep = [''], verbose = False):
             print(s+'\n')
         print('--------------------------\n')
         for r in paths:
-            print(dict_part[r[0]]+', '+r[1]+': \n'+r[2]+'\n')
+            print(dict_tab[r[0]]+', '+dict_part[r[1]]+', '+r[2]+':\n'+r[3]+'\n')
         
     return paths
             
