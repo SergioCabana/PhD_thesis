@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.3.3 #################################
+############################## MAZEPIN v0.3.4 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -457,15 +457,15 @@ def pathfinder(rootdir, tab, part, sim = [''], sep = [''], verbose = False):
     '''
     paths = []
     for subdir, dirs, files in os.walk(rootdir):
-        for s in sep:          # loop over distinctions
-            for file in files: # loop over files n rootdir
-                for p in part: # loop over requested particles
+        for file in files: # loop over files in rootdir
+            for p in part: # loop over requested particles
+        
+                table_ext = '.t'+str(tables[p,tab]) 
+                # extension of table tab, particle p
             
-                    table_ext = '.t'+str(tables[p,tab]) 
-                    # extension of table tab, particle p
-                
-                    if file.endswith(table_ext) and all([c in file for c in sim]):
-                    # if our file has the right extension and all constraints
+                if file.endswith(table_ext) and all([c in file for c in sim]):
+                # if our file has the right extension and all constraints
+                    for s in sep: # loop over separations
                         if s == '' or s in file: #we take into account distinctions
                             paths.append([str(p), s, subdir + os.sep + file])
     
