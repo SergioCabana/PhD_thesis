@@ -9,6 +9,33 @@ import numpy as np
 colors = ['k', 'royalblue', 'r', 'gold', 'limegreen', 'navy', 'crimson', \
            'turquoise', 'darkorange', 'darkgreen']
     
+# Linsley model for the atmosphere
+
+b1, c1 = 1222.6562, 9941.8638e2
+b2, c2 = 1144.9069, 8781.5355e2
+b3, c3 = 1305.5948, 6361.4304e2
+b4, c4 = 540.1778, 7721.7016e2
+b5, c5 = 1, 1e9                  
+
+# coefficients b [g/cm2], c [cm]
+# see AIRES manual, table 2.1
+
+def rho_Lin(h):
+    if 0 <= h < 4:
+        return b1*np.exp(-h*1e5/c1)/c1
+    elif 4 <= h < 10:
+        return b2*np.exp(-h*1e5/c2)/c2
+    elif 10 <= h < 40:
+        return b3*np.exp(-h*1e5/c3)/c3
+    elif 40 <= h < 100:
+        return b4*np.exp(-h*1e5/c4)/c4
+    elif 100 <= h < 113:
+        return b5/c5
+    else:
+        return 0
+        
+    
+    
 # dictionary of tables in AIRES 19.04.08
 
 dict_tab = {'0' : 'Longitudinal development',
@@ -27,6 +54,48 @@ dict_tab = {'0' : 'Longitudinal development',
             '13': 'Unweighted longitudinal development of low energy particles',
             '14': 'Energy longitudinal development of low energy particles',
             '15': 'Longitudinal development of deposited energy'}
+
+# set of tables where x_axis is a traversed depth:
+    
+tabs_x_depth = ['0', '1', '2', '9', '10', '11', '12', '13', '14', '15']
+
+# dictionary of x_labels for plots of each table (default export specifications)
+
+dict_tab_xlab = {'0' : r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '1' : r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '2' : r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '3' : r'Distance to core [$\mathrm{m}$]',
+                 '4' : r'Distance to core [$\mathrm{m}$]',
+                 '5' : r'$E$ [$\mathrm{GeV}$]',
+                 '6' : r'$E$ [$\mathrm{GeV}$]',
+                 '7' : r'Distance to core [$\mathrm{m}$]',
+                 '8' : 'Not implemented',
+                 '9' : r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '10': r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '11': r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '12': r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '13': r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '14': r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '15': r'$X_v$ [$\mathrm{g/cm^2}$]'}
+
+# dictionary of y_labels for plots of each table (default export specifications)
+
+dict_tab_ylab = {'0' : r'Number of particles',
+                 '1' : r'Number of particles',
+                 '2' : r'$E$ [$\mathrm{GeV}$]',
+                 '3' : r'Number of particles',
+                 '4' : r'Number of particles',
+                 '5' : r'Number of particles',
+                 '6' : r'Number of particles',
+                 '7' : r'Arrival time [$\mathrm{ns}$]',
+                 '8' : 'Not implemented',
+                 '9' : r'Number of created particles',
+                 '10': r'Number of created entries',
+                 '11': r'$E$ of created particles [$\mathrm{GeV}$]',
+                 '12': r'Number of low $E$ particles',
+                 '13': r'Number of low $E$ particles',
+                 '14': r'$E$ of low $E$ particles [$\mathrm{GeV}$]' ,
+                 '15': r'Deposited energy [[$\mathrm{GeV}$]]'}
 
 # dictionary of particles in AIRES 19.04.08
 

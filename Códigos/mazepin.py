@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.4.1 #################################
+############################## MAZEPIN v0.4.3 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -254,9 +254,9 @@ def h_RAS(L, RD, RH, theta):
     v = h_IP(RD, RH, theta)
     c = cos_localtheta(v, theta, RASPASSHeight = RH)
     
-    return np.sqrt((RT+v)**2+L**2-2*L*(RT+v)*c)-RT
+    return np.abs(np.sqrt((RT+v)**2+L**2-2*L*(RT+v)*c)-RT)
 
-def dist_to_Xs(dist, RD, RH, theta, step = .05):
+def dist_to_Xs(dist, RD, RH, theta, step = .05, d_start = 0):
     ''' Converts distance [km] to slanted depth [g/cm2] covered along shower 
         axis, for a RASPASS trajectory. VERY approximate result 
         (rough and easy numerical integration)
@@ -271,24 +271,20 @@ def dist_to_Xs(dist, RD, RH, theta, step = .05):
         
         step: Step of integration. Default 50 m
         
-        Uses exponential model for atmosphere (for the moment). My plan is to 
-        add the Linsley model.
+        d_start : distance away from injection point where we start counting
+    
     '''    
     
     thetarad = theta *np.pi/180.
-    
-    def rho(h):
-        return 1.23e-3 * np.exp(-h/8.13)
-    
+
     def integrand(h):
-        return rho(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
+        return rho_Lin(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
     
     dist    = np.sort(dist)
     
     hmin    = (RT+RH)*np.sin(thetarad) - RT
     hmin    = hmin if hmin > 0 else 0  #minimum height in atmosphere
     
-    d_start = 0
     Xs      = [0.]
     
     for i in range(len(dist)):
@@ -329,18 +325,12 @@ def Xs_to_dist(X, RD, RH, theta, prec = .05):
         theta: PrimaryZenAngle [deg]
     
         prec: precission for the result. Default 50m
-        
-        Uses exponential model for atmosphere (for the moment). My plan is to 
-        add the Linsley model.
     '''
 
     thetarad = theta *np.pi/180.
     
-    def rho(h):
-        return 1.23e-3 * np.exp(-h/8.13)
-    
     def integrand(h):
-        return rho(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
+        return rho_Lin(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
     
     X      = np.sort(X)    # we sort values (just in case)
     X_last = max(X)        # last value, will be the highest
