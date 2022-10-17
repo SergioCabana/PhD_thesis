@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.3.5 #################################
+############################## MAZEPIN v0.4.1 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -40,10 +40,17 @@ from   mazepin_aux       import *
 
 # I will define a sequence of 10 colors that I can distinguish without many
 # problems. If you are not color-blind, you can comment or ignore the following
-# lines and go to the definition of functions
+# line and go to the definition of functions
 
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=colors)
 
+# RADIUS OF THE EARTH: This is a global definition for the module.
+# You can set it to the average value or to the polar value.
+# By default, I will use the polar radius
+
+#RT = 6371. # average [km]
+RT = 6357. # polar [km]
+ 
 def gcm2toh(t):
     ''' Converts vertical depth t (g/cm2) to heights in km
         Utilises Linsley parametrization
@@ -202,7 +209,6 @@ def cos_localtheta(h, theta, RASPASSHeight = 0.):
     '''
     
     thetarad = theta *np.pi/180.
-    RT = 6370.
     
     return np.sqrt(1.-((RT+RASPASSHeight)/(RT+h)*np.sin(thetarad))**2)
 
@@ -213,7 +219,6 @@ def RAS_Dist(h, theta, RH = 0):
         to whichever value you need [km]
     '''
     
-    RT = 6370
     c  = np.cos( theta *np.pi/180 )
      
     return -(RT+RH)*c + np.sqrt((RT+RH)**2*c**2 - (RH**2-h**2+2*RT*(RH-h)))
@@ -229,7 +234,6 @@ def h_IP(RD, RH, theta):
     '''
         
     thetarad = theta *np.pi/180.
-    RT = 6370.
     
     return np.sqrt((RT+RH)**2+RD**2+2*RD*(RT+RH)*np.cos(thetarad))-RT
 
@@ -246,19 +250,77 @@ def h_RAS(L, RD, RH, theta):
         
         theta: PrimaryZenAngle [deg]
     '''
-    RT = 6370.
     
     v = h_IP(RD, RH, theta)
     c = cos_localtheta(v, theta, RASPASSHeight = RH)
     
     return np.sqrt((RT+v)**2+L**2-2*L*(RT+v)*c)-RT
 
+def dist_to_Xs(dist, RD, RH, theta, step = .05):
+    ''' Converts distance [km] to slanted depth [g/cm2] covered along shower 
+        axis, for a RASPASS trajectory. VERY approximate result 
+        (rough and easy numerical integration)
+    
+        d: values of distance [km] (numpy.ndarray)
+        
+        RD: RASPASSDistance [km]
+    
+        RH: RASPASSHeight [km]
+    
+        theta: PrimaryZenAngle [deg]
+        
+        step: Step of integration. Default 50 m
+        
+        Uses exponential model for atmosphere (for the moment). My plan is to 
+        add the Linsley model.
+    '''    
+    
+    thetarad = theta *np.pi/180.
+    
+    def rho(h):
+        return 1.23e-3 * np.exp(-h/8.13)
+    
+    def integrand(h):
+        return rho(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
+    
+    dist    = np.sort(dist)
+    
+    hmin    = (RT+RH)*np.sin(thetarad) - RT
+    hmin    = hmin if hmin > 0 else 0  #minimum height in atmosphere
+    
+    d_start = 0
+    Xs      = [0.]
+    
+    for i in range(len(dist)):
+        
+        disc = np.arange(d_start, dist[i]+step, step) # discretization of interval
+        
+        x    = Xs[-1]    # last result (we start from here)
+        
+        for j in range(len(disc)-1):
+            h1    = h_RAS(disc[j], RD, RH, theta)
+            h2    = h_RAS(disc[j+1], RD, RH, theta)
+            
+            if hmin < h1 or hmin > h2:
+                delta_x = abs(integrand(.5*(h1+h2))*(h2-h1))*1e5
+            else:
+                delta_x = abs(integrand(.5*(hmin+h1))*(hmin-h1))*1e5 + \
+                          abs(integrand(.5*(h2+hmin))*(h2-hmin))*1e5
+            
+            x += delta_x
+        
+        Xs.append(x)
+        d_start = dist[i]
+        
+    return np.array(Xs[1:])
+            
+
 def Xs_to_dist(X, RD, RH, theta, prec = .05):
     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
         for a RASPASS trajectory. VERY approximate result 
         (rough and easy numerical integration)
     
-        X: values of slanted depth [km] (numpy.ndarray)
+        X: values of slanted depth [g/cm2] (numpy.ndarray)
         
         RD: RASPASSDistance [km]
     
@@ -271,8 +333,7 @@ def Xs_to_dist(X, RD, RH, theta, prec = .05):
         Uses exponential model for atmosphere (for the moment). My plan is to 
         add the Linsley model.
     '''
-    
-    RT = 6370.
+
     thetarad = theta *np.pi/180.
     
     def rho(h):
@@ -321,6 +382,44 @@ def Xs_to_dist(X, RD, RH, theta, prec = .05):
         L += prec
         
     return np.array(dist)
+
+def atmos_size(RH, theta, atmos_height = 100, stop = 'atmos'):
+    ''' Returns total distance and traversed matter for a RASPASS trajectory
+        starting at the top ot the atmosphere (fixes RASPASSDistance so that 
+        happens)
+        
+        RH : RASPASSHeight [km]
+        
+        theta : PrimaryZenAngle [deg]
+        
+        atmos_height : height of the atmosphere [km] and starting
+            point of the trajectory (default 100 km)
+            
+        stop : point up to which we measure distance and traversed matter
+            'atmos' : top of the atmosphere
+            'zaxis' : crossing of shower axis with the vertical of observer
+            'hmin'  : minimum height reached in the atmosphere
+    '''
+    
+    RD    = RAS_Dist(atmos_height, theta, RH = RH)  # RASPASSDistance
+    
+    c     = cos_localtheta(atmos_height, theta, RASPASSHeight = RH)
+    Lmin  = (RT+atmos_height) * c    # distance where minimum height is reached
+    
+    L_exit = 2*Lmin              # distance where atmos_height is reached again 
+    
+    if stop == 'atmos':
+        return L_exit, dist_to_Xs(np.array([L_exit]), RD, RH, theta)[0]
+    elif stop == 'zaxis':
+        return RD, dist_to_Xs(np.array([RD]), RD, RH, theta)[0]
+    elif stop == 'hmin':
+        return Lmin, dist_to_Xs(np.array([Lmin]), RD, RH, theta)[0]
+    
+    else: 
+        raise TypeError(r'Valid stops are: "atmos", "zaxis" and "hmin" ')
+        
+    
+    
     
 def table_finder(tab, part, verbose = False):
     ''' Returns the extension corresponding to each table and particle
