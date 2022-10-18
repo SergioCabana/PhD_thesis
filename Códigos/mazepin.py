@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.5.1 #################################
+############################## MAZEPIN v0.5.2 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -36,6 +36,7 @@ import scipy.integrate   as sci
 import os
 
 from   scipy.fftpack     import fft, fftfreq, fftshift
+from   scipy.interpolate import interp1d
 from   mazepin_aux       import *
 
 # I will define a sequence of 10 colors (mazepin_aux) that I can distinguish 
@@ -311,11 +312,10 @@ def dist_to_Xs(dist, RD, RH, theta, step = .05, d_start = 0):
         
     return np.array(Xs[1:])
             
-
-def Xs_to_dist(X, RD, RH, theta, prec = .05):
+def Xs_to_dist(X, RD, RH, theta, atmos_height = 113):
     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
         for a RASPASS trajectory. VERY approximate result 
-        (rough and easy numerical integration)
+        (rough and easy numerical integration). Inverts previous function.
     
         X: values of slanted depth [g/cm2] (numpy.ndarray)
         
@@ -324,58 +324,24 @@ def Xs_to_dist(X, RD, RH, theta, prec = .05):
         RH: RASPASSHeight [km]
     
         theta: PrimaryZenAngle [deg]
-    
-        prec: precission for the result. Default 50m
+
     '''
+    
+    RD_top = RAS_Dist(atmos_height, theta, RH = RH)
+    
+    offset_dist = RD - RD_top if RD - RD_top > 0 else 0 # distance outside atmosphere
 
-    thetarad = theta *np.pi/180.
+    L_full, X_full = atmos_size(RH, theta)
     
-    def integrand(h):
-        return rho_Lin(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
-        # rho_Lin is the Linsley atmosphere, defined in mazepin_aux
-        
-    X      = np.sort(X)    # we sort values (just in case)
-    X_last = max(X)        # last value, will be the highest
+    d = np.linspace(0, L_full+offset_dist, 1000)
     
-    hmin   = (RT+RH)*np.sin(thetarad) - RT
-    hmin   = hmin if hmin > 0 else 0  #minimum height in atmosphere
+    Xs = dist_to_Xs(d, RD, RH, theta)
     
-    x      = 0.
-    L      = 0.
+    inverse = interp1d(Xs, d)
     
-    dist   = []
-    index  = 0
+    return np.array([inverse(x) if x < X_full else L_full+offset_dist for x in X])
     
-    while x < X_last:
-        h1    = h_RAS(L, RD, RH, theta)
-        h2    = h_RAS(L+prec, RD, RH, theta)
-        
-        if hmin < h1 or hmin > h2:
-            delta_x = abs(integrand(.5*(h1+h2))*(h2-h1))*1e5
-        else:
-            delta_x = abs(integrand(.5*(hmin+h1))*(hmin-h1))*1e5 + \
-                      abs(integrand(.5*(h2+hmin))*(h2-hmin))*1e5
-        
-        # we find matter traversed when we move a distance prec
-        # absolute value to deal with increasing/decreasing heights
-        # take into account interval where height starts increasing
-        
-        x_new = x + delta_x
-
-        if x_new > X[index]: 
-            # X[index] is between x and x_new = x+delta_x
-            # we use a linear interpolation between the last two values
-            
-            distance = L + prec/delta_x * (X[index]-x)
-            index   += 1
-            dist.append(distance)
-        
-        x  = x_new
-        L += prec
-        
-    return np.array(dist)
-
-def atmos_size(RH, theta, atmos_height = 100, stop = 'atmos'):
+def atmos_size(RH, theta, atmos_height = 113, stop = 'atmos'):
     ''' Returns total distance and traversed matter for a RASPASS trajectory
         starting at the top ot the atmosphere (fixes RASPASSDistance so that 
         happens)
@@ -385,7 +351,7 @@ def atmos_size(RH, theta, atmos_height = 100, stop = 'atmos'):
         theta : PrimaryZenAngle [deg]
         
         atmos_height : height of the atmosphere [km] and starting
-            point of the trajectory (default 100 km)
+            point of the trajectory (default 113 km)
             
         stop : point up to which we measure distance and traversed matter
             'atmos' : top of the atmosphere
@@ -393,13 +359,20 @@ def atmos_size(RH, theta, atmos_height = 100, stop = 'atmos'):
             'hmin'  : minimum height reached in the atmosphere
     '''
     
-    RD    = RAS_Dist(atmos_height, theta, RH = RH)  # RASPASSDistance
+    RD     = RAS_Dist(atmos_height, theta, RH = RH)  # RASPASSDistance
     
-    c     = cos_localtheta(atmos_height, theta, RASPASSHeight = RH)
-    Lmin  = (RT+atmos_height) * c    # distance where minimum height is reached
+    c      = cos_localtheta(atmos_height, theta, RASPASSHeight = RH)
+    Lmin   = (RT+atmos_height) * c    # distance where minimum height is reached
+    L_exit = 2*Lmin              # distance where atmos_height is reached again
     
-    L_exit = 2*Lmin              # distance where atmos_height is reached again 
+    hmin  = (RT+RH)*np.sin(theta*np.pi/180.)-RT
     
+    hmin = hmin if hmin > 0 else 0
+    
+    if hmin == 0:  # NOT RASPASS !!!!
+        Lmin   = RD
+        L_exit = RD
+        
     if stop == 'atmos':
         return L_exit, dist_to_Xs(np.array([L_exit]), RD, RH, theta)[0]
     elif stop == 'zaxis':
@@ -748,7 +721,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
             if not slant:
                 raise TypeError('Conversor Xs_to_dist works with X_slanted as input')
     
-            xdata = Xs_to_dist(xdata, RD, RH, theta)
+            xdata = RD - Xs_to_dist(xdata, RD, RH, theta) # distance to z axis crossing
             
         elif slant and not Distance and tab in tabs_x_depth:
             
@@ -910,3 +883,65 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
             
 
 
+# def Xs_to_dist_old(X, RD, RH, theta, prec = .05):
+#     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
+#         for a RASPASS trajectory. VERY approximate result 
+#         (rough and easy numerical integration)
+    
+#         X: values of slanted depth [g/cm2] (numpy.ndarray)
+        
+#         RD: RASPASSDistance [km]
+    
+#         RH: RASPASSHeight [km]
+    
+#         theta: PrimaryZenAngle [deg]
+    
+#         prec: precission for the result. Default 50m
+#     '''
+
+#     thetarad = theta *np.pi/180.
+    
+#     def integrand(h):
+#         return rho_Lin(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
+#         # rho_Lin is the Linsley atmosphere, defined in mazepin_aux
+        
+#     X      = np.sort(X)    # we sort values (just in case)
+#     X_last = max(X)        # last value, will be the highest
+    
+#     hmin   = (RT+RH)*np.sin(thetarad) - RT
+#     hmin   = hmin if hmin > 0 else 0  #minimum height in atmosphere
+    
+#     x      = 0.
+#     L      = 0.
+    
+#     dist   = []
+#     index  = 0
+    
+#     while x < X_last:
+#         h1    = h_RAS(L, RD, RH, theta)
+#         h2    = h_RAS(L+prec, RD, RH, theta)
+        
+#         if hmin < h1 or hmin > h2:
+#             delta_x = abs(integrand(.5*(h1+h2))*(h2-h1))*1e5
+#         else:
+#             delta_x = abs(integrand(.5*(hmin+h1))*(hmin-h1))*1e5 + \
+#                       abs(integrand(.5*(h2+hmin))*(h2-hmin))*1e5
+        
+#         # we find matter traversed when we move a distance prec
+#         # absolute value to deal with increasing/decreasing heights
+#         # take into account interval where height starts increasing
+        
+#         x_new = x + delta_x
+
+#         if x_new > X[index]: 
+#             # X[index] is between x and x_new = x+delta_x
+#             # we use a linear interpolation between the last two values
+            
+#             distance = L + prec/delta_x * (X[index]-x)
+#             index   += 1
+#             dist.append(distance)
+        
+#         x  = x_new
+#         L += prec
+        
+#     return np.array(dist)
