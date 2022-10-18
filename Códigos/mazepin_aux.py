@@ -3,12 +3,14 @@
     that will be imported and used by the main module
 '''
 import numpy as np
+import matplotlib as mpl
 
 # colorblind friendly sequence of colors, at least for me ;)
 
 colors = ['k', 'royalblue', 'r', 'gold', 'limegreen', 'navy', 'crimson', \
            'turquoise', 'darkorange', 'darkgreen']
     
+
 # Linsley model for the atmosphere
 
 b1, c1 = 1222.6562, 9941.8638e2
@@ -59,6 +61,14 @@ dict_tab = {'0' : 'Longitudinal development',
     
 tabs_x_depth = ['0', '1', '2', '9', '10', '11', '12', '13', '14', '15']
 
+# set of tables where x_axis is energy:
+    
+tabs_x_ener = ['5', '6']
+
+# set of tables where x_axis is distance to core:
+    
+tabs_x_core = ['3', '4', '7']
+
 # dictionary of x_labels for plots of each table (default export specifications)
 
 dict_tab_xlab = {'0' : r'$X_v$ [$\mathrm{g/cm^2}$]',
@@ -95,7 +105,26 @@ dict_tab_ylab = {'0' : r'Number of particles',
                  '12': r'Number of low $E$ particles',
                  '13': r'Number of low $E$ particles',
                  '14': r'$E$ of low $E$ particles [$\mathrm{GeV}$]' ,
-                 '15': r'Deposited energy [[$\mathrm{GeV}$]]'}
+                 '15': r'Deposited energy [$\mathrm{GeV}$]'}
+
+# dictionary of y_labels for legends
+
+dict_tab_yleg = {'0' : r'#',
+                 '1' : r'#',
+                 '2' : r'$E$',
+                 '3' : r'#',
+                 '4' : r'#',
+                 '5' : r'#',
+                 '6' : r'#',
+                 '7' : r'Arrival time',
+                 '8' : 'Not implemented',
+                 '9' : r'# (created)',
+                 '10': r'# (entries)',
+                 '11': r'$E$ (created)',
+                 '12': r'# (low E)',
+                 '13': r'# (low E)',
+                 '14': r'$E$ (low $E$)' ,
+                 '15': r'Dep. $E$'}
 
 # dictionary of particles in AIRES 19.04.08
 

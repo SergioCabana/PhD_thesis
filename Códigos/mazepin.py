@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.4.3 #################################
+############################## MAZEPIN v0.5.1 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -38,9 +38,9 @@ import os
 from   scipy.fftpack     import fft, fftfreq, fftshift
 from   mazepin_aux       import *
 
-# I will define a sequence of 10 colors that I can distinguish without many
-# problems. If you are not color-blind, you can comment or ignore the following
-# line and go to the definition of functions
+# I will define a sequence of 10 colors (mazepin_aux) that I can distinguish 
+# without many problems. If you are not color-blind, you can comment or ignore 
+# the following line and go to the definition of functions
 
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=colors)
 
@@ -279,7 +279,8 @@ def dist_to_Xs(dist, RD, RH, theta, step = .05, d_start = 0):
 
     def integrand(h):
         return rho_Lin(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
-    
+        # rho_Lin is the Linsley atmosphere. Defined in mazepin_aux
+        
     dist    = np.sort(dist)
     
     hmin    = (RT+RH)*np.sin(thetarad) - RT
@@ -331,7 +332,8 @@ def Xs_to_dist(X, RD, RH, theta, prec = .05):
     
     def integrand(h):
         return rho_Lin(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
-    
+        # rho_Lin is the Linsley atmosphere, defined in mazepin_aux
+        
     X      = np.sort(X)    # we sort values (just in case)
     X_last = max(X)        # last value, will be the highest
     
@@ -512,13 +514,14 @@ def table_finder(tab, part, verbose = False):
     if part not in range(0,23,1):
         raise TypeError('Please introduce a valid particle id between 0 and 22')
         
-    table = tables[part,tab]
+    table = tables[part,tab]  # from mazepin_aux
     
     if table == 9999:
         raise TypeError('Table is not available in AIRES 19.04.08')
     
     if verbose:
         print('Requested table: '+dict_tab[str(tab)]+', for '+dict_part[str(part)])
+        # dictionaries at mazepin_aux
         
     return int(table)
 
@@ -553,7 +556,7 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
                 for p in part: # loop over requested particles
             
                     table_ext = '.t'+str(tables[p,tab]) 
-                    # extension of table tab, particle p
+                    # extension of table tab, particle p (table at mazepin_aux)
                 
                     if file.endswith(table_ext) and all([c in file for c in sim]):
                     # if our file has the right extension and all constraints
@@ -563,8 +566,18 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
     
     if len(sep) > 1 and len(paths) != len(part) * len(sep) * len(tabs):
         raise TypeError('Some tables are not available inside the main directory')
-
-    if verbose:
+        
+    order = []
+    for p in part:
+        for s in sep:
+            for elem in paths:
+                if str(p) in elem and s in elem:
+                    order.append(elem) 
+                    
+                    
+    paths = order # this is a trick to make the lists in paths ordered as sep is
+    
+    if verbose:  # all dictionaries in mazepin_aux
         print('Requested tables: \n')
         for t in tabs:
             print(dict_tab[str(t)]+'\n')
@@ -585,6 +598,315 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
             print(dict_tab[r[0]]+', '+dict_part[r[1]]+', '+r[2]+':\n'+r[3]+'\n')
         
     return paths
+
+
+def readfile(filename):
+    ''' Reads the AIRES output given. If ground position is specified in 
+        the file comments, returns it 
+    '''
+    file = open(filename, 'r')
+    lines = file.readlines()
+    file.close()
+    
+    ground = 'None'
+    
+    dataset = []
+    for line in lines:
+        if line[0:5] == '# GRD':
+            ground = line.split()
+        elif line[0] != '#':
+            dataset += [line.split()]
+    
+    data = np.array(dataset, dtype = float)
+    
+    ground = float(ground[2]) if ground != 'None' else 'None'
+    
+    return data[:,1:], ground
+
+
+def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
+               RASPASS = False, Distance = False, first_int = False, \
+               traject = []):
+    ''' Returns data to be plotted, and a collection of suitable labels
+    
+        data is a single instance of the output of maz.pathfinder, i.e.,
+        [tab, part, sep, path]
+
+        error_type (sigma, RMS): which error to return
+        
+        UG        : Adapts x_axis data for upgoing showers (basically turns it)
+        
+        slant     : True if we are using slant depth option for export tables
+        
+        RASPASS   : Adapts x_axis data for RASPASS trajectories
+        
+        Distance  : Turns x_axis data to distance measured along axis
+        
+        first_int : Offset in x_axis for different injection heights
+        
+        traject   : trajectory parameters. [inj_h, theta (0-90)] (not RASPASS), or
+                    [RDistance, RHeight, theta] (RASPASS)
+                    
+        Output:
+            
+        [xdata, ydata, error, label], x_axis_label, y_axis_label
+        
+        **WARNING** Table 5001 is not implemented
+    '''
+    
+    tab, part, sep, file = data
+    
+    label = dict_part_tex[part] + ', ' + sep # dictionary in mazepin_aux
+    
+    
+    ##################### DATA READING ################################
+    data, grd = readfile(file)
+    
+    xdata = data[:,0]
+    
+    ydata = data[:,1]
+    
+    if error_type == 'sigma':
+        err = data[:,3]
+    elif error_type == 'RMS':
+        err = data[:,2]
+    else:
+        raise TypeError('Please introduce a valid error_type ("sigma" or "RMS"")')
+        
+    x_axis_label, y_axis_label = dict_tab_xlab[tab], dict_tab_ylab[tab] 
+    # default labels, dictionary at mazepin_aux
+    
+    ######################### TRAJECTORY PARAMETERS ####################
+    traj_input = False
+    
+    if RASPASS and len(traject) == 3:
+        
+        RD, RH, theta = traject
+        inj_h         = h_IP(RD, RH, theta)
+        traj_input    = True
+    
+    elif not RASPASS and len(traject) == 2:
+        
+        inj_h, theta = traject
+        RD, RH       = RAS_Dist(inj_h, theta, RH = 0), 0
+        
+        RD_top       = RAS_Dist(113, theta, RH = 0) # RASPASSDistance of an inj ponit at atmosphere limit
+        traj_input   = True
+        
+        
+    ######################### X AXIS CONVERSIONS ##########################
+    if not RASPASS:  # "normal" upgoing or downgoing showers, RH = 0
+        
+        if Distance and tab in tabs_x_depth: 
+        # we want to convert x_data to distances along axis. tabs_x... in mazepin_aux
+        
+            x_axis_label = r'Dist. along axis [km]' 
+            
+            if not traj_input:
+                raise TypeError('Trajectory parameters are needed')
+                
+            if not slant:
+                raise TypeError('Conversor Xs_to_dist works with X_slanted as input')
+
+            grd_km = Xs_to_dist(np.array([grd]), RD_top, 0, theta) if grd != 'None' else RD_top
+            # position of ground from atmosphere limit, along axis
+            
+            xdata  = Xs_to_dist(xdata, RD_top, 0, theta)
+            
+            if first_int:
+                xdata = np.array([grd_km - x - RD for x in xdata]) if UG else np.array([x - RD for x in xdata])
+            else:
+                xdata = np.array([grd_km - x for x in xdata]) if UG else np.array(xdata)
+                
+        elif slant and not Distance and tab in tabs_x_depth:
+            
+            x_axis_label = r'$X_s$ [$\mathrm{g/cm^2}$]' 
+            
+            if first_int:
+                
+                if not traj_input:
+                    raise TypeError('Trajectory parameters are needed for first_int')
+                    
+                start_depth = dist_to_Xs(np.array([RD_top-RD]), RD_top, 0, theta)
+                
+                xdata = np.array([start_depth-x for x in xdata]) if UG else np.array([x-start_depth for x in xdata]) 
+            
+            else:
+                xdata = np.array([grd-x for x in xdata]) if UG else np.array(xdata)
+            
+
+            
+    else: # RASPASS SHOWERS
+    
+        if Distance and tab in tabs_x_depth: # we want to convert x_data to distances along axis 
+        
+            x_axis_label = r'Dist. to Z axis crossing [km]' 
+            
+            if not traj_input:
+                raise TypeError('Trajectory parameters are needed')
+                
+            if not slant:
+                raise TypeError('Conversor Xs_to_dist works with X_slanted as input')
+    
+            xdata = Xs_to_dist(xdata, RD, RH, theta)
+            
+        elif slant and not Distance and tab in tabs_x_depth:
+            
+            x_axis_label = r'$X_s$ [$\mathrm{g/cm^2}$]' 
+            
+
+    return [xdata, ydata, err, label], x_axis_label, y_axis_label
+
+
+def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
+               RASPASS = False, Distance = False, first_int = False, \
+               trajects = [], xlim = [], ylim = [], xscale = 'linear', \
+               yscale = 'linear', autolabel = True, graph_type = 'step', labels = [], \
+               verbose = False, size = 12, legend = True, title = '', \
+               loc_leg = 'best', fmt = '-', marker = 'o', linewidth = 2.):
+    
+    
+    ''' Plots AIRES outputs, preprocessed using pathfinder and Aires_data
+    
+        input_data : output of pathfinder. The selection of graphs is done there
+        
+        Allows to plot different tables in the same canvas, as long as it is possible
+        (i.e., same X_axis coordinate)
+        
+        error_type, UG, slant, RASPASS, Distance, first_int, trajects
+        are Aires_data options
+        
+        If traject is not needed, place an empty list [] for each plot
+        
+        xlim, ylim (list): limits for axes
+        
+        xscale, yscale ("linear", "log"): scales for axes
+        
+        autolabel (bool): Sets automatic labels for each plot
+        
+        graph_type: Valid types are "step" or "errorbar"
+        
+        labels: if autolabel is False, list of labels by hand (one for plot,
+                in the order of input_data)
+        
+        size : size of text
+        
+        legend (bool): sets legend in graph
+        
+        title (str): title of graph
+        
+        loc_leg : position of legend
+        
+        fmt : if graph_style == errorbar, format of plot
+        
+        marker : if graph_style == errorbar, marker of points
+        
+        linewidth : for both types of graphs
+        
+    '''
+    
+    tabs = [data_path[0] for data_path in input_data]
+    
+    x_depth = all([t in tabs_x_depth for t in tabs])
+    x_ener  = all([t in tabs_x_ener for t in tabs])
+    x_core  = all([t in tabs_x_core for t in tabs]) # lists in mazepin_aux
+    
+    if not any([x_depth, x_ener, x_core]):
+        raise TypeError('All tables must have the same type of x coordinate')
+    
+    counter    = 0
+
+    
+    xsets      = []
+    ysets      = []
+    yerrsets   = []
+    graph_labs = []
+    ylabs      = []
+    
+    fig = plt.figure(1)
+
+    ax  = fig.add_subplot(111)
+    plt.xticks(fontsize = size)
+    plt.yticks(fontsize = size)
+    
+    # scientific notation for offset text
+
+    form = mpl.ticker.ScalarFormatter(useMathText=True) 
+    form.set_scientific(True) 
+    form.set_powerlimits((-1,1))
+    ax.yaxis.set_major_formatter(form)
+    
+    for data_path in input_data:
+        dataset, x_axis_label, y_axis_label = Aires_data(data_path, error_type,\
+                                              UG, slant, RASPASS, Distance, \
+                                              first_int, traject = trajects[counter])
+        
+        xdata, ydata, err, label = dataset
+        
+        xsets.append(xdata); 
+        ysets.append(ydata);
+        yerrsets.append(err);
+        graph_labs.append(label); 
+        ylabs.append(y_axis_label)
+    
+        counter += 1
+        
+        
+    ylab_diff = list(dict.fromkeys(ylabs)); multi_y = len(ylab_diff) > 1
+
+    y_axis_label = ''
+    
+    for y_name in ylab_diff:
+        y_axis_label = y_axis_label + y_name + ' or '
+        
+    y_axis_label = y_axis_label[:-4]
+    
+    counter = 0
+    
+    for x, y, err, lab in list(zip(xsets, ysets, yerrsets, graph_labs)):
+        
+        if autolabel:
+            if multi_y:
+                glabel = dict_tab_yleg[tabs[counter]]+', '+lab # dict in mazepin_aux
+            else:
+                glabel = lab
+        else:
+            glabel = labels[counter]
+            
+        if graph_type == 'step':
+            ax.step(x, y, linewidth = linewidth, where = 'mid', label = glabel)
+
+        elif graph_type == 'errorbar':
+            ax.errorbar(x, y, err, fmt = fmt, marker=marker, linewidth=linewidth, label = glabel)
+
+        else:
+            raise TypeError('Valid graph styles are "step" and "errorbar"')
+            
+        counter += 1
+    
+    ax.set_xlabel(x_axis_label, size = size)
+    ax.set_ylabel(y_axis_label, size = size)
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
+    ax.set_title(title, size = size)
+    
+    text = ax.yaxis.get_offset_text()
+    text.set_size(size)
+    
+    if UG and not Distance and not slant:
+        ax.invert_xaxis()
+        
+    if RASPASS and Distance:
+        ax.invert_xaxis()
+    
+    if legend:
+        ax.legend(loc = loc_leg, prop = {'size':size})
+        
+    if len(xlim) == 2:
+        ax.set_xlim(xlim[0], xlim[1])
+    
+    if len(ylim) == 2:
+        ax.set_ylim(ylim[0], ylim[1])
             
 
 
