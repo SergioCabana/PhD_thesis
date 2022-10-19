@@ -257,7 +257,7 @@ def h_RAS(L, RD, RH, theta):
     
     return np.abs(np.sqrt((RT+v)**2+L**2-2*L*(RT+v)*c)-RT)
 
-def dist_to_Xs(dist, RD, RH, theta, step = .05, d_start = 0):
+def dist_to_Xs(dist, RD, RH, theta, step = .025):
     ''' Converts distance [km] to slanted depth [g/cm2] covered along shower 
         axis, for a RASPASS trajectory. VERY approximate result 
         (rough and easy numerical integration)
@@ -270,16 +270,14 @@ def dist_to_Xs(dist, RD, RH, theta, step = .05, d_start = 0):
     
         theta: PrimaryZenAngle [deg]
         
-        step: Step of integration. Default 50 m
+        step: Step of integration. Default 25 m
         
-        d_start : distance away from injection point where we start counting
-    
     '''    
     
     thetarad = theta *np.pi/180.
 
     def integrand(h):
-        return rho_Lin(h)/np.sqrt(1-((RT+RH)/(RT+h)*np.sin(thetarad))**2)
+        return rho_Lin(h)/np.sqrt(1-((RT+RH)*np.sin(thetarad)/(RT+h))**2)
         # rho_Lin is the Linsley atmosphere. Defined in mazepin_aux
         
     dist    = np.sort(dist)
@@ -288,10 +286,11 @@ def dist_to_Xs(dist, RD, RH, theta, step = .05, d_start = 0):
     hmin    = hmin if hmin > 0 else 0  #minimum height in atmosphere
     
     Xs      = [0.]
+    d_start = 0.
     
-    for i in range(len(dist)):
+    for d in dist:
         
-        disc = np.arange(d_start, dist[i]+step, step) # discretization of interval
+        disc = np.arange(d_start, d+step, step) # discretization of interval
         
         x    = Xs[-1]    # last result (we start from here)
         
@@ -308,39 +307,11 @@ def dist_to_Xs(dist, RD, RH, theta, step = .05, d_start = 0):
             x += delta_x
         
         Xs.append(x)
-        d_start = dist[i]
+        d_start = d
         
     return np.array(Xs[1:])
-            
-def Xs_to_dist(X, RD, RH, theta, atmos_height = 113):
-    ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
-        for a RASPASS trajectory. VERY approximate result 
-        (rough and easy numerical integration). Inverts previous function.
-    
-        X: values of slanted depth [g/cm2] (numpy.ndarray)
-        
-        RD: RASPASSDistance [km]
-    
-        RH: RASPASSHeight [km]
-    
-        theta: PrimaryZenAngle [deg]
+       
 
-    '''
-    
-    RD_top = RAS_Dist(atmos_height, theta, RH = RH)
-    
-    offset_dist = RD - RD_top if RD - RD_top > 0 else 0 # distance outside atmosphere
-
-    L_full, X_full = atmos_size(RH, theta)
-    
-    d = np.linspace(0, L_full+offset_dist, 1000)
-    
-    Xs = dist_to_Xs(d, RD, RH, theta)
-    
-    inverse = interp1d(Xs, d)
-    
-    return np.array([inverse(x) if x < X_full else L_full+offset_dist for x in X])
-    
 def atmos_size(RH, theta, atmos_height = 113, stop = 'atmos'):
     ''' Returns total distance and traversed matter for a RASPASS trajectory
         starting at the top ot the atmosphere (fixes RASPASSDistance so that 
@@ -383,9 +354,37 @@ def atmos_size(RH, theta, atmos_height = 113, stop = 'atmos'):
     else: 
         raise TypeError(r'Valid stops are: "atmos", "zaxis" and "hmin" ')
         
+        
+def Xs_to_dist(X, RD, RH, theta, atmos_height = 113):
+    ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
+        for a RASPASS trajectory. VERY approximate result 
+        (rough and easy numerical integration). Inverts previous function.
     
+        X: values of slanted depth [g/cm2] (numpy.ndarray)
+        
+        RD: RASPASSDistance [km]
     
+        RH: RASPASSHeight [km]
     
+        theta: PrimaryZenAngle [deg]
+
+    '''
+    
+    RD_top = RAS_Dist(atmos_height, theta, RH = RH)
+    
+    offset_dist = RD - RD_top if RD - RD_top > 0 else 0 # distance outside atmosphere
+
+    L_full, X_full = atmos_size(RH, theta)
+    
+    d = np.linspace(0, L_full+offset_dist, 1000)
+    
+    Xs = dist_to_Xs(d, RD, RH, theta)
+    
+    inverse = interp1d(Xs, d)
+    
+    return np.array([inverse(x) if x < X_full else L_full+offset_dist for x in X])
+    
+
 def table_finder(tab, part, verbose = False):
     ''' Returns the extension corresponding to each table and particle
     
