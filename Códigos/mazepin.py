@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.5.2 #################################
+############################## MAZEPIN v0.6.1 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -795,7 +795,7 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     graph_labs = []
     ylabs      = []
     
-    fig = plt.figure(1)
+    fig = plt.figure()
 
     ax  = fig.add_subplot(111)
     plt.xticks(fontsize = size)
@@ -879,6 +879,42 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     
     if len(ylim) == 2:
         ax.set_ylim(ylim[0], ylim[1])
+        
+
+def traject_finder(files, RASPASS = False, UG = False):
+    ''' Returns trajecory parameters given the name of the file
+        **WARNING** It uses my personal conventions for naming files
+        
+        files: output of pathfinder
+        
+    '''
+    trajects = []
+    
+    for f in files:
+        table_name = f[3].split('\\')[-1]
+        
+        chars = table_name.split('_')
+        
+        if RASPASS:
+            RD = chars[3][:-2]
+            RH = chars[4][:-2]
+            theta = chars[6][:-3]
+            
+            trajects.append([float(RD), float(RH), float(theta)])
+            
+        elif UG:
+            inj_h = chars[3][:-2]
+            theta = chars[4][:-3]
+            
+            trajects.append([float(inj_h), float(theta)])
+        
+        else:
+            inj_h = chars[2][:-2]
+            theta = chars[3][:-3]
+            
+            trajects.append([float(inj_h), float(theta)])
+    
+    return trajects
             
 
 
