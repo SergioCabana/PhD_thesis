@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.6.1 #################################
+############################## MAZEPIN v0.6.2 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -879,6 +879,8 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     
     if len(ylim) == 2:
         ax.set_ylim(ylim[0], ylim[1])
+        
+    return fig, ax
         
 
 def traject_finder(files, RASPASS = False, UG = False):
