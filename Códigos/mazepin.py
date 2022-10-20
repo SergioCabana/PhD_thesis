@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.6.2 #################################
+############################## MAZEPIN v0.7.0 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -982,7 +982,86 @@ def traject_finder(files, RASPASS = False, UG = False):
     return trajects
             
 
+def shell_script(job_name, input_file_dir, input_files, main = '/home2/', \
+                 user = 'sergio.cabana/', \
+                 exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSPrimary'],
+                 program = 'ZHAireSRASPASS'):
+    
+    ''' Creates a shell script (.sh extension) that can be submitted to queue 
+        systems (at least inside IGFAE nodes, with scratch). 
+        It is adapted for the cluster I use but easy to modify
+        
+        job_name: job ID for queue system
+        
+        input_file_dir: directory of input files (inside main/user/). Ends with /
+        
+        input_files : list of names of input files
+        
+        main : default root directory
+        
+        user : directory of current user
+        
+        exe  : paths (inside main) to executable binaries to import and use
 
+        program : name of binary executable to run the input files
+    '''
+
+    name = 'script_shell_'
+    
+    header = (        
+'''############ Created with mazepin.shell_script() ################
+
+#!/bin/bash
+#$ -N '''+job_name+'''
+#$ -cwd
+#$ -j y
+#$ -S /bin/bash
+#$ -q auger.q
+
+#if [ `hostname -s` -eq `nodo036.inv.usc.es` ]; then
+#   sleep 1h
+#fi
+
+'''
+    )
+    
+    scratch_dir = '/scratch/'+user+'Aires_tmp/'+job_name+'/'
+
+    with open(name+job_name+'.sh', 'w') as f:
+        
+        f.write(header)
+        f.write('[[ -d '+ scratch_dir + ' ]] || mkdir -p '+ scratch_dir)
+        f.write('\n\n')
+        f.write('cd ' + scratch_dir)
+        f.write('\n\n')
+        
+        f.write('############ EXECUTABLES ###########\n\n')
+        for e in exe:
+            
+            f.write('cp ' + main + user + e + ' ' + scratch_dir + '\n')
+        
+        f.write('\n\n')
+        
+        f.write('############ INPUT FILES ###########\n\n')
+        for inp in input_files:
+            
+            f.write('cp ' + main + user + input_file_dir + inp + ' ' + scratch_dir + '\n')
+            
+        f.write('\n\n')
+        
+        f.write('############ EXECUTION ###########\n\n')
+        for inp in input_files:
+            
+            f.write('./' + program + ' < ' + inp + ' > ' + inp[:-4] + '.out' + '\n')
+            
+        f.write('\n\n')
+        
+        f.write('############ OUTPUT SAVING AND EXIT ###########\n\n')
+
+        f.write('cp *.* '+ main + user + input_file_dir + '\n')
+        f.write('rm -rf ' + scratch_dir)
+                    
+        f.close()
 # def Xs_to_dist_old(X, RD, RH, theta, prec = .05):
 #     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
 #         for a RASPASS trajectory. VERY approximate result 
