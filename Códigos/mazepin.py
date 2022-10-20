@@ -384,6 +384,8 @@ def Xs_to_dist(X, RD, RH, theta, atmos_height = 113):
     
     return np.array([inverse(x) if x < X_full else L_full+offset_dist for x in X])
     
+def codes():
+    return dict_tab, dict_part
 
 def table_finder(tab, part, verbose = False):
     ''' Returns the extension corresponding to each table and particle
@@ -421,6 +423,8 @@ def table_finder(tab, part, verbose = False):
         14: Energy longitudinal development of low energy particles
         
         15: Longitudinal development of deposited energy
+        
+        16: Energy (per particle) longitudinal development
         
         part: type of particle (from 0 to 22)
         
@@ -481,21 +485,23 @@ def table_finder(tab, part, verbose = False):
         5513 : Zenith and azimuth vs shower number
     '''
     
-    if tab not in range(0,16,1):
-        raise TypeError('Please introduce a valid table id between 0 and 15')
+    if tab not in range(0,17,1):
+        raise TypeError('Please introduce a valid table id between 0 and 16')
     if part not in range(0,23,1):
         raise TypeError('Please introduce a valid particle id between 0 and 22')
         
-    table = tables[part,tab]  # from mazepin_aux
+    table = [tables[part,0], tables[part, 2]] if tab == 16 else [tables[part, tab]]  # from mazepin_aux
     
     if table == 9999:
         raise TypeError('Table is not available in AIRES 19.04.08')
     
     if verbose:
         print('Requested table: '+dict_tab[str(tab)]+', for '+dict_part[str(part)])
+        if tab == 16:
+            print('Two tables needed for energy per particle !!')
         # dictionaries at mazepin_aux
         
-    return int(table)
+    return [int(t) for t in table] 
 
 def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
     ''' Returns the list of paths inside rootdir corresponding to the requested
@@ -519,23 +525,43 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
          [tab1, part2, sep1, path3], [tab1, part2, sep2, path4],
          [tab2, part1, sep1, path5], ...]
         
-        ** sorry for the spaghetti **
+        ** sorry for the spaghetti, I know it is a huge mess :_( **
     '''
     paths = []
+    
     for subdir, dirs, files in os.walk(rootdir):
         for file in files:     # loop over files in rootdir
             for tab in tabs:   # loop over requested tables
                 for p in part: # loop over requested particles
-            
-                    table_ext = '.t'+str(tables[p,tab]) 
-                    # extension of table tab, particle p (table at mazepin_aux)
                 
-                    if file.endswith(table_ext) and all([c in file for c in sim]):
-                    # if our file has the right extension and all constraints
-                        for s in sep: # loop over separations
-                            if s == '' or s in file: #we take into account distinctions
-                                paths.append([str(tab), str(p), s, subdir + os.sep + file])
-    
+                    if tab != 16:  # NORMAL AIRES TABLES (JUST LOOP OVER FILES AND CHECK EXTENSIONS)
+                    
+                        table_ext = '.t'+str(tables[p,tab]) 
+                        # extension of table tab, particle p (table at mazepin_aux)
+                    
+                        if file.endswith(table_ext) and all([c in file for c in sim]):
+                        # if our file has the right extension and all constraints
+                            for s in sep: # loop over separations
+                                if s == '' or s in file: #we take into account distinctions
+                                    paths.append([str(tab), str(p), s, subdir + os.sep + file])
+                                    # save type of table, particle, separation and path
+                                    
+                    elif tab == 16: # energy per particle, we need 2 tables to calculate
+                    
+                        table_ext1 = '.t'+str(tables[p,0]) 
+                        table_ext2 = '.t'+str(tables[p,2])
+                        # extension of tables 0 and 2, particle p (table at mazepin_aux)
+                        
+                        if file.endswith(table_ext1) and all([c in file for c in sim]):
+                        # if our file has the right extension and all constraints
+                            for s in sep: # loop over separations
+                                if s == '' or s in file: #we take into account distinctions
+                                    filename = file[:-6] 
+                                    #name of task, should have both extensions inside rootdir
+                                    paths.append([str(tab), str(p), s, \
+                                                 [subdir + os.sep + file, subdir + os.sep + filename+table_ext2]])
+                                    # save both paths in the same element
+                                    
     if len(sep) > 1 and len(paths) != len(part) * len(sep) * len(tabs):
         raise TypeError('Some tables are not available inside the main directory')
         
@@ -554,6 +580,9 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
         for t in tabs:
             print(dict_tab[str(t)]+'\n')
         print('--------------------------\n')
+        if 16 in tabs:
+            print('WARNING: Energy per particle requested. Exporting tables 0 and 2 together\n')
+            print('--------------------------\n')
         print('Requested particles: \n')
         for p in part:
             print(dict_part[str(p)]+'\n')
@@ -567,7 +596,8 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
             print(s+'\n')
         print('--------------------------\n')
         for r in paths:
-            print(dict_tab[r[0]]+', '+dict_part[r[1]]+', '+r[2]+':\n'+r[3]+'\n')
+            print(dict_tab[r[0]]+', '+dict_part[r[1]]+', '+r[2]+':\n')
+            print(r[3]); print('\n')
         
     return paths
 
@@ -628,25 +658,56 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
     
     tab, part, sep, file = data
     
-    label = dict_part_tex[part] + ', ' + sep # dictionary in mazepin_aux
+    EperPart = True if tab == '16' else False # check if we have to find energy per particle
+    
+    label = dict_part_tex[part] + ', ' + sep
     
     
     ##################### DATA READING ################################
-    data, grd = readfile(file)
-    
-    xdata = data[:,0]
-    
-    ydata = data[:,1]
-    
-    if error_type == 'sigma':
-        err = data[:,3]
-    elif error_type == 'RMS':
-        err = data[:,2]
-    else:
-        raise TypeError('Please introduce a valid error_type ("sigma" or "RMS"")')
+    if not EperPart:
         
-    x_axis_label, y_axis_label = dict_tab_xlab[tab], dict_tab_ylab[tab] 
-    # default labels, dictionary at mazepin_aux
+        data, grd = readfile(file)
+        
+        xdata = data[:,0]
+        
+        ydata = data[:,1]
+        
+        if error_type == 'sigma':
+            err = data[:,3]
+        elif error_type == 'RMS':
+            err = data[:,2]
+        else:
+            raise TypeError('Please introduce a valid error_type ("sigma" or "RMS"")')
+        
+    else:
+        data1, grd = readfile(file[0]) # longitudinal development
+        data2, _  = readfile(file[1])  # energy longitudinal development data
+        
+        xdata = data1[:,0]; y1 = data1[:, 1]; y2 = data2[:,1]
+        ydata = [a/b if b!=0 else 0 for a, b in list(zip(y2, y1))] # divide both datasets
+        
+        if error_type == 'sigma':
+            err1 = data1[:,3]; err2 = data2[:,3]
+            
+            rerr1 = [e/v if v !=0 else 0 for e,v in list(zip(err1, y1))]
+            rerr2 = [e/v if v !=0 else 0 for e,v in list(zip(err2, y2))]
+            
+            err = [v * np.sqrt(re1**2+re2**2) for v, re1, re2 in list(zip(ydata, rerr1, rerr2))]
+            # error propagation
+            
+        elif error_type == 'RMS':
+            err1 = data1[:,2]; err2 = data2[:,2]
+            
+            rerr1 = [e/v if v !=0 else 0 for e,v in list(zip(err1, y1))]
+            rerr2 = [e/v if v !=0 else 0 for e,v in list(zip(err2, y2))]
+            
+            err = [v * np.sqrt(re1**2+re2**2) for v, re1, re2 in list(zip(ydata, rerr1, rerr2))]
+            # error propagation
+            
+        else:
+            raise TypeError('Please introduce a valid error_type ("sigma" or "RMS"")')
+        
+    x_axis_label, y_axis_label = dict_tab_xlab[tab], dict_tab_ylab[tab] #default
     
     ######################### TRAJECTORY PARAMETERS ####################
     traj_input = False
@@ -669,8 +730,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
     ######################### X AXIS CONVERSIONS ##########################
     if not RASPASS:  # "normal" upgoing or downgoing showers, RH = 0
         
-        if Distance and tab in tabs_x_depth: 
-        # we want to convert x_data to distances along axis. tabs_x... in mazepin_aux
+        if Distance and tab in tabs_x_depth: # we want to convert x_data to distances along axis 
         
             x_axis_label = r'Dist. along axis [km]' 
             
@@ -685,12 +745,12 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
             
             xdata  = Xs_to_dist(xdata, RD_top, 0, theta)
             
-            if first_int:
+            if first_int: # we start counting at the injection height, upwards or downwards
                 xdata = np.array([grd_km - x - RD for x in xdata]) if UG else np.array([x - RD for x in xdata])
             else:
                 xdata = np.array([grd_km - x for x in xdata]) if UG else np.array(xdata)
                 
-        elif slant and not Distance and tab in tabs_x_depth:
+        elif slant and not Distance and tab in tabs_x_depth: # slant depths in x axis
             
             x_axis_label = r'$X_s$ [$\mathrm{g/cm^2}$]' 
             
@@ -700,7 +760,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
                     raise TypeError('Trajectory parameters are needed for first_int')
                     
                 start_depth = dist_to_Xs(np.array([RD_top-RD]), RD_top, 0, theta)
-                
+                # we start counting at the injection height, upwards or downwards
                 xdata = np.array([start_depth-x for x in xdata]) if UG else np.array([x-start_depth for x in xdata]) 
             
             else:
@@ -720,7 +780,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
             if not slant:
                 raise TypeError('Conversor Xs_to_dist works with X_slanted as input')
     
-            xdata = RD - Xs_to_dist(xdata, RD, RH, theta) # distance to z axis crossing
+            xdata = Xs_to_dist(xdata, RD, RH, theta)
             
         elif slant and not Distance and tab in tabs_x_depth:
             
@@ -734,8 +794,8 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
                RASPASS = False, Distance = False, first_int = False, \
                trajects = [], xlim = [], ylim = [], xscale = 'linear', \
                yscale = 'linear', autolabel = True, graph_type = 'step', labels = [], \
-               verbose = False, size = 12, legend = True, title = '', \
-               loc_leg = 'best', fmt = '-', marker = 'o', linewidth = 2.):
+               size = 12, legend = True, title = '', loc_leg = 'best', \
+               fmt = '-', marker = 'o', linewidth = 2.):
     
     
     ''' Plots AIRES outputs, preprocessed using pathfinder and Aires_data
@@ -893,7 +953,10 @@ def traject_finder(files, RASPASS = False, UG = False):
     trajects = []
     
     for f in files:
-        table_name = f[3].split('\\')[-1]
+        if type(f[3]) == str:
+            table_name = f[3].split('\\')[-1] 
+        elif type(f[3]) == list:
+            table_name = f[3][0].split('\\')[-1] # just if we have asked for table 16
         
         chars = table_name.split('_')
         

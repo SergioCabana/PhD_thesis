@@ -38,7 +38,7 @@ def rho_Lin(h):
         
     
     
-# dictionary of tables in AIRES 19.04.08
+# dictionary of tables in AIRES 19.04.08 (table 16 is added by me)
 
 dict_tab = {'0' : 'Longitudinal development',
             '1' : 'Unweighted longitudinal development',
@@ -55,11 +55,12 @@ dict_tab = {'0' : 'Longitudinal development',
             '12': 'Longitudinal development of low energy particles',
             '13': 'Unweighted longitudinal development of low energy particles',
             '14': 'Energy longitudinal development of low energy particles',
-            '15': 'Longitudinal development of deposited energy'}
+            '15': 'Longitudinal development of deposited energy',
+            '16': 'Energy (per particle) longitudinal development'}
 
 # set of tables where x_axis is a traversed depth:
     
-tabs_x_depth = ['0', '1', '2', '9', '10', '11', '12', '13', '14', '15']
+tabs_x_depth = ['0', '1', '2', '9', '10', '11', '12', '13', '14', '15', '16']
 
 # set of tables where x_axis is energy:
     
@@ -86,7 +87,8 @@ dict_tab_xlab = {'0' : r'$X_v$ [$\mathrm{g/cm^2}$]',
                  '12': r'$X_v$ [$\mathrm{g/cm^2}$]',
                  '13': r'$X_v$ [$\mathrm{g/cm^2}$]',
                  '14': r'$X_v$ [$\mathrm{g/cm^2}$]',
-                 '15': r'$X_v$ [$\mathrm{g/cm^2}$]'}
+                 '15': r'$X_v$ [$\mathrm{g/cm^2}$]',
+                 '16': r'$X_v$ [$\mathrm{g/cm^2}$]'}
 
 # dictionary of y_labels for plots of each table (default export specifications)
 
@@ -105,7 +107,8 @@ dict_tab_ylab = {'0' : r'Number of particles',
                  '12': r'Number of low $E$ particles',
                  '13': r'Number of low $E$ particles',
                  '14': r'$E$ of low $E$ particles [$\mathrm{GeV}$]' ,
-                 '15': r'Deposited energy [$\mathrm{GeV}$]'}
+                 '15': r'Deposited energy [$\mathrm{GeV}$]',
+                 '16': r'$E$ (per particle) [$\mathrm{GeV}$]'}
 
 # dictionary of y_labels for legends
 
@@ -124,7 +127,8 @@ dict_tab_yleg = {'0' : r'#',
                  '12': r'# (low E)',
                  '13': r'# (low E)',
                  '14': r'$E$ (low $E$)' ,
-                 '15': r'Dep. $E$'}
+                 '15': r'Dep. $E$',
+                 '16': r'$E$ (per part.)'}
 
 # dictionary of particles in AIRES 19.04.08
 
