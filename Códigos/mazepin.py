@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.7.0 #################################
+############################## MAZEPIN v0.7.1 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -770,17 +770,15 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
             
     else: # RASPASS SHOWERS
     
-        if Distance and tab in tabs_x_depth: # we want to convert x_data to distances along axis 
+        if Distance and tab in tabs_x_depth:
         
             x_axis_label = r'Dist. to Z axis crossing [km]' 
             
             if not traj_input:
                 raise TypeError('Trajectory parameters are needed')
                 
-            if not slant:
-                raise TypeError('Conversor Xs_to_dist works with X_slanted as input')
-    
-            xdata = Xs_to_dist(xdata, RD, RH, theta)
+            if slant:
+                raise TypeError('RASPASS tables by default export distance in x axis (without any option). Do not use slant')
             
         elif slant and not Distance and tab in tabs_x_depth:
             
@@ -982,8 +980,8 @@ def traject_finder(files, RASPASS = False, UG = False):
     return trajects
             
 
-def shell_script(job_name, input_file_dir, input_files, main = '/home2/', \
-                 user = 'sergio.cabana/', \
+def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
+                 main = '/home2/', user = 'sergio.cabana/', \
                  exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSPrimary'],
                  program = 'ZHAireSRASPASS'):
     
@@ -992,6 +990,8 @@ def shell_script(job_name, input_file_dir, input_files, main = '/home2/', \
         It is adapted for the cluster I use but easy to modify
         
         job_name: job ID for queue system
+        
+        local_dir: directory to save the created .sh file
         
         input_file_dir: directory of input files (inside main/user/). Ends with /
         
@@ -1006,7 +1006,7 @@ def shell_script(job_name, input_file_dir, input_files, main = '/home2/', \
         program : name of binary executable to run the input files
     '''
 
-    name = 'script_shell_'
+    path = os.path.join(local_dir, 'script_shell_'+job_name+'.sh')
     
     header = (        
 '''############ Created with mazepin.shell_script() ################
@@ -1027,7 +1027,7 @@ def shell_script(job_name, input_file_dir, input_files, main = '/home2/', \
     
     scratch_dir = '/scratch/'+user+'Aires_tmp/'+job_name+'/'
 
-    with open(name+job_name+'.sh', 'w') as f:
+    with open(path, 'w') as f:
         
         f.write(header)
         f.write('[[ -d '+ scratch_dir + ' ]] || mkdir -p '+ scratch_dir)
