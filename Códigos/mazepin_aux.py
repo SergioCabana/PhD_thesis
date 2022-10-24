@@ -231,4 +231,27 @@ tables = np.array([[1001, 1301, 1501, 2001, 2301, 2501, 2801, 3001, 5001, 6001,\
         6793, 7293, 7493, 7793, 7993],
        [9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 6296, 6496,\
         6796, 9999, 9999, 9999, 9999]])
+    
 
+dict_basic_IDL = {'0': 'PrimaryParticle',
+                  '1': 'PrimaryEnergy',
+                  '2': 'GeomagneticField',
+                  '3': 'PropagatePrimary',
+                  '4': 'Site',
+                  '5': 'GroundAltitude'}
+
+dict_control_IDL = {'0': 'TotalShowers',
+                    '1': 'RunsPerProcess',
+                    '2': 'ShowersPerRun',
+                    '3': 'RandomSeed',
+                    '4': 'ObservingLevels',
+                    '5': 'ThinningEnergy',
+                    '6': 'ThinningWFactor',
+                    '7': 'SaveInFile grdpcles',
+                    '8': 'SaveInFile lgtpcles',
+                    '9': 'ElectronCutEnergy',
+                    '10': 'ElectronRoughCut',
+                    '11': 'GammaCutEnergy',
+                    '12': 'GammaRoughCut'}
+
+    

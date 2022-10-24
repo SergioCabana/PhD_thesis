@@ -969,7 +969,7 @@ def traject_finder(files, RASPASS = False, UG = False):
             inj_h = chars[3][:-2]
             theta = chars[4][:-3]
             
-            trajects.append([float(inj_h), float(theta)])
+            trajects.append([float(inj_h), 180-float(theta)]) # upgoing axis has theta < 90 in RASPASS
         
         else:
             inj_h = chars[2][:-2]
@@ -982,7 +982,7 @@ def traject_finder(files, RASPASS = False, UG = False):
 
 def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
                  main = '/home2/', user = 'sergio.cabana/', \
-                 exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSPrimary'],
+                 exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary'],\
                  program = 'ZHAireSRASPASS'):
     
     ''' Creates a shell script (.sh extension) that can be submitted to queue 
@@ -1009,7 +1009,7 @@ def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
     path = os.path.join(local_dir, 'script_shell_'+job_name+'.sh')
     
     header = (        
-'''############ Created with mazepin.shell_script() ################
+r'''############ Created with mazepin.shell_script() ################
 
 #!/bin/bash
 #$ -N '''+job_name+'''
@@ -1025,43 +1025,40 @@ def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
 '''
     )
     
-    scratch_dir = '/scratch/'+user+'Aires_tmp/'+job_name+'/'
+    scratch_dir = r'/scratch/'+user+'Aires_tmp/'+job_name+'/'
 
     with open(path, 'w') as f:
         
         f.write(header)
-        f.write('[[ -d '+ scratch_dir + ' ]] || mkdir -p '+ scratch_dir)
-        f.write('\n\n')
-        f.write('cd ' + scratch_dir)
-        f.write('\n\n')
+        f.write(r'[[ -d '+ scratch_dir + ' ]] || mkdir -p '+ scratch_dir+'\n')
+        f.write(r'cd ' + scratch_dir+'\n')
         
-        f.write('############ EXECUTABLES ###########\n\n')
+        f.write('############ EXECUTABLES ###########\n')
         for e in exe:
             
-            f.write('cp ' + main + user + e + ' ' + scratch_dir + '\n')
+            f.write(r'cp ' + main + user + e + ' ' + scratch_dir+'\n')
         
-        f.write('\n\n')
         
-        f.write('############ INPUT FILES ###########\n\n')
+        f.write('############ INPUT FILES ###########\n')
         for inp in input_files:
             
-            f.write('cp ' + main + user + input_file_dir + inp + ' ' + scratch_dir + '\n')
+            f.write(r'cp ' + main + user + input_file_dir + inp + ' ' + scratch_dir+'\n')
             
-        f.write('\n\n')
         
-        f.write('############ EXECUTION ###########\n\n')
+        f.write('############ EXECUTION ###########\n')
         for inp in input_files:
             
-            f.write('./' + program + ' < ' + inp + ' > ' + inp[:-4] + '.out' + '\n')
+            f.write(r'./' + program + ' < ' + inp + ' > ' + inp[:-4] + '.out'+'\n')
             
-        f.write('\n\n')
         
-        f.write('############ OUTPUT SAVING AND EXIT ###########\n\n')
+        f.write('############ OUTPUT SAVING AND EXIT ########### \n')
 
-        f.write('cp *.* '+ main + user + input_file_dir + '\n')
-        f.write('rm -rf ' + scratch_dir)
+        f.write(r'cp *.* '+ main + user + input_file_dir+'\n')
+        f.write(r'rm -rf ' + scratch_dir+'\n')
                     
         f.close()
+
+
 # def Xs_to_dist_old(X, RD, RH, theta, prec = .05):
 #     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
 #         for a RASPASS trajectory. VERY approximate result 
