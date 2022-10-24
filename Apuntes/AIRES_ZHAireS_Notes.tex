@@ -293,6 +293,8 @@ donde $\alpha^*$ es el ángulo cenital \textit{local}, i.e., entre una distancia
 	X(L) = \int_{h(L)}^{v}\rho(h')\frac{dh'}{\sqrt{1-\left(\frac{R_T+H}{R_T+h'}\right)^2\sin^2\theta}}\label{ec112}
 \end{equation}
 
+Debe usarse con cuidado la expresión anterior, que supone que el límite inferior de la integral es menor a $v$, i.e., \textit{integramos hacia arriba en la atmósfera}. Si tenemos cascadas hacia abajo, en que avanzar a lo largo del eje implica reducir la altura, aparecerá un signo extra. Peor aún, en cascadas estratosféricas la altura primero decrece y luego crece, así que según la región habrá un signo o no.
+
 \section{Normas para nombrar \textit{Tasks} en AIRES}
 Los archivos .inp y outputs de AIRES pueden dar lugar a bastantes dolores de cabeza, a la hora de identificar qué archivos son los correspondientes a qué simulación y viceversa. Se me han ocurrido unas normas para poner nombres a los \textit{Tasks} en AIRES de manera sistemática. La idea es que viendo el nombre de un archivo podamos identificar inmediatamente la simulación en cuestión y sus parámetros claves, además de poder hacer de manera más sencilla gráficas y análisis posteriores (ya que teniendo unas normas para los nombres de archivos, podremos simplemente escribir un código que haga el trabajo de buscar los ficheros de datos necesarios para la gráfica que queremos, por ejemplo).
 
@@ -304,7 +306,7 @@ El formato típico para un \textit{task} será:
 Es decir, indicaremos:
 \begin{itemize}
 	\item Indicador de partícula especial: Si hemos usado una primaria introducida mediante la instrucción \verb|AddSpecialParticle| y un código \textit{externo} a AIRES. Los códigos más habituales (en mi caso) serían:
-	\verb|uprimary_...| , \verb|RAS_...| (para RASPASS)
+	\verb|upr_...| , \verb|RAS_...| (para RASPASS)
 	\item Partícula primaria: Siempre con dos caracteres o más.
 \begin{table}[H]
 	\centering
@@ -315,7 +317,7 @@ Es decir, indicaremos:
 	\end{tabular}
 \end{table}
 
-La norma general para las partículas comunes será usar \verb|prot|, \verb|elec|, \verb|neut|. Para las demás partículas y núcleos, siempre el nombre completo: \verb|muon|, \verb|pion|, \verb|kaon|, \verb|lead|, ...
+La norma general para las partículas comunes será usar \verb|prot|, \verb|elec|, \verb|gamma|. Para las demás partículas y núcleos, siempre el nombre completo: \verb|muon|, \verb|pion|, \verb|kaon|, \verb|lead|, ...
 
 \item Energía de la partícula primaria: En $\mathrm{eV}$ con formato exponencial. Por ejemplo, ...\verb|_1e18eV_|..., ...\verb|_5.7e15eV_|... 
 \item Trayectoria: Depende del tipo de partícula, ya que añadir primarios especiales normalmente implica cambiar los parámetros que definen la trayectoria. En cualquier caso, los ángulos se indicarán en grados y las distancias en $\mathrm{km}$ (con las unidades explícitas). Todos los parámetros se indicarán con  al menos dos cifras numéricas y se separarán con \verb|_|. En los casos habituales:
@@ -354,7 +356,11 @@ Como norma general para otros casos, deben indicarse todos los parámetros que d
 	\item \textit{El suelo está a $35\,\mathrm{m}$ a.s.l.}: ...\verb|_grd35m|
 \end{enumerate}
 Como recomendación, está bien usar más de dos cifras para cualquier magnitud numérica.
+
+
 \end{itemize} 
+\textbf{PELIGRO: Existe un límite de 64 caracteres para la longitud de los nombres para tasks, si se supera AIRES truncará la cadena de caracteres y perderemos información en los comentarios extra.}
+
 Algunos ejemplos pueden ser:
 \begin{itemize}
 	\item Cascada iniciada por un protón de $100\,\mathrm{TeV}$, inyectado a $100\,\mathrm{km}$ de altura con ángulos $\theta=65^\circ$, $\varphi=0^\circ$, con el suelo a $100\,\mathrm{m}$ a.s.l.
@@ -363,12 +369,18 @@ Algunos ejemplos pueden ser:
 	\end{verbatim}
 	\item Cascada hacia arriba iniciada por un electrón de $1,5\,\mathrm{EeV}$, interaccionando a $1,\mathrm{km}$ del suelo, con ángulos $\theta = 95^\circ$, $\varphi=65^\circ$ (geográfico), calculando emisión en radio en dominio temporal con índice de refracción constante:
 	\begin{verbatim}
-		uprimary_elec_1e18eV_01km_95deg_65degG_ZHSt_nconst
+		upr_elec_1e18eV_01km_95deg_65degG_ZHSt_nconst
 	\end{verbatim}
-\item Cascada estratosférica iniciada por un protón (RASPASS) de $1\,\mathrm{EeV}$, a ángulo cenital $93,25^\circ$ y azimut $0^\circ$. La trayectoria cruza la vertical del observador a $35\,\mathrm{km}$ de altura (RASPASSHeight) y el primario se inyecta a $2000\,\mathrm{km}$ de dicho cruce (RASPASSDistance). No se impone TimeShift, se calcula emisión en radio en ambos dominios con un campo magnético fijado.
+\item Cascada estratosférica iniciada por un fotón (RASPASS) de $1\,\mathrm{EeV}$, a ángulo cenital $93,25^\circ$ y azimut $0^\circ$. La trayectoria cruza la vertical del observador (en el Polo Sur) a $35\,\mathrm{km}$ de altura (RASPASSHeight) y el primario se inyecta a $1462.5\,\mathrm{km}$ de dicho cruce (RASPASSDistance). No se impone TimeShift, se calcula emisión en radio en ambos dominios con un campo magnético fijado.
 \begin{verbatim}
-	RAS_prot_1e18eV_2000km_35km_00ns_93.25deg_00deg_ZHSb_fixB
+	RAS_gamma_1e18eV_1462.5km_35km_00ns_93.25deg_00deg_SouthPole_ZHSb_fixB
 \end{verbatim}
+
+En este caso se pasa de 64 caracteres y se pierden comentarios extra. Nos encontraríamos esto en los outputs:
+\begin{verbatim}
+	RAS_gamma_1e18eV_1462.5km_35km_00ns_93.25deg_00deg_SouthPole_ZHS
+\end{verbatim}
+Hay que recortar el nombre eliminando los comentarios menos relevantes (\verb|_SouthPole|, por ejemplo, ya que el campo magnético que afecta a la simulación de emisión en radio está fijado previamente). 
 \end{itemize}
 
 \end{document}
