@@ -819,6 +819,8 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
             if slant:
                 raise TypeError('RASPASS tables by default export distance in x axis (without any option). Do not use slant')
             
+            xdata = np.array([RD-x for x in xdata])
+            
         elif slant and not Distance and tab in tabs_x_depth:
             
             x_axis_label = r'$X_s$ [$\mathrm{g/cm^2}$]' 
