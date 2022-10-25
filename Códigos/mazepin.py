@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.7.1 #################################
+############################## MAZEPIN v0.8.0 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -31,11 +31,13 @@
 import numpy             as np
 import matplotlib.pyplot as plt
 import matplotlib        as mpl
-import pandas            as pd
-import scipy.integrate   as sci
+# import pandas            as pd
+# import scipy.integrate   as sci
 import os
+import paramiko
+import time
 
-from   scipy.fftpack     import fft, fftfreq, fftshift
+# from   scipy.fftpack     import fft, fftfreq, fftshift
 from   scipy.interpolate import interp1d
 from   mazepin_aux       import *
 
@@ -227,11 +229,15 @@ def RAS_Dist(h, theta, RH = 0):
 def h_IP(RD, RH, theta):
     ''' Returns height of injection point [km] in a RASPASS trajectory
     
+        ==============================================================
+        
         RD: RASPASSDistance [km]
         
         RH: RASSPASSHeight  [km]
         
         theta: PrimaryZenAngle (deg)
+        
+        ==============================================================
     '''
         
     thetarad = theta *np.pi/180.
@@ -243,6 +249,8 @@ def h_RAS(L, RD, RH, theta):
         that is a distance L [km] away from the IP (converts traversed 
         distance to height)
         
+        ====================================================================
+        
         L: traversed distance from IP [km]
         
         RD: RASPASSDistance [km]
@@ -250,6 +258,8 @@ def h_RAS(L, RD, RH, theta):
         RH: RASPASSHeight [km]
         
         theta: PrimaryZenAngle [deg]
+        
+        ====================================================================
     '''
     
     v = h_IP(RD, RH, theta)
@@ -262,6 +272,8 @@ def dist_to_Xs(dist, RD, RH, theta, step = .025):
         axis, for a RASPASS trajectory. VERY approximate result 
         (rough and easy numerical integration)
     
+        ========================================================================
+        
         d: values of distance [km] (numpy.ndarray)
         
         RD: RASPASSDistance [km]
@@ -271,6 +283,8 @@ def dist_to_Xs(dist, RD, RH, theta, step = .025):
         theta: PrimaryZenAngle [deg]
         
         step: Step of integration. Default 25 m
+        
+        ========================================================================
         
     '''    
     
@@ -317,6 +331,8 @@ def atmos_size(RH, theta, atmos_height = 113, stop = 'atmos'):
         starting at the top ot the atmosphere (fixes RASPASSDistance so that 
         happens)
         
+        ====================================================================
+        
         RH : RASPASSHeight [km]
         
         theta : PrimaryZenAngle [deg]
@@ -328,6 +344,8 @@ def atmos_size(RH, theta, atmos_height = 113, stop = 'atmos'):
             'atmos' : top of the atmosphere
             'zaxis' : crossing of shower axis with the vertical of observer
             'hmin'  : minimum height reached in the atmosphere
+            
+        ===================================================================
     '''
     
     RD     = RAS_Dist(atmos_height, theta, RH = RH)  # RASPASSDistance
@@ -360,6 +378,10 @@ def Xs_to_dist(X, RD, RH, theta, atmos_height = 113):
         for a RASPASS trajectory. VERY approximate result 
         (rough and easy numerical integration). Inverts previous function.
     
+        Interpolation may not be reliable at all, use with caution
+        
+        ================================================================
+        
         X: values of slanted depth [g/cm2] (numpy.ndarray)
         
         RD: RASPASSDistance [km]
@@ -367,6 +389,8 @@ def Xs_to_dist(X, RD, RH, theta, atmos_height = 113):
         RH: RASPASSHeight [km]
     
         theta: PrimaryZenAngle [deg]
+        
+        =================================================================
 
     '''
     
@@ -385,104 +409,111 @@ def Xs_to_dist(X, RD, RH, theta, atmos_height = 113):
     return np.array([inverse(x) if x < X_full else L_full+offset_dist for x in X])
     
 def codes():
+    ''' Returns codes for AIRES tables and particles
+    '''
+    
     return dict_tab, dict_part
 
 def table_finder(tab, part, verbose = False):
     ''' Returns the extension corresponding to each table and particle
     
+        ==============================================================
+        
         tab: type of table (from 0 to 15)
         
-        0 : Longitudinal development
-        
-        1 : Unweighted longitudinal development
-        
-        2 : Energy longitudinal development
-        
-        3 : Lateral distribution
-        
-        4 : Unweighted lateral distribution
-        
-        5 : Energy distribution at ground
-        
-        6 : Unweighted energy distribution
-        
-        7 : Mean arrival time distribution
-        
-        8 : Number and energy of particles at ground vs shower number
-        
-        9 : Number of created particles
-        
-        10: Number of created entries
-        
-        11: Energy of created particles
-        
-        12: Longitudinal development of low energy particles
-        
-        13: Unweighted longitudinal development of low energy particles
-        
-        14: Energy longitudinal development of low energy particles
-        
-        15: Longitudinal development of deposited energy
-        
-        16: Energy (per particle) longitudinal development
+            0 : Longitudinal development
+            
+            1 : Unweighted longitudinal development
+            
+            2 : Energy longitudinal development
+            
+            3 : Lateral distribution
+            
+            4 : Unweighted lateral distribution
+            
+            5 : Energy distribution at ground
+            
+            6 : Unweighted energy distribution
+            
+            7 : Mean arrival time distribution
+            
+            8 : Number and energy of particles at ground vs shower number
+            
+            9 : Number of created particles
+            
+            10: Number of created entries
+            
+            11: Energy of created particles
+            
+            12: Longitudinal development of low energy particles
+            
+            13: Unweighted longitudinal development of low energy particles
+            
+            14: Energy longitudinal development of low energy particles
+            
+            15: Longitudinal development of deposited energy
+            
+            16: Energy (per particle) longitudinal development
         
         part: type of particle (from 0 to 22)
         
-        0 : gammas
-        
-        1 : electrons
-        
-        2 : positrons
-        
-        3 : muons (+)
-        
-        4 : muons (-)
-        
-        5 : pions (+)
-        
-        6 : pions (-)
-        
-        7 : kaons (+)
-        
-        8 : kaons (-)
-        
-        9 : neutrons
-        
-        10: protons
-        
-        11: antiprotons
-        
-        12: nuclei
-        
-        13: Other charged particles (excluding p and antip)
-        
-        14: Other neutral particles (excluding neutrons)
-        
-        15: e+e-
-        
-        16: mu+mu-
-        
-        17: pi+pi-
-        
-        18: K+K-
-        
-        19: All charged particles
-        
-        20: All neutral particles
-        
-        21: All particles
-        
-        22: All neutrinos
+            0 : gammas
+            
+            1 : electrons
+            
+            2 : positrons
+            
+            3 : muons (+)
+            
+            4 : muons (-)
+            
+            5 : pions (+)
+            
+            6 : pions (-)
+            
+            7 : kaons (+)
+            
+            8 : kaons (-)
+            
+            9 : neutrons
+            
+            10: protons
+            
+            11: antiprotons
+            
+            12: nuclei
+            
+            13: Other charged particles (excluding p and antip)
+            
+            14: Other neutral particles (excluding neutrons)
+            
+            15: e+e-
+            
+            16: mu+mu-
+            
+            17: pi+pi-
+            
+            18: K+K-
+            
+            19: All charged particles
+            
+            20: All neutral particles
+            
+            21: All particles
+            
+            22: All neutrinos
 
+        ====================================================================
+        
         There are some special tables, these are:
         
-        0100 : Atmospheric profile
-        
-        5501 : Xmax and Nmax (charged particles) vs shower number
-        
-        5511 : First interaction depth and primary energy vs shower number
-        
-        5513 : Zenith and azimuth vs shower number
+            0100 : Atmospheric profile
+            
+            5501 : Xmax and Nmax (charged particles) vs shower number
+            
+            5511 : First interaction depth and primary energy vs shower number
+            
+            5513 : Zenith and azimuth vs shower number
     '''
     
     if tab not in range(0,17,1):
@@ -507,6 +538,8 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
     ''' Returns the list of paths inside rootdir corresponding to the requested
         tables.
         
+        ===================================================================
+        
         tabs (list of int): types of tables. See mazepin.table_finder() .
         
         part (list of int): types of particles. See mazepin.table_finder() .
@@ -518,6 +551,8 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
         sep (list of str): Special distinctions. Output will indicate which files
         contain these special strings. Default '', all files with the right 
         extension are kept
+        
+        ===================================================================
         
         Output (with separators sep = [sep1, sep2]):
             
@@ -631,6 +666,8 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
                traject = []):
     ''' Returns data to be plotted, and a collection of suitable labels
     
+        ===================================================================
+        
         data is a single instance of the output of maz.pathfinder, i.e.,
         [tab, part, sep, path]
 
@@ -648,7 +685,9 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
         
         traject   : trajectory parameters. [inj_h, theta (0-90)] (not RASPASS), or
                     [RDistance, RHeight, theta] (RASPASS)
-                    
+        
+        ===================================================================
+        
         Output:
             
         [xdata, ydata, error, label], x_axis_label, y_axis_label
@@ -798,6 +837,8 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     
     ''' Plots AIRES outputs, preprocessed using pathfinder and Aires_data
     
+        ====================================================================
+        
         input_data : output of pathfinder. The selection of graphs is done there
         
         Allows to plot different tables in the same canvas, as long as it is possible
@@ -833,6 +874,7 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
         
         linewidth : for both types of graphs
         
+        =====================================================================
     '''
     
     tabs = [data_path[0] for data_path in input_data]
@@ -945,8 +987,11 @@ def traject_finder(files, RASPASS = False, UG = False):
     ''' Returns trajecory parameters given the name of the file
         **WARNING** It uses my personal conventions for naming files
         
+        =================================================================
+        
         files: output of pathfinder
         
+        ===================================================================
     '''
     trajects = []
     
@@ -980,6 +1025,147 @@ def traject_finder(files, RASPASS = False, UG = False):
     return trajects
             
 
+def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgoing = False, \
+               ZHAireS = False, ZHAireS_control = [], exports = [], extra = [], save_path = ''):
+    
+    ''' Creates an AIRES/ZHAireS input file
+    
+        ==============================================================================
+        
+        task_name (str): name of task (without .inp extension)
+        
+        basic (list of str): list of key simulation parameters
+        
+            [primary, energy (in eV), GeomagneticField, PropagatePrimary, Site, Ground]
+            
+        trajectory (list of str): depend on primary
+            
+            [inj_h (in km), theta (in deg), phi (in deg)] for normal AIRES
+            
+            [ALTITUDE (in km), theta (in deg), phi (in deg)] for upgoing
+            
+            [RASPASSDistance (in m), RASPASSHeight (in m), RASPASSTimeShift (in m), theta (in deg), phi (in deg)] for RASPASS
+            
+        sim_control (list of str): parameters to control the simulation (default options in mazepin_aux):
+            
+        [TotalShowers, RunsPerProcess, ShowerPerRun, RandomSeed, ObsLevels, ThinningEnergy, ThinnningWFactor, SaveInFile's, electron cuts, gamma cuts]
+         
+        RASPASS, upgoing (bool): Control of special primaries
+        
+        ZHAireS: Calculation of radio emission on or off
+        
+        ZHAireS_control (list of str): ZHAireS instructions:
+            [FresnelTime (On/Off), FresnelFreq (On/Off), list_of_antenna_coord (list of [x y z] in m), list_of_freq (list of numbers) in MHz, direct_instructs (list of str)]
+            
+        exports (list): tables to export. Format is [tab, part, options (str)] with mazepin codes (maz.codes())
+        
+        save_path: directory to save input file
+        
+        ============================================================================
+    '''
+    if len(task_name) > 64:
+        raise TypeError('Task Name will get truncated (max. 64 chars)')
+        
+    if len(basic) != 6:
+        raise TypeError('Wrong length of "basic"')
+
+    if RASPASS and len(trajectory) != 5:
+        raise TypeError('Wrong length of "trajectory"')
+        
+    if not RASPASS and len(trajectory) != 3:
+        raise TypeError('Wrong length of "trajectory"')
+        
+    path = os.path.join(save_path, task_name+'.inp')
+    
+    with open(path, 'w') as f:
+        f.write('########## CREATED WITH mazepin.input_file ########### \n')
+        f.write('TaskName '+task_name+' \n')
+        
+        if RASPASS:
+            f.write('########### RASPASS PRIMARY ############## \n')
+            f.write('AddSpecialParticle RASPASS'+basic[0]+ ' ./RASPASSprimary '+basic[0]+' \n')
+            
+            basic[0] = 'RASPASS'+basic[0]
+            
+        elif upgoing:
+            f.write('########### UPGOING PRIMARY ############## \n')
+            f.write('AddSpecialParticle U'+basic[0]+ ' ./uprimary '+basic[0]+' \n')
+            
+            basic[0] = 'U'+basic[0]
+            
+        f.write('########### BASIC: PRIMARY TYPE, ENERGY AND TRAJECTORY ############## \n')
+        for i in range(len(basic)):
+            if basic[i] != '':    
+                f.write(dict_basic_IDL[str(i)] + ' '+ basic[i]+basic_units[str(i)]+' \n')
+                
+        #trajectory
+        
+        if RASPASS:
+            RD, RH, RTs, theta, phi = trajectory
+            f.write('SetGlobal RASPASSDistance '+RD+' \n')
+            f.write('SetGlobal RASPASSHeight '+RH+' \n')
+            f.write('SetGlobal RASPASSTimeShift '+RTs+' \n')
+            f.write('PrimaryZenAngle '+theta+' deg \n')
+            f.write('PrimaryAzimAngle '+phi+' deg \n')
+        
+        elif upgoing:
+            ALT, theta, phi = trajectory
+            f.write('SetGlobal ALTITUDE '+ALT+' \n')
+            f.write('PrimaryZenAngle '+theta+' deg \n')
+            f.write('PrimaryAzimAngle '+phi+' deg \n')
+        
+        else:
+            inj_h, theta, phi = trajectory
+            f.write('InjectionHeight '+inj_h+' km \n')
+            f.write('PrimaryZenAngle '+theta+' deg \n')
+            f.write('PrimaryAzimAngle '+phi+' deg \n')
+            
+        f.write('########### SIMULATION CONTROL ############## \n')
+        for i in range(len(sim_control)):
+            if sim_control[i] != '':    
+                f.write(dict_control_IDL[str(i)] + ' '+ sim_control[i]+' \n')
+        
+        f.write('########### EXTRA INSTRUCTIONS ############## \n')
+        for e in extra: 
+            f.write(e+' \n')
+            
+        if ZHAireS:
+            
+            Time, Freq, Antenas, Freq_list, Direct = ZHAireS_control
+            
+            f.write('########### ZHAireS CALCULATIONS ############## \n')
+            f.write('ZHAireS On \n')
+            f.write('FresnelTime '+Time+' \n')
+            f.write('FresnelFreq '+Freq+' \n')
+            
+            i = 0
+            for x, y, z in Antenas:
+                f.write('AddAntenna '+str(i)+' '+str(x)+ ' ' +str(y) + ' '+str(z)+' \n')
+                i+=1
+            for fr in Freq_list:
+                f.write('AddFrequency '+str(fr)+' \n')
+                i+=1
+            
+            for instruction in Direct:
+                f.write(instruction + ' \n')
+         
+        f.write('########### EXPORTING DATA ############## \n')
+        for tab, part, option in exports:
+
+            table = table_finder(tab, part)
+            
+            if table == 9999:
+                raise TypeError('Requested table does not exist')
+            
+            opt = ' Opt '+option if option != '' else ''
+            f.write('ExportTables '+str(table[0])+opt+' \n')
+            
+        f.write('End')
+        f.close()
+        
+        return path, task_name+'.inp'
+
+
 def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
                  main = '/home2/', user = 'sergio.cabana/', \
                  exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary'],\
@@ -988,6 +1174,8 @@ def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
     ''' Creates a shell script (.sh extension) that can be submitted to queue 
         systems (at least inside IGFAE nodes, with scratch). 
         It is adapted for the cluster I use but easy to modify
+        
+        =====================================================================
         
         job_name: job ID for queue system
         
@@ -1004,60 +1192,248 @@ def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
         exe  : paths (inside main) to executable binaries to import and use
 
         program : name of binary executable to run the input files
+        
+        =======================================================================
     '''
 
     path = os.path.join(local_dir, 'script_shell_'+job_name+'.sh')
     
     header = (        
-r'''############ Created with mazepin.shell_script() ################
-
+'''############ Created with mazepin.shell_script() ################
 #!/bin/bash
 #$ -N '''+job_name+'''
 #$ -cwd
 #$ -j y
 #$ -S /bin/bash
 #$ -q auger.q
-
 #if [ `hostname -s` -eq `nodo036.inv.usc.es` ]; then
 #   sleep 1h
 #fi
-
 '''
     )
     
-    scratch_dir = r'/scratch/'+user+'Aires_tmp/'+job_name+'/'
+    scratch_dir = '/scratch/' + user + 'Aires_tmp/' + job_name + '/'
 
     with open(path, 'w') as f:
         
         f.write(header)
-        f.write(r'[[ -d '+ scratch_dir + ' ]] || mkdir -p '+ scratch_dir+'\n')
-        f.write(r'cd ' + scratch_dir+'\n')
+        f.write('[[ -d ' + scratch_dir + ' ]] || mkdir -p ' + scratch_dir + ' \n')
+        f.write('cd ' + scratch_dir + ' \n')
         
-        f.write('############ EXECUTABLES ###########\n')
+        f.write('############ EXECUTABLES ########### \n')
         for e in exe:
             
-            f.write(r'cp ' + main + user + e + ' ' + scratch_dir+'\n')
+            f.write('cp ' + main + user + e + ' ' + scratch_dir + ' \n')
         
         
-        f.write('############ INPUT FILES ###########\n')
+        f.write('############ INPUT FILES ########### \n')
         for inp in input_files:
             
-            f.write(r'cp ' + main + user + input_file_dir + inp + ' ' + scratch_dir+'\n')
+            f.write('cp ' + main + user + input_file_dir + inp + ' ' + scratch_dir + ' \n')
             
         
-        f.write('############ EXECUTION ###########\n')
+        f.write('############ EXECUTION ########### \n')
         for inp in input_files:
             
-            f.write(r'./' + program + ' < ' + inp + ' > ' + inp[:-4] + '.out'+'\n')
+            f.write('./' + program + ' < ' + inp + ' > ' + inp[:-4] + '.out' + ' \n')
             
         
         f.write('############ OUTPUT SAVING AND EXIT ########### \n')
 
-        f.write(r'cp *.* '+ main + user + input_file_dir+'\n')
-        f.write(r'rm -rf ' + scratch_dir+'\n')
+        f.write('cp *.* ' + main + user + input_file_dir + ' \n')
+        f.write('rm -rf ' + scratch_dir + ' \n')
                     
         f.close()
+        
+        return path, 'script_shell_'+job_name+'.sh'
 
+
+def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID, \
+              RASPASS = False, upgoing = False, ZHAireS = False, \
+              ZHAireS_control = [], remote_main = '/home2/', user = 'sergio.cabana/', remote_dir = '', \
+              exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary', 'SpecialPrimaries/uprimary'], \
+              program = 'ZHAireSRASPASS', local_savepath = '', eco = False, \
+              server = 'mastercr1.igfae.usc.es', node = 'nodo014', \
+              username = 'sergio.cabana'):
+    
+    ''' Full simulation process.
+    
+        Creates input files, shell scripts, submits to remote machine and runs simulations
+        
+        ============================================================================
+        
+        task_names (list): names of tasks (max 64 char), one per each input file required
+        
+        basics (list): set of basic parameters (arg of mazepin.input_file()). one per each input file
+        
+        trajects (list): set of trajectory params (arg of mazepin.input_file()). one per each input file
+        
+        sim_control (list): set of parameters to control simulation (arg of mazepin.input_file()). Default options at mazepin_aux. one per each input file
+        
+        exports (list): lists of [tab, part, option] to export in each input (arg of mazepin.input_file()). one per each input file.
+        
+        extras (list): lists of extra instructions to include in each input file (arg of mazepin.input_file()). one per each input file.
+        
+        jobID (str): Identifier of remote job (qsub)
+        
+        RASPASS, upgoing (bool): Special particle options
+        
+        ZHAireS (bool): input files include radio emission calculations
+        
+        ZHAireS_control: (list): set of parameters to run ZHAireS. (arg of mazepin.input_file()).
+        
+        remote_main (str, ends with /): root directory in remote machine
+        
+        user (str, edns with /): remote machine user. All directories in remote machine should be like /remote_dir/user/something
+        
+        remote_dir (str, ends with /): directory inside remote_dir/user/ to upload files and store outputs
+            
+        exe (list of str): list of paths inside remote_dir/user/ where executables to run special particles are
+        
+        program: name of executable that runs the simulations
+
+        local_savepath (str): directory to save created files
+        
+        eco (bool): True to send only one shell script to remote (otherwise, one per input file to parallelize)
+        
+        server: host remote machine
+        
+        node : where to ssh to from remote server
+        
+        username: name of remote user
+        
+        ===========================================================================================
+        
+        Though there are quite a few inputs, most of themo wont change between input files (usually,
+        only one or two parameters change, mostly energies or trajectories)
+        
+        Will ask for remote machine password (assumes same password for both remote server and node)
+    '''
+    lengths = [len(task_names), len(basics), len(trajects), len(sim_controls), len(exports), len(extras)]
+    
+    if not all([l == lengths[0] for l in lengths]):
+        raise TypeError('Mismatch of lengths of task_names, basics, sim_controls, exports, extras')
+        
+    if ZHAireS and len(ZHAireS_control) != len(task_names):
+        raise TypeError('Length of ZHAireS_control does not match number of input files')
+        
+    
+    # We create all the input files
+    simulations = list(zip(task_names, basics, trajects, sim_controls, exports, extras))
+    counter     = 0
+    
+    local_paths = []
+    input_files = []
+    
+    for taskname, basic, traj, sim_control, exp, ext in simulations:
+        
+        ZHScon = ZHAireS_control[counter] if ZHAireS else []
+        
+        path, name = input_file(task_name = taskname, basic = basic, trajectory = traj, \
+                                sim_control = sim_control, RASPASS = RASPASS, upgoing = upgoing, \
+                                ZHAireS = ZHAireS, ZHAireS_control = ZHScon, exports = exp, \
+                                extra = ext, save_path = local_savepath)
+            
+        local_paths.append(path)
+        input_files.append(name)
+        
+        counter += 1
+        
+    # we create all the required shell_scripts
+    
+    local_paths_shell = []
+    shell_scripts     = []
+    
+    if eco:
+        path, name = shell_script(job_name = jobID, input_file_dir = remote_dir, \
+                                  input_files = input_files, local_dir = local_savepath, \
+                                  main = remote_main, user = user, exe = exe, program = program)
+        
+        local_paths_shell.append(path)
+        shell_scripts.append(name)
+            
+    else:
+        for i in range(len(input_files)):
+            path, name = shell_script(job_name = jobID+str(i), input_file_dir = remote_dir, \
+                                      input_files = [input_files[i]], local_dir = local_savepath, \
+                                      main = remote_main, user = user, exe = exe, program = program)
+            
+            local_paths_shell.append(path)
+            shell_scripts.append(name) 
+            
+    # we connect to our remote host
+    
+    password = str(input('Please introduce your remote machine password (careful, it is visible): '))
+    
+    host = paramiko.SSHClient()
+    host.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    host.connect(server, username=username, password=password)
+
+    # we open a communication channel
+    hosttransport = host.get_transport()
+    dest_addr = (node, 22)
+    local_addr = (server, 22)
+    hostchannel = hosttransport.open_channel("direct-tcpip", dest_addr, local_addr)
+
+    # connection with node 
+    nodehost = paramiko.SSHClient()
+    nodehost.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    nodehost.connect(node, username=username, password=password, sock=hostchannel)
+
+    # open sftp channel to upload files
+    
+    ftp_client  = host.open_sftp()
+    
+    remote_path = remote_main + user + remote_dir
+    
+    input_remote_paths = []
+    
+    shell_remote_paths = []
+    
+    for inppath, inpname in list(zip(local_paths, input_files)):
+        
+        ftp_client.put(localpath = inppath, remotepath = remote_path + inpname, confirm = False)
+        
+        input_remote_paths.append(remote_path + inpname)
+        
+    for shpath, shname in list(zip(local_paths_shell, shell_scripts)):
+        
+        ftp_client.put(localpath = shpath, remotepath = remote_path + shname, confirm = False)
+        
+        shell_remote_paths.append(remote_path + shname)
+        
+        
+    ftp_client.close()
+    
+    # before submitting to queue system, we correct possible mistakes between DOS / UNIX
+    for input_path in input_remote_paths:
+        new_path = input_path[:-4]+'_new.inp'
+        stdin, stdout, stderr = nodehost.exec_command('tr "\r" "\n" < '+input_path+' > '+new_path)
+        stdin, stdout, stderr = nodehost.exec_command('mv '+new_path+' '+input_path)
+        
+    for shell_path in shell_remote_paths:
+        new_path = shell_path[:-3]+'_new.sh'
+        stdin, stdout, stderr = nodehost.exec_command('tr "\r" "\n" < '+shell_path+' > '+new_path)
+        stdin, stdout, stderr = nodehost.exec_command('mv '+new_path+' '+shell_path)
+        
+    # now we submit to queque system:
+        
+    for shell_path in shell_remote_paths:
+        stdin, stdout, stderr = nodehost.exec_command('qsub '+shell_path)
+    
+    # we check that everything is working
+    
+    print('Everything should be submitted by now. Let\'s see what qstat returns (Wait for 5 secs):')
+    print('===========================================================\n')
+    
+    time.sleep(5)
+    stdin, stdout, stderr = nodehost.exec_command('qstat')
+    for line in stdout.readlines():
+        print(line)
+        
+        
+    nodehost.close()
+    host.close()
 
 # def Xs_to_dist_old(X, RD, RH, theta, prec = .05):
 #     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,

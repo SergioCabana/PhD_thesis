@@ -233,12 +233,22 @@ tables = np.array([[1001, 1301, 1501, 2001, 2301, 2501, 2801, 3001, 5001, 6001,\
         6796, 9999, 9999, 9999, 9999]])
     
 
+# IDL DIRECTIVES, USED BY INPUT MAKER FUNCTIONS
+# Only the most basic ones
+
 dict_basic_IDL = {'0': 'PrimaryParticle',
                   '1': 'PrimaryEnergy',
                   '2': 'GeomagneticField',
                   '3': 'PropagatePrimary',
                   '4': 'Site',
                   '5': 'GroundAltitude'}
+
+basic_units = {'0': '',
+               '1': ' eV',
+               '2': '',
+               '3': '',
+               '4': '',
+               '5': ''}
 
 dict_control_IDL = {'0': 'TotalShowers',
                     '1': 'RunsPerProcess',
@@ -253,5 +263,13 @@ dict_control_IDL = {'0': 'TotalShowers',
                     '10': 'ElectronRoughCut',
                     '11': 'GammaCutEnergy',
                     '12': 'GammaRoughCut'}
+
+# Default simulation controls (with and wothout ZHAireS)
+
+default_sim_control = ['1', 'Infinite', '1', '0.123456', '250', '1e-6 Relative',
+                       '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV']
+
+default_sim_control_ZHS = ['1', 'Infinite', '1', '0.123456', '250', '1e-4 Relative',
+                       '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV']
 
     
