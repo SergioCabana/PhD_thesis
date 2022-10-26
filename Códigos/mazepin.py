@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.8.0 #################################
+############################## MAZEPIN v0.8.1 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -326,7 +326,7 @@ def dist_to_Xs(dist, RD, RH, theta, step = .025):
     return np.array(Xs[1:])
        
 
-def atmos_size(RH, theta, atmos_height = 113, stop = 'atmos'):
+def atmos_size(RH, theta, atmos_height = 100, stop = 'atmos'):
     ''' Returns total distance and traversed matter for a RASPASS trajectory
         starting at the top ot the atmosphere (fixes RASPASSDistance so that 
         happens)
@@ -338,7 +338,7 @@ def atmos_size(RH, theta, atmos_height = 113, stop = 'atmos'):
         theta : PrimaryZenAngle [deg]
         
         atmos_height : height of the atmosphere [km] and starting
-            point of the trajectory (default 113 km)
+            point of the trajectory (default 100 km)
             
         stop : point up to which we measure distance and traversed matter
             'atmos' : top of the atmosphere
@@ -373,7 +373,7 @@ def atmos_size(RH, theta, atmos_height = 113, stop = 'atmos'):
         raise TypeError(r'Valid stops are: "atmos", "zaxis" and "hmin" ')
         
         
-def Xs_to_dist(X, RD, RH, theta, atmos_height = 113):
+def Xs_to_dist(X, RD, RH, theta, atmos_height = 100):
     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
         for a RASPASS trajectory. VERY approximate result 
         (rough and easy numerical integration). Inverts previous function.
@@ -662,7 +662,7 @@ def readfile(filename):
 
 
 def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
-               RASPASS = False, Distance = False, first_int = False, \
+               RASPASS = False, Distance = False, first_int = True, \
                traject = []):
     ''' Returns data to be plotted, and a collection of suitable labels
     
@@ -762,7 +762,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
         inj_h, theta = traject
         RD, RH       = RAS_Dist(inj_h, theta, RH = 0), 0
         
-        RD_top       = RAS_Dist(113, theta, RH = 0) # RASPASSDistance of an inj ponit at atmosphere limit
+        RD_top       = RAS_Dist(100, theta, RH = 0) # RASPASSDistance of an inj ponit at atmosphere limit
         traj_input   = True
         
         
@@ -770,8 +770,10 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
     if not RASPASS:  # "normal" upgoing or downgoing showers, RH = 0
         
         if Distance and tab in tabs_x_depth: # we want to convert x_data to distances along axis 
-        
-            x_axis_label = r'Dist. along axis [km]' 
+            if not UG:
+                x_axis_label = r'Dist. to ground [km]' 
+            else:
+                x_axis_label = r'Dist. from ground [km]' if not first_int else r'Dist. from first interaction [km]'
             
             if not traj_input:
                 raise TypeError('Trajectory parameters are needed')
@@ -784,10 +786,10 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
             
             xdata  = Xs_to_dist(xdata, RD_top, 0, theta)
             
-            if first_int: # we start counting at the injection height, upwards or downwards
-                xdata = np.array([grd_km - x - RD for x in xdata]) if UG else np.array([x - RD for x in xdata])
+            if first_int and UG:
+                xdata  =  grd_km - np.array(xdata) - RD
             else:
-                xdata = np.array([grd_km - x for x in xdata]) if UG else np.array(xdata)
+                xdata = grd_km - np.array(xdata)
                 
         elif slant and not Distance and tab in tabs_x_depth: # slant depths in x axis
             
@@ -830,7 +832,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
 
 
 def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
-               RASPASS = False, Distance = False, first_int = False, \
+               RASPASS = False, Distance = False, first_int = True, \
                trajects = [], xlim = [], ylim = [], xscale = 'linear', \
                yscale = 'linear', autolabel = True, graph_type = 'step', labels = [], \
                size = 12, legend = True, title = '', loc_leg = 'best', \
@@ -967,10 +969,10 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     text = ax.yaxis.get_offset_text()
     text.set_size(size)
     
-    if UG and not Distance and not slant:
+    if not UG and Distance:
         ax.invert_xaxis()
-        
-    if RASPASS and Distance:
+    
+    if UG and not Distance and not slant:
         ax.invert_xaxis()
     
     if legend:
@@ -1019,8 +1021,8 @@ def traject_finder(files, RASPASS = False, UG = False):
             trajects.append([float(inj_h), 180-float(theta)]) # upgoing axis has theta < 90 in RASPASS
         
         else:
-            inj_h = chars[2][:-2]
-            theta = chars[3][:-3]
+            inj_h = chars[3][:-2]
+            theta = chars[4][:-3]
             
             trajects.append([float(inj_h), float(theta)])
     
