@@ -1048,7 +1048,7 @@ def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgo
             
             [ALTITUDE (in km), theta (in deg), phi (in deg)] for upgoing
             
-            [RASPASSDistance (in m), RASPASSHeight (in m), RASPASSTimeShift (in m), theta (in deg), phi (in deg)] for RASPASS
+            [RASPASSDistance (in m), RASPASSHeight (in m), RASPASSTimeShift (in ns), theta (in deg), phi (in deg)] for RASPASS
             
         sim_control (list of str): parameters to control the simulation (default options in mazepin_aux):
             
@@ -1102,6 +1102,8 @@ def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgo
             if basic[i] != '':    
                 f.write(dict_basic_IDL[str(i)] + ' '+ basic[i]+basic_units[str(i)]+' \n')
                 
+        f.write('Date 2010 7 11 \n')
+        
         #trajectory
         
         if RASPASS:
