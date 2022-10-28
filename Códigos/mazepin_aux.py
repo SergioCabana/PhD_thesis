@@ -266,10 +266,10 @@ dict_control_IDL = {'0': 'TotalShowers',
 
 # Default simulation controls (with and wothout ZHAireS)
 
-default_sim_control = ['1', 'Infinite', '1', '0.123456', '250', '1e-6 Relative',
+default_sim_control = ['1', 'Infinite', '1', '0.123456', '350', '1e-6 Relative',
                        '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV']
 
-default_sim_control_ZHS = ['1', 'Infinite', '1', '0.123456', '250', '1e-4 Relative',
+default_sim_control_ZHS = ['1', 'Infinite', '1', '0.123456', '350', '1e-4 Relative',
                        '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV']
 
     
