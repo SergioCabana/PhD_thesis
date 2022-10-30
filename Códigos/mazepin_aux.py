@@ -264,7 +264,13 @@ dict_control_IDL = {'0': 'TotalShowers',
                     '11': 'GammaCutEnergy',
                     '12': 'GammaRoughCut'}
 
-# Default simulation controls (with and wothout ZHAireS)
+# Bash loops to rename files with Opt a export option
+
+rename1 = 'for f in *.t*; do if [ "${f: -1}" = "b" ]; then mv "$f" "${f%.*}_slan.${f##*.}"; else mv "$f" "${f%.*}_vert.${f##*.}"; fi; done'
+rename2 = 'for f in *b; do mv "$f" "${f%?}"; done'
+
+
+# Default simulation controls (with and without ZHAireS)
 
 default_sim_control = ['1', 'Infinite', '1', '0.123456', '350', '1e-6 Relative',
                        '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV']

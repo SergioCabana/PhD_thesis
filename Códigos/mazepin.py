@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.8.1 #################################
+############################## MAZEPIN v0.8.2 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -1175,7 +1175,7 @@ def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgo
 def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
                  main = '/home2/', user = 'sergio.cabana/', \
                  exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary'],\
-                 program = 'ZHAireSRASPASS'):
+                 program = 'ZHAireSRASPASS', autorename = True):
     
     ''' Creates a shell script (.sh extension) that can be submitted to queue 
         systems (at least inside IGFAE nodes, with scratch). 
@@ -1198,6 +1198,8 @@ def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
         exe  : paths (inside main) to executable binaries to import and use
 
         program : name of binary executable to run the input files
+        
+        autorename: bool to rename exported tables with opt a
         
         =======================================================================
     '''
@@ -1243,7 +1245,11 @@ def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
             
             f.write('./' + program + ' < ' + inp + ' > ' + inp[:-4] + '.out' + ' \n')
             
-        
+        if autorename:
+            f.write('############ RENAMING EXTENSIONS ########### \n')
+            f.write(rename1 + ' \n')
+            f.write(rename2 + ' \n') #loops defined at mazepin_aux
+            
         f.write('############ OUTPUT SAVING AND EXIT ########### \n')
 
         f.write('cp *.* ' + main + user + input_file_dir + ' \n')
@@ -1258,8 +1264,8 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
               RASPASS = False, upgoing = False, ZHAireS = False, \
               ZHAireS_control = [], remote_main = '/home2/', user = 'sergio.cabana/', remote_dir = '', \
               exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary', 'SpecialPrimaries/uprimary'], \
-              program = 'ZHAireSRASPASS', local_savepath = '', eco = False, \
-              server = 'mastercr1.igfae.usc.es', node = 'nodo014', \
+              program = 'ZHAireSRASPASS', autorename = True, local_savepath = '', \
+              eco = False, server = 'mastercr1.igfae.usc.es', node = 'nodo014', \
               username = 'sergio.cabana'):
     
     ''' Full simulation process.
@@ -1297,6 +1303,8 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
         exe (list of str): list of paths inside remote_dir/user/ where executables to run special particles are
         
         program: name of executable that runs the simulations
+        
+        autorename: bool to include loops in shell script to rename tables with opt a
 
         local_savepath (str): directory to save created files
         
@@ -1353,7 +1361,8 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
     if eco:
         path, name = shell_script(job_name = jobID, input_file_dir = remote_dir, \
                                   input_files = input_files, local_dir = local_savepath, \
-                                  main = remote_main, user = user, exe = exe, program = program)
+                                  main = remote_main, user = user, exe = exe, program = program,\
+                                  autorename = autorename)
         
         local_paths_shell.append(path)
         shell_scripts.append(name)
@@ -1362,7 +1371,8 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
         for i in range(len(input_files)):
             path, name = shell_script(job_name = jobID+str(i), input_file_dir = remote_dir, \
                                       input_files = [input_files[i]], local_dir = local_savepath, \
-                                      main = remote_main, user = user, exe = exe, program = program)
+                                      main = remote_main, user = user, exe = exe, program = program, \
+                                      autorename = autorename)
             
             local_paths_shell.append(path)
             shell_scripts.append(name) 

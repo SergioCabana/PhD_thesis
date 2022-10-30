@@ -272,8 +272,10 @@ fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False
 # remote_dir     = 'Pruebas_Running/Pruebas_submit/' # where to store files and future outputs
 # exe            = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary', 'SpecialPrimaries/uprimary']
 # program        = 'ZHAireSRASPASS'
+# autorename     = True
 # local_savepath = ''
 # eco            = False
+
 
 # server         = 'mastercr1.igfae.usc.es'
 # node           = 'nodo014'
@@ -283,6 +285,6 @@ fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False
 # maz.simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID, \
 #               RASPASS = RASPASS, upgoing = upgoing, ZHAireS = ZHAireS, \
 #               ZHAireS_control = ZHAireS_control, remote_main = remote_main, \
-#               user = user, remote_dir = rmeote_dir, exe = exe, \
-#               program = program, local_savepath = local_savepath, eco = eco, \
-#               server = server, node = node, username = username)
+#               user = user, remote_dir = remote_dir, exe = exe, \
+#               program = program, autorename = autorename, local_savepath = local_savepath, \
+#               eco = eco, server = server, node = node, username = username)
