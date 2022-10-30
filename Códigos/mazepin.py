@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.8.2 #################################
+############################## MAZEPIN v0.8.3 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -604,7 +604,7 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
     for p in part:
         for s in sep:
             for elem in paths:
-                if str(p) in elem and s in elem:
+                if str(p) == elem[1] and s == elem[2]:
                     order.append(elem) 
                     
                     
