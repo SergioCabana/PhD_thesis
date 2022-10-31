@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.8.3 #################################
+############################## MAZEPIN v0.8.4 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -1266,7 +1266,7 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
               exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary', 'SpecialPrimaries/uprimary'], \
               program = 'ZHAireSRASPASS', autorename = True, local_savepath = '', \
               eco = False, server = 'mastercr1.igfae.usc.es', node = 'nodo014', \
-              username = 'sergio.cabana'):
+              username = 'sergio.cabana', mail = True):
     
     ''' Full simulation process.
     
@@ -1315,6 +1315,8 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
         node : where to ssh to from remote server
         
         username: name of remote user
+        
+        mail: bool to decide whether send email when simulations are complete. Address will be asked if true
         
         ===========================================================================================
         
@@ -1433,9 +1435,14 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
         stdin, stdout, stderr = nodehost.exec_command('mv '+new_path+' '+shell_path)
         
     # now we submit to queque system:
+    submit_cmd = 'qsub '
+    
+    if mail:
+        mail_dir = str(input('Please introduce your email address for notification: '))
+        submit_cmd += '-m e -M ' + mail_dir + ' '
         
     for shell_path in shell_remote_paths:
-        stdin, stdout, stderr = nodehost.exec_command('qsub '+shell_path)
+        stdin, stdout, stderr = nodehost.exec_command(submit_cmd + shell_path)
     
     # we check that everything is working
     
