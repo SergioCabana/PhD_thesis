@@ -29,12 +29,14 @@ tabs = [0]
 # ask for e+e-
 part = [15]
 # constraint the simulation files: ask for strings that all file names must have
-sim = ['dg', 'prot', '1e18eV', '100km', '00pdeg', 'vert']
-# separations: give string to plot separately the datasets corresponding to each string
-sep = ['00deg', '50deg', '85deg']
+sim = ['dg', 'prot', '1e18eV', '100km', '00pdeg','vert']
+# separations: give list of strings to plot separately the datasets corresponding to each set
+sep = [['00deg'],
+       ['50deg'],
+       ['85deg']]
 
 # retrieve the files
-files = maz.pathfinder(rootdir, tabs, part, sim, sep)
+files = maz.pathfinder(rootdir=rootdir, tabs=tabs, part=part, sim=sim, sep=sep)
 # get the trajectories
 trajects = maz.traject_finder(files)
 # and plot
@@ -66,7 +68,10 @@ fig4, ax4 = maz.Aires_Plot(files, error_type = 'sigma', \
 tabs = [0]
 part = [15]
 sim = ['upr', 'prot', '1e18eV', '05km', '00pdeg', 'vert'] # Injection height at 5km !
-sep = ['95deg', '100deg', '110deg', '120deg'] # we separate different zenith angles
+sep = [['95deg'], 
+       ['100deg'], 
+       ['110deg'], 
+       ['120deg']] # we separate different zenith angles
 
 # retrieve the files
 files = maz.pathfinder(rootdir, tabs, part, sim, sep)
@@ -117,8 +122,16 @@ fig5, ax5 = maz.Aires_Plot(files, slant = True, Distance = True, UG = True, firs
 # We do basically the same, and ask for slanted data
 tabs = [0]
 part = [15]
-sim = ['RAS', 'gamma', '1e18eV', 'slan']
-sep = ['15km', '20km', '25km', '30km', '35km', '40km']
+sim = ['RAS', 'gamma', '1e18eV', 'slan', 'BothOn']
+# The BothOn string is just because I was playing with magnetic field and photonuclear
+# interactions. That string means that both things are "On" in AIRES
+
+sep = [['15km'], 
+       ['20km'], 
+       ['25km'], 
+       ['30km'], 
+       ['35km'], 
+       ['40km']]
 
 #retrieve the files
 files = maz.pathfinder(rootdir, tabs, part, sim, sep)
@@ -132,14 +145,14 @@ fig, ax = maz.Aires_Plot(files, RASPASS = True, slant = True, trajects = traject
 # now, we retrieve "_vert" files, exported with the default options and thus containing
 # distances on the x axis
 
-sim = ['RAS', 'gamma', '1e18eV', 'vert']
+sim = ['RAS', 'gamma', '1e18eV', 'vert', 'BothOn']
 files = maz.pathfinder(rootdir, tabs, part, sim, sep)
 
 # the other things (tab, part, sim, trajects) are the same
 
 # plot using Distance = True
-fig2, ax2 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = True, \
-                          trajects = trajects, graph_type = 'step')
+# fig2, ax2 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = True, \
+#                           trajects = trajects, graph_type = 'step')
     
 # WRONG, DO NOT USE SLANT DATA (it's just for remembering, if you were to set slant = False
 # and use slant data, the program would not notice so be awake). Comment the previous line please ;)
@@ -151,8 +164,10 @@ fig2, ax2 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False
 # You can also set more than one particle and table per graph
 tabs = [0]
 part = [15, 16] # two particles
-sim = ['RAS', 'gamma', '1e18eV', 'vert']
-sep = ['20km', '30km', '40km']
+sim = ['RAS', 'gamma', '1e18eV', 'vert', 'BothOn']
+sep = [['20km'], 
+       ['30km'], 
+       ['40km']]
 
 files = maz.pathfinder(rootdir, tabs, part, sim, sep)
 trajects = maz.traject_finder(files, RASPASS = True)
@@ -162,14 +177,35 @@ fig3, ax3 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False
     
 tabs = [0, 2] # two tables
 part = [16]
-sim = ['RAS', 'gamma', '1e18eV', 'vert']
-sep = ['20km', '30km', '40km']
+sim = ['RAS', 'gamma', '1e18eV', 'vert', 'BothOn']
+sep = [['20km'], 
+       ['30km'], 
+       ['40km']]
 
 files = maz.pathfinder(rootdir, tabs, part, sim, sep)
 trajects = maz.traject_finder(files, RASPASS = True)
 
 fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False, \
                          trajects = trajects, graph_type = 'step')
+    
+# You can also set more than  one distinction. Let's see what happens at different
+# heights, turning on and off the Geomagnetic Field and Photonuclear interactions
+
+tabs = [0]
+part = [15]
+sim = ['RAS', 'gamma', '1e18eV', 'vert']
+sep = [['20km', 'BothOn'], 
+       ['20km', 'BothOff'], 
+       ['40km', 'BothOn'],
+       ['40km', 'BothOff']]
+
+files = maz.pathfinder(rootdir, tabs, part, sim, sep)
+trajects = maz.traject_finder(files, RASPASS = True)
+
+fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False, \
+                         trajects = trajects, graph_type = 'step')
+    
+# Such an interesting result at RASPASSHeight = 40km ;)
 
 #%% mazepin.simulator example
 

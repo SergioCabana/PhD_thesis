@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.8.4 #################################
+############################## MAZEPIN v0.8.5 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -534,7 +534,7 @@ def table_finder(tab, part, verbose = False):
         
     return [int(t) for t in table] 
 
-def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
+def pathfinder(rootdir, tabs, part, sim = [''], sep = [], verbose = False):
     ''' Returns the list of paths inside rootdir corresponding to the requested
         tables.
         
@@ -548,21 +548,22 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
         these strings). Default '', all files with the right extension are kept.
         I am using my rules for naming files (see notes at GitHub repo). 
         
-        sep (list of str): Special distinctions. Output will indicate which files
-        contain these special strings. Default '', all files with the right 
-        extension are kept
+        sep (list of lists of str): Distinctions. Output will indicate which files,
+        among the selected with sim, contain these special strings. 
+        Default [], all files with the constraint and right extension are kept
         
         ===================================================================
         
-        Output (with separators sep = [sep1, sep2]):
+        Output (with separators sep = [['s1', 's2'], ['s3', 's4']]):
             
-        [[tab1, part1, sep1, path1], [tab1, part1, sep2, path2], 
-         [tab1, part2, sep1, path3], [tab1, part2, sep2, path4],
-         [tab2, part1, sep1, path5], ...]
+        [[tab1, part1, 's1, s2', path1], [tab1, part1, 's3, s4', path2], 
+         [tab1, part2, 's1, s2', path3], [tab1, part2, 's3, s4', path4],
+         [tab2, part1, 's1, s2', path5], ...]
         
         ** sorry for the spaghetti, I know it is a huge mess :_( **
     '''
-    paths = []
+    paths    = []
+    separate = True if sep != [] else False
     
     for subdir, dirs, files in os.walk(rootdir):
         for file in files:     # loop over files in rootdir
@@ -573,13 +574,16 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
                     
                         table_ext = '.t'+str(tables[p,tab]) 
                         # extension of table tab, particle p (table at mazepin_aux)
-                    
                         if file.endswith(table_ext) and all([c in file for c in sim]):
                         # if our file has the right extension and all constraints
-                            for s in sep: # loop over separations
-                                if s == '' or s in file: #we take into account distinctions
-                                    paths.append([str(tab), str(p), s, subdir + os.sep + file])
-                                    # save type of table, particle, separation and path
+                            if separate:
+                                for s in sep: # loop over separations
+                                    string = ", ".join([str(item) for item in s])              
+                                    if all([item in file for item in s]): #we take into account distinctions
+                                        paths.append([str(tab), str(p), string, subdir + os.sep + file])
+                                        # save type of table, particle, separation and path
+                            else:
+                                paths.append([str(tab), str(p), '', subdir + os.sep + file])
                                     
                     elif tab == 16: # energy per particle, we need 2 tables to calculate
                     
@@ -589,26 +593,37 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [''], verbose = False):
                         
                         if file.endswith(table_ext1) and all([c in file for c in sim]):
                         # if our file has the right extension and all constraints
-                            for s in sep: # loop over separations
-                                if s == '' or s in file: #we take into account distinctions
-                                    filename = file[:-6] 
-                                    #name of task, should have both extensions inside rootdir
-                                    paths.append([str(tab), str(p), s, \
-                                                 [subdir + os.sep + file, subdir + os.sep + filename+table_ext2]])
-                                    # save both paths in the same element
+                            if separate:
+                                for s in sep: # loop over separations
+                                    string = ", ".join([str(item) for item in s])
+                                    if all([item in file for item in s]): #we take into account distinctions
+                                        filename = file[:-6] 
+                                        #name of task, should have both extensions inside rootdir
+                                        paths.append([str(tab), str(p), string, \
+                                                     [subdir + os.sep + file, subdir + os.sep + filename+table_ext2]])
+                                        # save both paths in the same element
+                            else:
+                                filename = file[:-6] 
+                                #name of task, should have both extensions inside rootdir
+                                paths.append([str(tab), str(p), '', \
+                                             [subdir + os.sep + file, subdir + os.sep + filename+table_ext2]])
                                     
-    if len(sep) > 1 and len(paths) != len(part) * len(sep) * len(tabs):
+    if len(sep) > 1 and len(paths) < len(part) * len(sep) * len(tabs):
         raise TypeError('Some tables are not available inside the main directory')
+    elif len(sep) > 1 and len(paths) > len(part) * len(sep) * len(tabs):
+        raise TypeError('Simulations are not constrained enough (add strings to sim)')
         
-    order = []
-    for p in part:
-        for s in sep:
-            for elem in paths:
-                if str(p) == elem[1] and s == elem[2]:
-                    order.append(elem) 
-                    
-                    
-    paths = order # this is a trick to make the lists in paths ordered as sep is
+    if separate:
+        order = []
+        for p in part:
+            for s in sep:
+                string = ", ".join([str(item) for item in s])
+                for elem in paths:
+                    if str(p) == elem[1] and string == elem[2]:
+                        order.append(elem) 
+                        
+                        
+        paths = order # this is a trick to make the lists in paths ordered as sep is
     
     if verbose:  # all dictionaries in mazepin_aux
         print('Requested tables: \n')
