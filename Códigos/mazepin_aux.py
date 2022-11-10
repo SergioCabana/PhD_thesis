@@ -262,7 +262,9 @@ dict_control_IDL = {'0': 'TotalShowers',
                     '9': 'ElectronCutEnergy',
                     '10': 'ElectronRoughCut',
                     '11': 'GammaCutEnergy',
-                    '12': 'GammaRoughCut'}
+                    '12': 'GammaRoughCut',
+                    '13': 'PerShowerData',
+                    '14': 'ExportPerShower'}
 
 # Bash loops to rename files with Opt a export option
 
@@ -273,9 +275,9 @@ rename2 = 'for f in *b; do mv "$f" "${f%?}"; done'
 # Default simulation controls (with and without ZHAireS)
 
 default_sim_control = ['1', 'Infinite', '1', '0.123456', '350', '1e-6 Relative',
-                       '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV']
+                       '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV', 'Full', 'Off']
 
 default_sim_control_ZHS = ['1', 'Infinite', '1', '0.123456', '350', '1e-4 Relative',
-                       '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV']
+                       '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV', 'Full', 'Off']
 
     

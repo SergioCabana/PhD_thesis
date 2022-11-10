@@ -1,5 +1,3 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import mazepin as maz
 
 #%% mazepin.Aires_plot example
@@ -53,12 +51,27 @@ trajects = maz.traject_finder(files)
 fig2, ax2 = maz.Aires_Plot(files, slant = True, trajects = trajects, graph_type = 'step')
 
 # Let's now ask for distance in the x axis. Conversor works with slanted data,
-# so our current files will do the work. Keep slant = True
+# so our current files would do the work. Just to see how other options work,
+# we can instead say that we do not want files with 'vert'
+
+sim = ['dg', 'prot', '1e18eV', '100km', '00pdeg']
+out = ['vert']
+# retrieve the files again
+files = maz.pathfinder(rootdir, tabs, part, sim, sep, out)
+# get the trajectories
+trajects = maz.traject_finder(files)
+
+# Kepp slant True
 fig3, ax3 = maz.Aires_Plot(files, slant = True, Distance = True, trajects = trajects, graph_type = 'step')
 
-# I you have data averaged over several showers, you can also plot errorbars 
+# I you have data averaged over several showers, you can also plot errorbars or fill plots 
 fig4, ax4 = maz.Aires_Plot(files, error_type = 'sigma', \
                            slant = True, Distance = True, trajects = trajects, graph_type = 'errorbar')
+
+fig5, ax5 = maz.Aires_Plot(files, error_type = 'sigma', \
+                           slant = True, Distance = True, trajects = trajects, graph_type = 'fill', marker = '')
+    
+# zoom in the last one please :_)
 
 #%% ######################### UPGOING SHOWERS ###########################
 # Uploaded files: long. dev. of e+e-, varying theta and injection height
@@ -118,6 +131,14 @@ fig5, ax5 = maz.Aires_Plot(files, slant = True, Distance = True, UG = True, firs
 # returns tables with DISTANCE on the x axis, and the "Opt a" option returns
 # tables with slanted depth in the x axis. There is no interest in using vertical 
 # traversed matter in these kind of geometry
+
+# SUPER MEGA ULTRA WARNING: If you want to set the observation planes normal
+# to the shoer axis (and why would you not want to do that?, you must add an Opt p
+# to everything. This is, for the table with distance covered along axis, export
+# with Opt p; and for the table of matter traversed along axis, export with Opt ap
+
+# Of course, I found about this after exporting the tables that I have uploaded,
+# but they are good enough to see how the module works.
 
 # We do basically the same, and ask for slanted data
 tabs = [0]
@@ -205,17 +226,19 @@ trajects = maz.traject_finder(files, RASPASS = True)
 fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False, \
                          trajects = trajects, graph_type = 'step')
     
-# Such an interesting result at RASPASSHeight = 40km ;)
+# Such an interesting result at RASPASSHeight = 40km. Do not think too much about it,
+# as I said, I should have exported with Opt p and up to date, I think what appears
+# here might be due to that
 
-#%% mazepin.simulator example
+#%% mazepin.setup_simulator_SGE and run_simulation_SGE example
 
 ## This is commented to avoid problems, like running the whole script
  
-# though there are a lot of inputs, I hope copy/paste will speed up all the preparation
-# mazepin.simulator tries to avoid working with remote machines, creating and
-# submitting directly all the necessary files to run the desired simulations
+# # though there are a lot of inputs, I hope copy/paste will speed up all the preparation
+# # These functions try to avoid working with remote machines, creating and
+# # submitting directly all the necessary files to run the desired simulations
 
-###################### task names for each input file ##########################
+# ###################### task names for each input file ##########################
 
 # task_names = ['input_file1', 
 #               'input_file2']
@@ -227,30 +250,33 @@ fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False
 # # empty string means input file will not contain the IDL, and thus go with default
 
 # basics = [
-#           ['Proton', '1e15', 'On', 'Off', 'SouthPole', ''],
-#           ['Proton', '1e15', 'On', 'Off', 'SouthPole', '']
-#           ]
+#          ['Proton', '1e15', 'On', 'Off', 'SouthPole', ''],
+#          ['Proton', '1e15', 'On', 'Off', 'SouthPole', '']
+#          ]
 
 # #################### trajectory parameters############# 
 # #In a RASPASS shower we have 5 params, for the rest 3 params
 
 # trajects = [
-#             ['100', '0', '0'],
-#             ['100', '65', '0']
-#             ] 
+#            ['100', '0', '0'],
+#            ['100', '65', '0']
+#            ] 
 # # vertical downgoing and inclined downgoing
 
 # ####################### simulation control basic parameters ##################
 
 # #   TotalShowers, RunsPerProcess, ShowersPerRun, RandomSeed, ObservingLevels, ThinningEnergy,
 # #   ThinningWFactor, SaveInFile grdpcles, SaveInFIle lgtpcles, ElectronCutEnergy,
-# #   ElectronRoughCut, GammaCutEnergy, GammaRoughCut
+# #   ElectronRoughCut, GammaCutEnergy, GammaRoughCut, PerShowerData, ExportPerShower
 # # Default options at mazepin_aux (default_sim_control and default_sim_control_ZHS for ZHAireS simulations)
  
 # sim_controls = [
-#                default_sim_control_ZHS,
-#                ['1', 'Infinite', '1', '', '350', '1e-4 Relative', '0.06', 'None', 'None', '', '', '', '']
-#                ]
+#                 default_sim_control_ZHS,
+#                 ['1', 'Infinite', '1', '', '350', '1e-4 Relative', '0.06', 'None', 'None', '', '', '', '', 'Full', 'Off']
+#                 ]
+
+# # in the second case, I take out the RandomSeed, indicate that I do not want to
+# # store data in lgtpcles and grdpcles, go with the default energy cuts
 
 # ######################## tables to export ###########################
 
@@ -267,13 +293,13 @@ fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False
 # # not considered (not basic) for each input file
 
 # extras = [
-#          ['Atmosphere Linsley', 'PhotoNuclear Off'],
-#          ['Atmosphere Linsley', 'PhotoNuclear Off']
-#          ]
+#           ['Atmosphere Linsley', 'PhotoNuclear Off'],
+#           ['Atmosphere Linsley', 'PhotoNuclear Off']
+#           ]
 
 # ########################## ZHAireS control ###############################
 
-# freqs   = [100, 300, 500]
+# freqs   = [300]
 
 # antenas = [
 #           [0, 0, 0],
@@ -283,10 +309,7 @@ fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False
 #           [-10, 0, 0],
 #           ]
 
-# direct_ZHS_inst = [
-#                   ['RemoveZeroOutput On'],
-#                   ['RemoveZeroOutput On']
-#                   ]
+# direct_ZHS_inst = ['RemoveZeroOutput On']
 
 # # On/Off for FresnelTime, On/Off for FresenlFreq, antena coordinates, frequency list, other direct instructions
 
@@ -318,9 +341,13 @@ fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False
 # username       = 'sergio.cabana'
 # #########################################################################
 
-# maz.simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID, \
+# shells = maz.setup_simulation_SGE(task_names, basics, trajects, sim_controls, exports, extras, jobID, \
 #               RASPASS = RASPASS, upgoing = upgoing, ZHAireS = ZHAireS, \
 #               ZHAireS_control = ZHAireS_control, remote_main = remote_main, \
 #               user = user, remote_dir = remote_dir, exe = exe, \
 #               program = program, autorename = autorename, local_savepath = local_savepath, \
 #               eco = eco, server = server, node = node, username = username)
+    
+
+# maz.run_simulation_SGE(shell_remote_paths = shells, server = server, node = node,\
+#                        username = username, mail = False)

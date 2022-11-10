@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.8.5 #################################
+############################## MAZEPIN v0.8.6 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -409,7 +409,7 @@ def Xs_to_dist(X, RD, RH, theta, atmos_height = 100):
     return np.array([inverse(x) if x < X_full else L_full+offset_dist for x in X])
     
 def codes():
-    ''' Returns codes for AIRES tables and particles
+    ''' Returns codes (in mazepin) for AIRES tables and particles
     '''
     
     return dict_tab, dict_part
@@ -534,7 +534,7 @@ def table_finder(tab, part, verbose = False):
         
     return [int(t) for t in table] 
 
-def pathfinder(rootdir, tabs, part, sim = [''], sep = [], verbose = False):
+def pathfinder(rootdir, tabs, part, sim = [''], sep = [], out = [], verbose = False):
     ''' Returns the list of paths inside rootdir corresponding to the requested
         tables.
         
@@ -551,6 +551,11 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [], verbose = False):
         sep (list of lists of str): Distinctions. Output will indicate which files,
         among the selected with sim, contain these special strings. 
         Default [], all files with the constraint and right extension are kept
+        
+        out (list of str): Strings that we do not want our files to have
+        Might be useful when we have avergaed tables and individual shower tables,
+        that will have and extra "s00..." by default
+        Default [], no strings are excluded
         
         ===================================================================
         
@@ -574,7 +579,10 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [], verbose = False):
                     
                         table_ext = '.t'+str(tables[p,tab]) 
                         # extension of table tab, particle p (table at mazepin_aux)
-                        if file.endswith(table_ext) and all([c in file for c in sim]):
+                        sim_check = all([c in file for c in sim])
+                        out_check = all([c not in file for c in out])
+                        
+                        if file.endswith(table_ext) and sim_check and out_check:
                         # if our file has the right extension and all constraints
                             if separate:
                                 for s in sep: # loop over separations
@@ -586,12 +594,15 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [], verbose = False):
                                 paths.append([str(tab), str(p), '', subdir + os.sep + file])
                                     
                     elif tab == 16: # energy per particle, we need 2 tables to calculate
-                    
+                        
                         table_ext1 = '.t'+str(tables[p,0]) 
                         table_ext2 = '.t'+str(tables[p,2])
                         # extension of tables 0 and 2, particle p (table at mazepin_aux)
                         
-                        if file.endswith(table_ext1) and all([c in file for c in sim]):
+                        sim_check = all([c in file for c in sim])
+                        out_check = all([c not in file for c in out])
+                        
+                        if file.endswith(table_ext1) and sim_check and out_check:
                         # if our file has the right extension and all constraints
                             if separate:
                                 for s in sep: # loop over separations
@@ -611,7 +622,7 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [], verbose = False):
     if len(sep) > 1 and len(paths) < len(part) * len(sep) * len(tabs):
         raise TypeError('Some tables are not available inside the main directory')
     elif len(sep) > 1 and len(paths) > len(part) * len(sep) * len(tabs):
-        raise TypeError('Simulations are not constrained enough (add strings to sim)')
+        raise TypeError('Simulations are not constrained enough (add strings to sim or out)')
         
     if separate:
         order = []
@@ -640,6 +651,10 @@ def pathfinder(rootdir, tabs, part, sim = [''], sep = [], verbose = False):
         print('Constraints: \n')
         for c in sim:
             print(c+'\n')
+        print('--------------------------\n')
+        print('Unwanted strings: \n')
+        for s in out:
+            print(s+'\n')
         print('--------------------------\n')
         print('Separations: \n')
         for s in sep:
@@ -731,7 +746,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
         elif error_type == 'RMS':
             err = data[:,2]
         else:
-            raise TypeError('Please introduce a valid error_type ("sigma" or "RMS"")')
+            raise TypeError('Please introduce a valid error_type ("sigma" or "RMS")')
         
     else:
         data1, grd = readfile(file[0]) # longitudinal development
@@ -759,7 +774,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
             # error propagation
             
         else:
-            raise TypeError('Please introduce a valid error_type ("sigma" or "RMS"")')
+            raise TypeError('Please introduce a valid error_type ("sigma" or "RMS")')
         
     x_axis_label, y_axis_label = dict_tab_xlab[tab], dict_tab_ylab[tab] #default
     
@@ -834,7 +849,7 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
                 raise TypeError('Trajectory parameters are needed')
                 
             if slant:
-                raise TypeError('RASPASS tables by default export distance in x axis (without any option). Do not use slant')
+                raise TypeError('RASPASS tables by default export distance in x axis. Do not use slant')
             
             xdata = np.array([RD-x for x in xdata])
             
@@ -851,7 +866,7 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
                trajects = [], xlim = [], ylim = [], xscale = 'linear', \
                yscale = 'linear', autolabel = True, graph_type = 'step', labels = [], \
                size = 12, legend = True, title = '', loc_leg = 'best', \
-               fmt = '-', marker = 'o', linewidth = 2.):
+               fmt = '-', marker = 'o', linewidth = 2., alpha = .7):
     
     
     ''' Plots AIRES outputs, preprocessed using pathfinder and Aires_data
@@ -874,7 +889,7 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
         
         autolabel (bool): Sets automatic labels for each plot
         
-        graph_type: Valid types are "step" or "errorbar"
+        graph_type: Valid types are "step", "errorbar" or "fill"
         
         labels: if autolabel is False, list of labels by hand (one for plot,
                 in the order of input_data)
@@ -893,6 +908,8 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
         
         linewidth : for both types of graphs
         
+        alpha : opacity of filling color, only for graph_type = "fill"
+        
         =====================================================================
     '''
     
@@ -907,7 +924,6 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     
     counter    = 0
 
-    
     xsets      = []
     ysets      = []
     yerrsets   = []
@@ -922,10 +938,10 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     
     # scientific notation for offset text
 
-    form = mpl.ticker.ScalarFormatter(useMathText=True) 
-    form.set_scientific(True) 
-    form.set_powerlimits((-1,1))
-    ax.yaxis.set_major_formatter(form)
+    # form = mpl.ticker.ScalarFormatter(useMathText=True) 
+    # form.set_scientific(True) 
+    # form.set_powerlimits((-1,1))
+    # ax.yaxis.set_major_formatter(form)
     
     for data_path in input_data:
         dataset, x_axis_label, y_axis_label = Aires_data(data_path, error_type,\
@@ -969,9 +985,13 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
 
         elif graph_type == 'errorbar':
             ax.errorbar(x, y, err, fmt = fmt, marker=marker, linewidth=linewidth, label = glabel)
+        
+        elif graph_type == 'fill':
+            ax.errorbar(x, y, fmt = fmt, marker = marker, linewidth = linewidth, label = glabel)
+            ax.fill_between(x, y-err, y+err, alpha = alpha)
 
         else:
-            raise TypeError('Valid graph styles are "step" and "errorbar"')
+            raise TypeError('Valid graph styles are "step", "errorbar" or "fill"')
             
         counter += 1
     
@@ -989,6 +1009,7 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     
     if UG and not Distance and not slant:
         ax.invert_xaxis()
+
     
     if legend:
         ax.legend(loc = loc_leg, prop = {'size':size})
@@ -1045,7 +1066,8 @@ def traject_finder(files, RASPASS = False, UG = False):
             
 
 def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgoing = False, \
-               ZHAireS = False, ZHAireS_control = [], exports = [], extra = [], save_path = ''):
+               ZHAireS = False, ZHAireS_control = [], exports = [], extra = [], set_date = False,\
+               save_path = ''):
     
     ''' Creates an AIRES/ZHAireS input file
     
@@ -1067,7 +1089,8 @@ def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgo
             
         sim_control (list of str): parameters to control the simulation (default options in mazepin_aux):
             
-        [TotalShowers, RunsPerProcess, ShowerPerRun, RandomSeed, ObsLevels, ThinningEnergy, ThinnningWFactor, SaveInFile's, electron cuts, gamma cuts]
+        [TotalShowers, RunsPerProcess, ShowerPerRun, RandomSeed, ObsLevels, ThinningEnergy, ThinnningWFactor, \
+         SaveInFile's, electron cuts, gamma cuts, PerShowerData, ExportPerShower]
          
         RASPASS, upgoing (bool): Control of special primaries
         
@@ -1078,6 +1101,8 @@ def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgo
             
         exports (list): tables to export. Format is [tab, part, options (str)] with mazepin codes (maz.codes())
         
+        set_date (bool): If True, no Date will be specified. This function uses 2010 7 11 as default date,
+            but if set_date = False then no directive will be included (unless given in extras)
         save_path: directory to save input file
         
         ============================================================================
@@ -1116,8 +1141,9 @@ def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgo
         for i in range(len(basic)):
             if basic[i] != '':    
                 f.write(dict_basic_IDL[str(i)] + ' '+ basic[i]+basic_units[str(i)]+' \n')
-                
-        f.write('Date 2010 7 11 \n')
+        
+        if not set_date:
+            f.write('Date 2010 7 11 \n')
         
         #trajectory
         
@@ -1187,12 +1213,12 @@ def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgo
         return path, task_name+'.inp'
 
 
-def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
+def shell_script_SGE(job_name, input_file_dir, input_files, local_dir = '', \
                  main = '/home2/', user = 'sergio.cabana/', \
                  exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary'],\
                  program = 'ZHAireSRASPASS', autorename = True):
     
-    ''' Creates a shell script (.sh extension) that can be submitted to queue 
+    ''' Creates a shell script (.sh extension) that can be submitted to SGE queue 
         systems (at least inside IGFAE nodes, with scratch). 
         It is adapted for the cluster I use but easy to modify
         
@@ -1214,7 +1240,9 @@ def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
 
         program : name of binary executable to run the input files
         
-        autorename: bool to rename exported tables with opt a
+        autorename: bool to rename exported tables with opt a. Use carefully,
+            only works for two different export options, namely default and Opt a
+            (or Opt p and Opt ap for RASPASS)
         
         =======================================================================
     '''
@@ -1273,9 +1301,9 @@ def shell_script(job_name, input_file_dir, input_files, local_dir = '', \
         f.close()
         
         return path, 'script_shell_'+job_name+'.sh'
+    
 
-
-def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID, \
+def setup_simulation_SGE(task_names, basics, trajects, sim_controls, exports, extras, jobID, \
               RASPASS = False, upgoing = False, ZHAireS = False, \
               ZHAireS_control = [], remote_main = '/home2/', user = 'sergio.cabana/', remote_dir = '', \
               exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary', 'SpecialPrimaries/uprimary'], \
@@ -1283,9 +1311,8 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
               eco = False, server = 'mastercr1.igfae.usc.es', node = 'nodo014', \
               username = 'sergio.cabana'):
     
-    ''' Full simulation process.
-    
-        Creates input files, shell scripts, submits to remote machine and runs simulations
+    ''' Creates all the files (.inp, .sh) needed to run simulations inside a SGE system,
+        and uploads them to your remote machine
         
         ============================================================================
         
@@ -1315,11 +1342,11 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
         
         remote_dir (str, ends with /): directory inside remote_dir/user/ to upload files and store outputs
             
-        exe (list of str): list of paths inside remote_dir/user/ where executables to run special particles are
+        exe (list of str): list of paths inside remote_dir/user/ where required executables are
         
         program: name of executable that runs the simulations
         
-        autorename: bool to include loops in shell script to rename tables with opt a
+        autorename: bool to include loops in shell script to rename tables with Opt a
 
         local_savepath (str): directory to save created files
         
@@ -1330,12 +1357,11 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
         node : where to ssh to from remote server
         
         username: name of remote user
+        
         ===========================================================================================
         
-        Though there are quite a few inputs, most of themo wont change between input files (usually,
-        only one or two parameters change, mostly energies or trajectories)
+        Returns the list of paths to uploaded shell scripts inside the remote machine 
         
-        Will ask for remote machine password (assumes same password for both remote server and node)
     '''
     lengths = [len(task_names), len(basics), len(trajects), len(sim_controls), len(exports), len(extras)]
     
@@ -1373,7 +1399,7 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
     shell_scripts     = []
     
     if eco:
-        path, name = shell_script(job_name = jobID, input_file_dir = remote_dir, \
+        path, name = shell_script_SGE(job_name = jobID, input_file_dir = remote_dir, \
                                   input_files = input_files, local_dir = local_savepath, \
                                   main = remote_main, user = user, exe = exe, program = program,\
                                   autorename = autorename)
@@ -1383,7 +1409,7 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
             
     else:
         for i in range(len(input_files)):
-            path, name = shell_script(job_name = jobID+str(i), input_file_dir = remote_dir, \
+            path, name = shell_script_SGE(job_name = jobID+str(i), input_file_dir = remote_dir, \
                                       input_files = [input_files[i]], local_dir = local_savepath, \
                                       main = remote_main, user = user, exe = exe, program = program, \
                                       autorename = autorename)
@@ -1446,10 +1472,58 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
         stdin, stdout, stderr = nodehost.exec_command('tr "\r" "\n" < '+shell_path+' > '+new_path)
         stdin, stdout, stderr = nodehost.exec_command('mv '+new_path+' '+shell_path)
         
-    # now we submit to queque system:
+    nodehost.close()
+    host.close()
+    
+    return shell_remote_paths
 
+
+def run_simulation_SGE(shell_remote_paths, server = 'mastercr1.igfae.usc.es', node = 'nodo014', \
+                       username = 'sergio.cabana', fake_time = 3., mail = True):
+    
+    ''' Submits to SGE queue system the shell_scripts prepared with mazepin.setup_simulation_SGE()
+    
+        ==================================================================================
+        
+        shell_remote_paths (list of str): list of paths to shell scripts inside remote machine. Output of setup_simulation_SGE
+        
+        server, node, username (str): same as in setup_simulation_SGE
+        
+        fake_time (float): Time to wait between submits
+        
+        mail (bool): if True, asks for an email address to send notification when jobs are completed
+    
+    '''
+    
+    # we connect to our remote host
+    
+    password = str(input('Please introduce your remote machine password (careful, it is visible): '))
+    
+    host = paramiko.SSHClient()
+    host.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    host.connect(server, username=username, password=password)
+
+    # we open a communication channel
+    hosttransport = host.get_transport()
+    dest_addr = (node, 22)
+    local_addr = (server, 22)
+    hostchannel = hosttransport.open_channel("direct-tcpip", dest_addr, local_addr)
+
+    # connection with node 
+    nodehost = paramiko.SSHClient()
+    nodehost.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    nodehost.connect(node, username=username, password=password, sock=hostchannel)
+    
+    # now we submit to queque system:
+    submit_cmd = 'qsub '
+    
+    if mail:
+        address = str(input('Please introduce your email for notification: '))
+        submit_cmd += '-me -M ' + address + ' '
+        
     for shell_path in shell_remote_paths:
-        stdin, stdout, stderr = nodehost.exec_command('qsub ' + shell_path)
+        time.sleep(fake_time)
+        stdin, stdout, stderr = nodehost.exec_command(submit_cmd + shell_path)
     
     # we check that everything is working
     
@@ -1461,9 +1535,199 @@ def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID
     for line in stdout.readlines():
         print(line)
         
-        
     nodehost.close()
     host.close()
+    
+
+# def simulator(task_names, basics, trajects, sim_controls, exports, extras, jobID, \
+#               RASPASS = False, upgoing = False, ZHAireS = False, \
+#               ZHAireS_control = [], remote_main = '/home2/', user = 'sergio.cabana/', remote_dir = '', \
+#               exe = ['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary', 'SpecialPrimaries/uprimary'], \
+#               program = 'ZHAireSRASPASS', autorename = True, local_savepath = '', \
+#               eco = False, server = 'mastercr1.igfae.usc.es', node = 'nodo014', \
+#               username = 'sergio.cabana'):
+    
+#     ''' Full simulation process.
+    
+#         Creates input files, shell scripts, submits to remote machine and runs simulations
+        
+#         ============================================================================
+        
+#         task_names (list): names of tasks (max 64 char), one per each input file required
+        
+#         basics (list): set of basic parameters (arg of mazepin.input_file()). one per each input file
+        
+#         trajects (list): set of trajectory params (arg of mazepin.input_file()). one per each input file
+        
+#         sim_control (list): set of parameters to control simulation (arg of mazepin.input_file()). Default options at mazepin_aux. one per each input file
+        
+#         exports (list): lists of [tab, part, option] to export in each input (arg of mazepin.input_file()). one per each input file.
+        
+#         extras (list): lists of extra instructions to include in each input file (arg of mazepin.input_file()). one per each input file.
+        
+#         jobID (str): Identifier of remote job (qsub)
+        
+#         RASPASS, upgoing (bool): Special particle options
+        
+#         ZHAireS (bool): input files include radio emission calculations
+        
+#         ZHAireS_control: (list): set of parameters to run ZHAireS. (arg of mazepin.input_file()).
+        
+#         remote_main (str, ends with /): root directory in remote machine
+        
+#         user (str, edns with /): remote machine user. All directories in remote machine should be like /remote_dir/user/something
+        
+#         remote_dir (str, ends with /): directory inside remote_dir/user/ to upload files and store outputs
+            
+#         exe (list of str): list of paths inside remote_dir/user/ where executables to run special particles are
+        
+#         program: name of executable that runs the simulations
+        
+#         autorename: bool to include loops in shell script to rename tables with opt a
+
+#         local_savepath (str): directory to save created files
+        
+#         eco (bool): True to send only one shell script to remote (otherwise, one per input file to parallelize)
+        
+#         server: host remote machine
+        
+#         node : where to ssh to from remote server
+        
+#         username: name of remote user
+#         ===========================================================================================
+        
+#         Though there are quite a few inputs, most of themo wont change between input files (usually,
+#         only one or two parameters change, mostly energies or trajectories)
+        
+#         Will ask for remote machine password (assumes same password for both remote server and node)
+#     '''
+#     lengths = [len(task_names), len(basics), len(trajects), len(sim_controls), len(exports), len(extras)]
+    
+#     if not all([l == lengths[0] for l in lengths]):
+#         raise TypeError('Mismatch of lengths of task_names, basics, sim_controls, exports, extras')
+        
+#     if ZHAireS and len(ZHAireS_control) != len(task_names):
+#         raise TypeError('Length of ZHAireS_control does not match number of input files')
+        
+    
+#     # We create all the input files
+#     simulations = list(zip(task_names, basics, trajects, sim_controls, exports, extras))
+#     counter     = 0
+    
+#     local_paths = []
+#     input_files = []
+    
+#     for taskname, basic, traj, sim_control, exp, ext in simulations:
+        
+#         ZHScon = ZHAireS_control[counter] if ZHAireS else []
+        
+#         path, name = input_file(task_name = taskname, basic = basic, trajectory = traj, \
+#                                 sim_control = sim_control, RASPASS = RASPASS, upgoing = upgoing, \
+#                                 ZHAireS = ZHAireS, ZHAireS_control = ZHScon, exports = exp, \
+#                                 extra = ext, save_path = local_savepath)
+            
+#         local_paths.append(path)
+#         input_files.append(name)
+        
+#         counter += 1
+        
+#     # we create all the required shell_scripts
+    
+#     local_paths_shell = []
+#     shell_scripts     = []
+    
+#     if eco:
+#         path, name = shell_script(job_name = jobID, input_file_dir = remote_dir, \
+#                                   input_files = input_files, local_dir = local_savepath, \
+#                                   main = remote_main, user = user, exe = exe, program = program,\
+#                                   autorename = autorename)
+        
+#         local_paths_shell.append(path)
+#         shell_scripts.append(name)
+            
+#     else:
+#         for i in range(len(input_files)):
+#             path, name = shell_script(job_name = jobID+str(i), input_file_dir = remote_dir, \
+#                                       input_files = [input_files[i]], local_dir = local_savepath, \
+#                                       main = remote_main, user = user, exe = exe, program = program, \
+#                                       autorename = autorename)
+            
+#             local_paths_shell.append(path)
+#             shell_scripts.append(name) 
+            
+#     # we connect to our remote host
+    
+#     password = str(input('Please introduce your remote machine password (careful, it is visible): '))
+    
+#     host = paramiko.SSHClient()
+#     host.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#     host.connect(server, username=username, password=password)
+
+#     # we open a communication channel
+#     hosttransport = host.get_transport()
+#     dest_addr = (node, 22)
+#     local_addr = (server, 22)
+#     hostchannel = hosttransport.open_channel("direct-tcpip", dest_addr, local_addr)
+
+#     # connection with node 
+#     nodehost = paramiko.SSHClient()
+#     nodehost.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+#     nodehost.connect(node, username=username, password=password, sock=hostchannel)
+
+#     # open sftp channel to upload files
+    
+#     ftp_client  = host.open_sftp()
+    
+#     remote_path = remote_main + user + remote_dir
+    
+#     input_remote_paths = []
+    
+#     shell_remote_paths = []
+    
+#     for inppath, inpname in list(zip(local_paths, input_files)):
+        
+#         ftp_client.put(localpath = inppath, remotepath = remote_path + inpname, confirm = False)
+        
+#         input_remote_paths.append(remote_path + inpname)
+        
+#     for shpath, shname in list(zip(local_paths_shell, shell_scripts)):
+        
+#         ftp_client.put(localpath = shpath, remotepath = remote_path + shname, confirm = False)
+        
+#         shell_remote_paths.append(remote_path + shname)
+        
+        
+#     ftp_client.close()
+    
+#     # before submitting to queue system, we correct possible mistakes between DOS / UNIX
+#     for input_path in input_remote_paths:
+#         new_path = input_path[:-4]+'_new.inp'
+#         stdin, stdout, stderr = nodehost.exec_command('tr "\r" "\n" < '+input_path+' > '+new_path)
+#         stdin, stdout, stderr = nodehost.exec_command('mv '+new_path+' '+input_path)
+        
+#     for shell_path in shell_remote_paths:
+#         new_path = shell_path[:-3]+'_new.sh'
+#         stdin, stdout, stderr = nodehost.exec_command('tr "\r" "\n" < '+shell_path+' > '+new_path)
+#         stdin, stdout, stderr = nodehost.exec_command('mv '+new_path+' '+shell_path)
+        
+#     # now we submit to queque system:
+
+#     for shell_path in shell_remote_paths:
+#         stdin, stdout, stderr = nodehost.exec_command('qsub ' + shell_path)
+    
+#     # we check that everything is working
+    
+#     print('Everything should be submitted by now. Let\'s see what qstat returns (Wait for 5 secs):')
+#     print('===========================================================\n')
+    
+#     time.sleep(5)
+#     stdin, stdout, stderr = nodehost.exec_command('qstat')
+#     for line in stdout.readlines():
+#         print(line)
+        
+        
+#     nodehost.close()
+#     host.close()
 
 # def Xs_to_dist_old(X, RD, RH, theta, prec = .05):
 #     ''' Converts slanted depth [g/cm2] to distance covered along shower axis,
