@@ -226,9 +226,100 @@ trajects = maz.traject_finder(files, RASPASS = True)
 fig4, ax4 = maz.Aires_Plot(files, RASPASS = True, Distance = True, slant = False, \
                          trajects = trajects, graph_type = 'step')
     
-# Such an interesting result at RASPASSHeight = 40km. Do not think too much about it,
-# as I said, I should have exported with Opt p and up to date, I think what appears
-# here might be due to that
+# Such an interesting result at RASPASSHeight = 40km. The smae behaviour appears
+# if the tables are exported with the Opt p.
+
+#%% mazepin.ZHAireS_setup() and mazepin.ZHAireS_plot() examples
+
+# In the mazepin_examples_files directory, I have included two FreqFresnel files
+# to see how these functions work. I thought of uploading a TimeFresnel dataset,
+# but the smallest one I had was 160MB, so I did not.
+
+# ZHAireS_setup is specially designed to load data exactly once, and then use that
+# to call ZHAireS_plot and do whatever you want. This is particularly interesting
+# if you use an IDE like Spyder, where variables are stored between each run, as long
+# as you do not change the terminal. VSCode does not do that, at least I have not found how to.
+
+
+rootdir = 'mazepin_examples_files/'
+
+file1 = rootdir+'freqfresnel-variousfreqs.dat'
+file2 = rootdir+'freqfresnel-root_mix.dat'
+
+# First, call ZHAireS_setup to load data an get info on antennas and frequencies
+# If you want to see the antenna positions (with their indices), just use plot = True
+# step_antenna = 5 just means that every 5 antennas, only one is plotted.
+# Of course, here time_data = False. If you had TimeFresnel output, use time_data = True
+# and remove 'freq' from the returns (only data, ant_data, i_ant)
+
+data, ant_data, i_ant, freqs = maz.ZHAireS_setup(file1, time_data=False, plot=True, step_antenna = 5)
+
+print('List of frequency components considered: ', freqs)
+
+#%%
+# Here, we have antennas in a cross-like setup, 2800 m a.s.l (South Pole ground)
+# Antennas 1 to 50 cover the x axis (N-S) and antennas 51 to 100 cover the y axis (E-W)
+
+# I simulated a 10EeV proton shower at zenith 70deg, azimuth 0deg Magnetic over this configuration,
+# with a magnetic field 55 uT -72.42 deg 0 deg (SouthPole, but explicitly inputting it)
+# I was trying to reproduce some plots of arXiv:1208.0951 [astro-ph.HE]
+
+# Let's ask for some plots. Valid variables for frequency data are
+#   'f', 'x', 'y', 'z', 'xy', 'xz', 'yz'
+# And valid magnitudes are:
+#     'E', 'Ex', 'Ey', 'Ez'
+    
+# If we had TimeFresnel data, valid variables would be:
+#     't', 'f' (FFT of signal), 'x', 'y', 'z', 'xy', 'xz', 'yz' (Against coordinates, max values are plotted)
+# And valid magnitudes are:
+#     'A', 'Ax', 'Ay', 'Az', 'E', 'Ex', 'Ey', 'Ez', 'EF', 'EFx', 'EFy', 'EFz' (Though energy fluence is not implemented)
+
+# We request magnitude, variable, list of antenna indices
+
+plots = [
+        ['E', 'f', [1, 3, 65, 78]], # legend will indicate antenna coordinates
+        ['Ey', 'f', [3, 6, 44, 91]],
+        ['E', 'x', [i for i in range(1, 50)]],
+        ['E', 'y', [i for i in range(51, 100)]],
+        ['E', 'xy', [i for i in range(1, 100)]],
+        ]
+
+# For this case, we can also request frequency components
+freq_request = [50, 100, 300]
+        
+axes = maz.ZHAireS_plot(data, ant_data, i_ant, freqs = freqs, plots = plots, \
+                        freq_request = freq_request, time_data = False, \
+                        linewidth = 1, marker = 'o', mix_plot = False)
+    
+# We can see the Cerenkov ring clearly
+
+#%%
+# For each plot we get a canvas. We can mix combine them a little bit more with mix_plot:
+  
+axes = maz.ZHAireS_plot(data, ant_data, i_ant, freqs = freqs, plots = plots, \
+                        freq_request = freq_request, time_data = False, \
+                        linewidth = 1, marker = 'o', mix_plot = True)
+
+#%%
+
+# A cooler dataset: Antennas at 36 km height above ground, covering the whole
+# Cerenkov ring for a 1EeV proton upgoing shower at zenith 95deg, azimuth 0deg
+# with a magnetic field of 50 uT 0deg 0deg
+
+data, ant_data, i_ant, freqs = maz.ZHAireS_setup(file2, time_data=False, plot=True, step_antenna = 5)
+
+print('List of frequency components considered: ', freqs)
+
+
+plots = [
+        ['E', 'xy', [i for i in range(1, len(ant_data))]]
+        ]
+
+freq_request = [100, 300, 500]
+        
+axes = maz.ZHAireS_plot(data, ant_data, i_ant, freqs = freqs, plots = plots, \
+                        freq_request = freq_request, time_data = False, \
+                        lims_cmap = [0, 1.5e-7], mix_plot = False, legend = False)
 
 #%% mazepin.setup_simulator_SGE and run_simulation_SGE example
 

@@ -1,4 +1,4 @@
-############################## MAZEPIN v0.8.6 #################################
+############################## MAZEPIN v0.9.0 #################################
 ''' 
     Welcome to MAZEPIN (Module for an Aires and Zhaires Environment in PythoN)
     
@@ -11,16 +11,23 @@
     my Master thesis, designed to produce fast graphs and results from
     direct outputs of AIRES and ZHAireS (though it was quite a mess).
     
-    The main goal of this module is to have easy-to-use tools in Python to deal
-    with the output files, and also to provide the user with a way of producing
-    quickly the most relevant plots.
+    The main goal of this module is to have tools in Python to deal with the 
+    output files, and also to provide the user with a way of producing
+    quickly the most relevant plots. Also, I have included a set of functions
+    to write input files and preparing simulations to run in remote machines
+    with a SGE management system. I would like to include also their adaptation
+    to HTCondor.
     
     Updates to this module will be uploaded to my PhD_thesis GitHub repository
-    (https://github.com/SergioCabana/PhD_thesis) . There you will also find
-    a collection of notes with some of the rules that I will be using to name
-    tasks in AIRES and ZHAireS
+    (https://github.com/SergioCabana/PhD_thesis) . There you will also find a
+    script with examples on how to use the most important functions.
     
-    Sergio Cabana Freire. 05/11/2022.
+    Disclaimer: This is not a "formal" module, I would rather call it a script
+    with a bunch of definitions. To use them fast, the most important thing up to
+    now is copy-pasting a huge number of lists with inputs. There are no definitions
+    of objects or a well defined structure. Basically, a huge mess that does the work.
+    
+    Sergio Cabana Freire. 16/11/2022.
     
     P.S.: Replacing a more reasonable 'Y' with an 'I' in MAZEPIN is 
     absolutely necessary for the joke, though it might go unnoticed if you are 
@@ -31,14 +38,15 @@
 import numpy             as np
 import matplotlib.pyplot as plt
 import matplotlib        as mpl
-# import pandas            as pd
+import pandas            as pd
 # import scipy.integrate   as sci
 import os
 import paramiko
 import time
 
-# from   scipy.fftpack     import fft, fftfreq, fftshift
+from   scipy.fftpack     import fft, fftfreq
 from   scipy.interpolate import interp1d
+from   getpass           import getpass
 from   mazepin_aux       import *
 
 # I will define a sequence of 10 colors (mazepin_aux) that I can distinguish 
@@ -741,12 +749,17 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
         
         ydata = data[:,1]
         
-        if error_type == 'sigma':
-            err = data[:,3]
-        elif error_type == 'RMS':
-            err = data[:,2]
-        else:
-            raise TypeError('Please introduce a valid error_type ("sigma" or "RMS")')
+        try:
+            if error_type == 'sigma':
+                err = data[:,3]
+            elif error_type == 'RMS':
+                err = data[:,2]
+            else:
+                raise TypeError('Please introduce a valid error_type ("sigma" or "RMS")')
+        
+        except IndexError:
+            print('Ignore this message if you requested individual shower tables')
+            err = np.zeros(np.shape(xdata))
         
     else:
         data1, grd = readfile(file[0]) # longitudinal development
@@ -755,26 +768,31 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
         xdata = data1[:,0]; y1 = data1[:, 1]; y2 = data2[:,1]
         ydata = [a/b if b!=0 else 0 for a, b in list(zip(y2, y1))] # divide both datasets
         
-        if error_type == 'sigma':
-            err1 = data1[:,3]; err2 = data2[:,3]
+        try:
+            if error_type == 'sigma':
+                err1 = data1[:,3]; err2 = data2[:,3]
+                
+                rerr1 = [e/v if v !=0 else 0 for e,v in list(zip(err1, y1))]
+                rerr2 = [e/v if v !=0 else 0 for e,v in list(zip(err2, y2))]
+                
+                err = [v * np.sqrt(re1**2+re2**2) for v, re1, re2 in list(zip(ydata, rerr1, rerr2))]
+                # error propagation
+                
+            elif error_type == 'RMS':
+                err1 = data1[:,2]; err2 = data2[:,2]
+                
+                rerr1 = [e/v if v !=0 else 0 for e,v in list(zip(err1, y1))]
+                rerr2 = [e/v if v !=0 else 0 for e,v in list(zip(err2, y2))]
+                
+                err = [v * np.sqrt(re1**2+re2**2) for v, re1, re2 in list(zip(ydata, rerr1, rerr2))]
+                # error propagation
             
-            rerr1 = [e/v if v !=0 else 0 for e,v in list(zip(err1, y1))]
-            rerr2 = [e/v if v !=0 else 0 for e,v in list(zip(err2, y2))]
-            
-            err = [v * np.sqrt(re1**2+re2**2) for v, re1, re2 in list(zip(ydata, rerr1, rerr2))]
-            # error propagation
-            
-        elif error_type == 'RMS':
-            err1 = data1[:,2]; err2 = data2[:,2]
-            
-            rerr1 = [e/v if v !=0 else 0 for e,v in list(zip(err1, y1))]
-            rerr2 = [e/v if v !=0 else 0 for e,v in list(zip(err2, y2))]
-            
-            err = [v * np.sqrt(re1**2+re2**2) for v, re1, re2 in list(zip(ydata, rerr1, rerr2))]
-            # error propagation
-            
-        else:
-            raise TypeError('Please introduce a valid error_type ("sigma" or "RMS")')
+            else:
+                raise TypeError('Please introduce a valid error_type ("sigma" or "RMS")')
+        
+        except IndexError:
+            print('Ignore this message if you requested individual shower tables')
+            err = np.zeros(np.shape(xdata))
         
     x_axis_label, y_axis_label = dict_tab_xlab[tab], dict_tab_ylab[tab] #default
     
@@ -864,9 +882,9 @@ def Aires_data(data, error_type = 'sigma', UG = False, slant = False, \
 def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
                RASPASS = False, Distance = False, first_int = True, \
                trajects = [], xlim = [], ylim = [], xscale = 'linear', \
-               yscale = 'linear', autolabel = True, graph_type = 'step', labels = [], \
-               size = 12, legend = True, title = '', loc_leg = 'best', \
-               fmt = '-', marker = 'o', linewidth = 2., alpha = .7):
+               yscale = 'linear', graph_type = 'step', size = 12, legend = True,\
+               title = '', loc_leg = 'best', fmt = '-', marker = 'o', \
+               linewidth = 2., alpha = .7, figsize = (7,5)):
     
     
     ''' Plots AIRES outputs, preprocessed using pathfinder and Aires_data
@@ -887,12 +905,7 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
         
         xscale, yscale ("linear", "log"): scales for axes
         
-        autolabel (bool): Sets automatic labels for each plot
-        
         graph_type: Valid types are "step", "errorbar" or "fill"
-        
-        labels: if autolabel is False, list of labels by hand (one for plot,
-                in the order of input_data)
         
         size : size of text
         
@@ -910,7 +923,24 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
         
         alpha : opacity of filling color, only for graph_type = "fill"
         
+        figsize: typical option of matplotlib.pyplot.figure
+            
         =====================================================================
+        
+        Automatically sets labels and legends in the plot (If legend = True).
+        If you want to change labels or remove the legend after calling the4
+        function, use returned axes:
+            
+            axes.legend(['Label for curve 1', 'Label for curve 2', ...])
+            axes.get_legend.remove()
+            
+        For the last operation, you might get AttributeError, just handle the exception:
+        
+        for a in axes:
+            try:
+                a.get_legend().remove()
+            except AttributeError:
+                continue
     '''
     
     tabs = [data_path[0] for data_path in input_data]
@@ -930,7 +960,7 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     graph_labs = []
     ylabs      = []
     
-    fig = plt.figure()
+    fig = plt.figure(figsize = figsize)
 
     ax  = fig.add_subplot(111)
     plt.xticks(fontsize = size)
@@ -972,13 +1002,7 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     
     for x, y, err, lab in list(zip(xsets, ysets, yerrsets, graph_labs)):
         
-        if autolabel:
-            if multi_y:
-                glabel = dict_tab_yleg[tabs[counter]]+', '+lab # dict in mazepin_aux
-            else:
-                glabel = lab
-        else:
-            glabel = labels[counter]
+        glabel = dict_tab_yleg[tabs[counter]]+', '+lab if multi_y else lab # dict in mazepin_aux
             
         if graph_type == 'step':
             ax.step(x, y, linewidth = linewidth, where = 'mid', label = glabel)
@@ -1020,6 +1044,8 @@ def Aires_Plot(input_data, error_type = 'sigma', UG = False, slant = False, \
     if len(ylim) == 2:
         ax.set_ylim(ylim[0], ylim[1])
         
+    plt.show()
+    
     return fig, ax
         
 
@@ -1063,6 +1089,625 @@ def traject_finder(files, RASPASS = False, UG = False):
             trajects.append([float(inj_h), float(theta)])
     
     return trajects
+
+def ZHAireS_file_mixer(file, rootdir = '', domain = 't'):
+    ''' Combines ZHAireS output files in a single one, in the case that
+        several runs with different set of antennas were needed
+        
+        ================================================================
+        
+        files (list) : List of file paths to datasets that we want to join
+        
+        rootdir (str) : Main directory, where the new file will be saved. By default takes execution directory
+        
+        domain (str) : Type of output file ("t" for TimeFresnel or "f" for FreqFresnel)
+
+        ==================================================================
+    '''
+    
+    datasets = []
+    n_ant = 0
+    
+    for i in range(len(file)):
+        try:
+            data = np.loadtxt(file[i], comments = '#').T
+
+        except ValueError:
+            if rootdir == '':
+                print('Reading error, try to introduce rootdir and call again')
+            else:
+                print('Reading error, working on it ...')
+                
+                name = 'timefresnel-rootnew_'+str(i+1)+'.dat' if domain == 't' else 'freqfresnel-rootnew_'+str(i+1)+'.dat'
+                fileout = rootdir + name
+                
+                f = open(file[i],'r')
+                filedata = f.read()
+                f.close()
+            
+                newdata = filedata.replace("-"," -")
+            
+                f = open(fileout,'w')
+                f.write(newdata)
+                f.close()
+                print('Corrected file: ', fileout)
+                
+            data = pd.read_csv(fileout, comment = '#', delimiter = '\s+').to_numpy().T
+        
+        data[1] = data[1]+n_ant
+        
+        n_ant = np.max(data[1])
+        
+        datasets.append(data)
+        
+        
+    new_file = 'timefresnel-root_mix.dat' if domain == 't' else 'freqfresnel-root_mix.dat'
+    
+    output   = rootdir + new_file 
+
+    
+    if domain == 'f':
+        
+        header = ' -----------Freq Fresnel file----------\n'
+        header += ' Combined files: \n'
+        for arch in file:
+            header += ' '+arch+'\n'
+        header += ' \n'
+        header += ' Columns: \n'
+        header += '        1 - Shower Number\n'
+        header += '        2 - Antenna Number\n'
+        header += '        3 - Antenna X (m)\n'
+        header += '        4 - Antenna Y (m)\n'
+        header += '        5 - Antenna Z (m)\n'
+        header += '        6 - Frequency #\n'
+        header += '        7 - Frequency (MHz)\n'
+        header += '        8 - |E| (V/M MHz)\n'
+        header += '        9 -  Ex  (V/M MHz)\n'
+        header += '        10 - Ey  (V/M MHz)\n'
+        header += '        11 - Ez  (V/M MHz)\n'
+        header += '\n'
+        header += ' new shower    1\n'
+        header += '\n' 
+        
+    elif domain == 't':
+        
+        header = ' -----------Time Fresnel file----------\n'
+        header += ' Combined files: \n'
+        for arch in file:
+            header += ' '+arch+'\n'
+        header += ' \n'
+        header += 'Columns: \n'
+        header += '        1 - Shower Number\n'
+        header += '        2 - Antenna Number\n'
+        header += '        3 - Antenna X (m)\n'
+        header += '        4 - Antenna Y (m)\n'
+        header += '        5 - Antenna Z (m)\n'
+        header += '        6 - Time (ns)\n'
+        header += '        7 - |A| (V/M)\n'
+        header += '        8 -  Ax  (V/M)\n'
+        header += '        9 -  Ay  (V/M)\n'
+        header += '        10 - Az  (V/M)\n'
+        header += '        11 -|E| (V/M)\n'
+        header += '        12 - Ex  (V/M)\n'
+        header += '        13 - Ey  (V/M)\n'
+        header += '        14 - Ez  (V/M)\n'
+        header += '\n'
+        header += ' new shower    1\n'
+        header += '\n' 
+        
+    full_data = np.hstack(tuple(d for d in datasets))
+    
+    np.savetxt(output, full_data.T, fmt = '%.3e', header = header)
+    
+    return output
+
+def ZHAireS_setup(file, time_data = True, plot = False, step_antenna = 5):
+    ''' Returns:
+        
+        numpy.ndarray of data
+        A list of antenna labels and positions (AIRES coord system)
+        A list of indexes, each one indicates where the data of one antenna starts
+        A list of frequencies, if it is the case
+        
+        Plots the position of antennas with their label if Plot = True
+        
+        ===================================================================
+        
+        file (str): path to the ZHAireS output file
+        
+        time_data (bool): True if TimeFresnel output, False if FreqFresnel Output
+        
+        plot (bool): whether to plot or not the antenna positions
+        
+        step_antenna (int): Number of antennas to skip when plotting. For example,
+        with step_atenna = 5, will plot antennas 5, 10, 15, 20, ...
+        
+        ===================================================================
+        
+    '''
+    
+    data  = np.loadtxt(file, comments = '#').T
+    
+    antenna_numbers = list(data[1])
+    i_ant           = []
+    n_ant           = int(max(antenna_numbers))
+    
+    ant_data        = []
+    
+    for i in range(n_ant):
+        index = antenna_numbers.index(i+1)
+        i_ant.append(index)
+        ant_data.append([int(antenna_numbers[index]), data[2][index], data[3][index], 100000. - data[4][index]])
+
+    i_ant.append(len(data.T))
+    
+    if plot:
+        
+        fig = plt.figure(1)
+        ax = fig.add_subplot(111, projection = '3d')
+    
+        for label, x, y, z in ant_data[::-step_antenna]:
+            
+            ax.plot(x, y, z, marker = '1', color = 'k', markersize = 12)
+            ax.text(x+10, y+10, z+10, str(int(label)))
+            ax.set_xlabel('X [m]')
+            ax.set_ylabel('Y [m]')
+            ax.set_zlabel('Z [m]')
+
+        plt.show()
+        
+    if not time_data:
+        
+        freq_list = [data[6][i] for i in range(i_ant[0], i_ant[1])]
+        
+        return data, ant_data, i_ant, freq_list
+    
+    else:
+        
+        return data, ant_data, i_ant
+
+def ZHAireS_data(data, ant_data, i_ant, plot_request, freq = [], time_data = True, freq_request = []):
+
+    ''' Returns dataset and labels suitable for plotting. Only one request per call
+
+        ===========================================================================
+
+        data, ant_data, i_ant, freq: Output of ZHAireS_setup
+
+        plot_request (list): Element of the form [magnitude, variable, [list of requested antenna indices]]
+
+        time_data (bool) : True (False) if TimeFresnel (FreqFresnel) dataset
+
+        freq_request (list): if not time_data, list of frequency compinents to plot if it is the case
+
+
+    '''
+
+    mag, var, req_antennas = plot_request
+
+    if time_data and [mag, var] not in [[i, j] for i in valid_mag_t for j in valid_vars_t]:
+        raise TypeError('Requested plot is not valid')
+    if not time_data and [mag, var] not in [[i, j] for i in valid_mag_f for j in valid_vars_f]:
+        raise TypeError('Requested plot is not valid')
+
+    if len(req_antennas) == 0:
+        raise TypeError('Please request at least one antena for the plot '+mag+' vs '+var)
+
+    var_2d = True if len(var) == 2 else False
+
+    EFluence = mag[:2] == 'EF'
+
+    if EFluence:
+        print('Energy Fluence plots are not implemented yet :_)')
+
+    elif time_data and var == 't': # Plot of signal against time
+        curves = []
+        for a in req_antennas:
+                start_index, end_index = i_ant[a-1], i_ant[a]
+                x = data[dict_vars_ZHSt[var]][start_index:end_index]
+                y = data[dict_vars_ZHSt[mag]][start_index:end_index]
+                
+                ax, ay, az = [str(c) for c in ant_data[a][1:]]
+                curves.append([x, y, '',  'Antenna ('+ax+', '+ay+', '+az+')'])
+
+            
+    elif time_data and var == 'f': # FFT of time data
+
+        curves = []
+            
+        for a in req_antennas:
+            x = data[dict_vars_ZHSt['t']][i_ant[a-1]:i_ant[a]]
+            y = data[dict_vars_ZHSt[mag]][i_ant[a-1]:i_ant[a]]
+            
+            N = len(y) # number of signal points
+                
+            dT = (x[1]-x[0])*1e-9 #time bin in ns
+                
+            xf = np.abs(fftfreq(N, dT)*1e-6) #frequencies in MHz
+                
+            yf = np.abs(fft(y))/N # FFT of data
+
+            ax, ay, az = [str(c) for c in ant_data[a][1:]]
+            curves.append([xf, yf, '', 'Antenna ('+ax+', '+ay+', '+az+')'])
+                
+
+    elif time_data and var not in ['f', 't']: # Plots against coordinates
+
+        if not var_2d: # single coordinate points
+            x = []; y = []
+
+            z0   = 100000. if var == 'z' else 0.
+            sign = 1. if var == 'z' else -1.
+            
+            for a in req_antennas:
+                start_index, end_index = i_ant[a-1], i_ant[a]
+                
+                x.append(z0-sign*data[dict_vars_ZHSt[var]][start_index])
+                    
+                y.append(max(data[dict_vars_ZHSt[mag]][start_index:end_index]))
+                    
+            curves = [[np.array(x), np.array(y), '', dict_dirs_ZHS[var]]]
+
+        else:
+            x = []; y = []; z = []
+            varx, vary = var[0], var[1]
+            z0   = 100000. if vary == 'z' else 0.
+            sign = 1. if var == 'z' else -1.
+            
+            for a in req_antennas:
+
+                start_index, end_index = i_ant[a-1], i_ant[a]
+                
+                x.append(data[dict_vars_ZHSt[varx]][start_index])
+                    
+                y.append(z0-sign*data[dict_vars_ZHSt[vary]][start_index])
+
+                z.append(max(data[dict_vars_ZHSt[mag]][start_index:end_index]))
+
+            curves = [[np.array(x), np.array(y), np.array(z), '']]
+
+    elif not time_data and var == 'f': # FreqFresnel dataset, plot against frequencies
+
+        curves = []
+            
+        for a in req_antennas:
+            start_index, end_index = i_ant[a-1], i_ant[a]
+            x = data[dict_vars_ZHSf[var]][start_index:end_index]
+            y = data[dict_vars_ZHSf[mag]][start_index:end_index]
+            ax, ay, az = [str(c) for c in ant_data[a][1:]]
+
+            curves.append([x, y, '', 'Antenna ('+ax+', '+ay+', '+az+')'])
+            
+
+    else: # FreqFresnel dataset and coordinate plot
+        
+        curves = []
+
+        if len(freq_request) == 0:
+            raise TypeError('Please request at least one frequency for the plot '+mag+' vs '+var)
+
+        if not var_2d:
+                
+            for f in freq_request:
+                    
+                x = []; y = []
+                    
+                for a in req_antennas:
+
+                    index = i_ant[a-1] + freq_request.index(float(f))
+                        
+                    z0   = 100000. if var == 'z' else 0.
+                    sign = 1. if var == 'z' else -1.
+                    
+                    x.append(z0-sign*data[dict_vars_ZHSf[var]][index])
+                    
+                    y.append(data[dict_vars_ZHSf[mag]][index])
+                        
+                
+                curves.append([np.array(x), np.array(y), '', str(f)+' MHz, '+dict_dirs_ZHS[var]])
+
+        else:
+            varx, vary = var[0], var[1]
+
+            for f in freq_request:
+                    
+                x = []; y = []; z = []
+                    
+                for a in req_antennas:
+                    
+                    index = i_ant[a-1] + freq_request.index(float(f))
+                        
+                    z0   = 100000. if vary == 'z' else 0.
+                    sign = 1. if var == 'z' else -1.
+                    
+                    x.append(data[dict_vars_ZHSf[varx]][index])
+                    
+                    y.append(z0-sign*data[dict_vars_ZHSf[vary]][index])
+    
+                    z.append(data[dict_vars_ZHSf[mag]][index])
+                        
+                    
+                curves.append([x, y, z, str(f)+' MHz'])
+
+    return [mag, var, curves]
+
+
+def ZHAireS_plot(data, ant_data, i_ant, plots, freqs = [], freq_request = [], \
+                 mix_plot = True, time_data = True, lims_cmap = [], fmt = '-',\
+                 marker = 'o', linewidth = 2., size = 12, legend = True, \
+                 loc_leg = 'best', figsize = (7, 5)):
+    
+    ''' Represents requested plots
+    
+        =============================================================================================
+        
+        data, ant_data, i_ant, freqs: output of ZHAireS_setup
+        
+        plots (list) : list of elements like [mag, var, [list of antenna indices]]
+        
+            Valid magnitudes are: 'A', 'Ax', 'Ay', 'Az', 'E', 'Ex', 'Ey', 'Ez', 'EF', 'EFx', 'EFy', 'EFz'
+            Valid variables are : 't', 'f', 'x', 'y', 'z', 'xy', 'xz', 'yz'
+        
+        mix_plot (bool) : If False, each requested plot goes into a different canvas
+        
+        time_data (bool) : True (False) if we are using TimeFresnel (FreqFresnel) outputs
+        
+        freq_request (list) : If time_data = False, list of frequency components to plot
+        
+        lims_cmap (list) : lower and upper limit for cmap (only for plots against 2 coordinates)
+        
+        fmt, marker, linewidth : usual specifications for plotting
+        
+        size : fontsize
+        
+        legend (bool) : Whether to set or not a legend
+        
+        loc_leg: placing of legend, typical matplotlib options
+        
+        figsize (tuple) : size of canvas 
+        ============================================================================================
+        
+        Automatically sets labels and legends in the plot (If legend = True).
+        If you want to change labels or remove the legend after calling the4
+        function, use returned axes:
+            
+            axes.legend(['Label for curve 1', 'Label for curve 2', ...])
+            axes.get_legend.remove()
+            
+        For the last operation, you might get AttributeError, just handle the exception:
+        
+        for a in axes:
+            try:
+                a.get_legend().remove()
+            except AttributeError:
+                continue
+            
+        Energy fluence plots are not implemented.
+        I would like to include also plots of the Fourier transformed time signal against
+        coordinates, for a continuous range of frequency
+        
+    '''
+
+    n_plots = len(plots)
+    
+    axes = []
+    
+    dict_vars = dict_labs_ZHSt_tex if time_data else dict_labs_ZHSf_tex
+    dict_legs = dict_labs_ZHSt_tex_2 if time_data else dict_labs_ZHSf_tex_2 
+    
+    def launch_plot(fig, ax, mag, multi_y, curve, var_2d = False, 
+                    lims_cmap = [], fmt = '-', marker = 'o', linewidth = 2.):
+        
+        ''' Assistant plotting function. Given the figure, axes, magnitude and curve
+            will plot with the specified properties.
+            Multi_y is a bool to state whether we have more than one variable in the 
+            y axis
+        '''
+        
+        x, y, z, label = curve
+        
+        if var_2d:
+            
+            df = pd.DataFrame.from_dict(np.array([x, y, z]).T)
+            
+            df.columns = ['X', 'Y', 'Z']
+            
+            pivotted = df.pivot('Y', 'X', 'Z').to_numpy()
+            
+            ny, nx = pivotted.shape
+            
+            x_min, x_max, y_min, y_max =  min(x), max(x), min(y), max(y)
+            
+            deltax, deltay = (x_max-x_min)/(nx), (y_max-y_min)/(ny)
+            
+            extent = [x_min-deltax/2, x_max+deltax/2, y_min-deltay/2, y_max+deltay/2]
+            
+            if len(lims_cmap) > 0:
+                sc = ax.imshow(pivotted , origin = 'lower', cmap = 'gnuplot', 
+                               aspect = 'auto', extent = extent, vmin = lims_cmap[0], vmax = lims_cmap[1])
+            else:
+                sc = ax.imshow(pivotted , origin = 'lower', cmap = 'gnuplot', 
+                               aspect = 'auto', extent = extent)
+                
+            cbar = fig.colorbar(sc)
+            cbar.set_label(dict_vars[mag], size = size, rotation = 270, labelpad = 30)
+            cbar.ax.tick_params(labelsize=size)
+            
+            ax.xaxis.set_tick_params(labelsize=size)
+            ax.yaxis.set_tick_params(labelsize=size)
+            
+            if label != '':
+                ax.set_title(label, size = size)
+        
+        elif label != '':
+            label = dict_legs[mag] + ', ' + label if multi_y else label
+            ax.errorbar(x, y, label = label, fmt = fmt, marker = marker, linewidth = linewidth)
+            ax.xaxis.set_tick_params(labelsize=size)
+            ax.yaxis.set_tick_params(labelsize=size)
+            
+        elif multi_y:
+            label = dict_vars[mag]
+            ax.errorbar(x, y, label = label, fmt = fmt, marker = marker, linewidth = linewidth)
+            ax.xaxis.set_tick_params(labelsize=size)
+            ax.yaxis.set_tick_params(labelsize=size)
+            
+        else:
+            ax.errorbar(x, y, fmt = fmt, marker = marker, linewidth = linewidth)
+            ax.xaxis.set_tick_params(labelsize=size)
+            ax.yaxis.set_tick_params(labelsize=size)
+            
+            
+    if mix_plot:
+        variables = [ p[1] for p in plots ]
+        index_t   = [ i for i in range(n_plots) if plots[i][1] == 't']
+        index_f   = [ i for i in range(n_plots) if plots[i][1] == 'f']
+        index_c   = [ i for i in range(n_plots) if plots[i][1] in ['x', 'y', 'z']]
+        index_2   = [ i for i in range(n_plots) if i not in index_t+index_f+index_c]
+        
+        if len(index_t) > 0:
+            figt = plt.figure(figsize = figsize)
+            axt  = figt.add_subplot(111)
+            axt.set_xlabel(r'$t$ [$\mathrm{ns}$]', size = size)
+            
+            variables = [dict_vars[m[0]] for m in [plots[i] for i in index_t]]
+            ylab_diff = list(dict.fromkeys(variables)); multi_yt = len(ylab_diff) > 1
+
+            y_axis_label = ''
+            for y_name in ylab_diff:
+                y_axis_label = y_axis_label + y_name + ' or '
+                
+            y_axis_label = y_axis_label[:-4]
+            
+            axt.set_ylabel(y_axis_label, size = size)
+            
+            axes.append(axt)
+            
+        if len(index_f) > 0:
+            figf = plt.figure(figsize = figsize)
+            axf  = figf.add_subplot(111)
+            axf.set_xlabel(r'Frequency [$\mathrm{MHz}$]', size = size)
+            
+            variables = [dict_vars[m[0]] for m in [plots[i] for i in index_f]]
+            ylab_diff = list(dict.fromkeys(variables)); multi_yf = len(ylab_diff) > 1
+
+            y_axis_label = ''
+            for y_name in ylab_diff:
+                y_axis_label = y_axis_label + y_name + ' or '
+                
+            y_axis_label = y_axis_label[:-4]
+            
+            axf.set_ylabel(y_axis_label, size = size)
+            
+            axes.append(axf)
+            
+        if len(index_c) > 0:
+            figc = plt.figure(figsize = figsize)
+            axc  = figc.add_subplot(111)
+            axc.set_xlabel(r'Distance to core [$\mathrm{m}$]', size = size)
+            
+            variables = [dict_vars[m[0]] for m in [plots[i] for i in index_c]]
+            ylab_diff = list(dict.fromkeys(variables)); multi_yc = len(ylab_diff) > 1
+
+            y_axis_label = ''
+            for y_name in ylab_diff:
+                y_axis_label = y_axis_label + y_name + ' or '
+                
+            y_axis_label = y_axis_label[:-4]
+            
+            axc.set_ylabel(y_axis_label, size = size)
+            
+            axes.append(axc)
+        
+        for i in index_t:
+            mag, var, curves = ZHAireS_data(data, ant_data, i_ant, plot_request = plots[i])
+            
+            for c in curves:
+                launch_plot(figt, axt, mag, multi_yt, c, fmt = fmt, 
+                            marker = marker, linewidth = linewidth)
+            
+            if legend:
+                axt.legend(loc = loc_leg, prop={'size':size})
+                
+        for i in index_f:
+            if time_data:
+                mag, var, curves = ZHAireS_data(data, ant_data, i_ant, plot_request = plots[i])
+            else:
+                mag, var, curves = ZHAireS_data(data, ant_data, i_ant, plot_request = plots[i], freq = freqs,
+                                               freq_request=freq_request, time_data = False)
+            for c in curves:
+                launch_plot(figf, axf, mag, multi_yf, c, fmt = fmt, marker = marker, linewidth = linewidth)
+                
+            if legend:
+                axf.legend(loc = loc_leg, prop={'size':size})
+                
+        for i in index_c:
+            if time_data:
+                mag, var, curves = ZHAireS_data(data, ant_data, i_ant, plot_request = plots[i])
+            else:
+                mag, var, curves = ZHAireS_data(data, ant_data, i_ant, plot_request = plots[i], freq = freqs,
+                                               freq_request=freq_request, time_data = False)
+            for c in curves:
+                launch_plot(figc, axc, mag, multi_yc, c, fmt = fmt, marker = marker, linewidth = linewidth)
+                
+            if legend:
+                axc.legend(loc = loc_leg, prop={'size':size})
+                
+        for i in index_2:
+            
+            if time_data:
+                mag, var, curves = ZHAireS_data(data, ant_data, i_ant, plot_request = plots[i])
+            else:
+                mag, var, curves = ZHAireS_data(data, ant_data, i_ant, plot_request = plots[i], freq = freqs,
+                                               freq_request=freq_request, time_data = False)
+                
+            for c in curves:
+                fig = plt.figure(figsize = figsize)
+                ax  = fig.add_subplot(111)
+                ax.set_xlabel(dict_vars[var[0]], size = size)
+                ax.set_ylabel(dict_vars[var[1]], size = size)
+                axes.append(ax)
+                launch_plot(fig, ax, mag, False, c, var_2d = True, lims_cmap = lims_cmap)
+            
+    
+    else:
+        for plot in plots:
+            mag, var, curves = ZHAireS_data(data, ant_data, i_ant, plot_request = plot, freq = freqs,
+                                            time_data = time_data, freq_request = freq_request)
+            var_2d = len(var) > 1
+            
+            if not var_2d:
+                fig = plt.figure(figsize = figsize)
+                ax = fig.add_subplot(111)
+                ax.xaxis.set_tick_params(labelsize=size)
+                ax.yaxis.set_tick_params(labelsize=size)
+                
+                axes.append(ax)
+                
+                for c in curves:
+                    launch_plot(fig, ax, mag, False, c, var_2d, \
+                                lims_cmap = lims_cmap, fmt = fmt, marker = marker, linewidth = linewidth)
+                        
+                ax.set_xlabel(dict_vars[var], size = size)
+                ax.set_ylabel(dict_vars[mag], size = size)
+                        
+            else:
+                for c in curves:
+                    fig = plt.figure(figsize = figsize)
+                    ax = fig.add_subplot(111)
+                    ax.xaxis.set_tick_params(labelsize=size)
+                    ax.yaxis.set_tick_params(labelsize=size)
+                    ax.set_xlabel(dict_vars[var[0]], size = size)
+                    ax.set_ylabel(dict_vars[var[1]], size = size)
+                    axes.append(ax)
+                    launch_plot(fig, ax, mag, False, c, var_2d, \
+                                lims_cmap = lims_cmap, fmt = fmt, marker = marker, linewidth = linewidth)
+                    
+                
+
+            if legend:
+                ax.legend(loc = loc_leg, prop={'size':size})
+                
+    return axes
             
 
 def input_file(task_name, basic, trajectory,  sim_control, RASPASS = False, upgoing = False, \
@@ -1419,7 +2064,10 @@ def setup_simulation_SGE(task_names, basics, trajects, sim_controls, exports, ex
             
     # we connect to our remote host
     
-    password = str(input('Please introduce your remote machine password (careful, it is visible): '))
+    print('PASSWORD INPUT: Be careful, it might be visible in some terminals')
+    print('If you do not get a warning before the input line, it should work properly')
+    
+    password = getpass('Please introduce your remote machine password: ')
     
     host = paramiko.SSHClient()
     host.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -1496,8 +2144,10 @@ def run_simulation_SGE(shell_remote_paths, server = 'mastercr1.igfae.usc.es', no
     '''
     
     # we connect to our remote host
+    print('PASSWORD INPUT: Be careful, it might be visible in some terminals')
+    print('If you do not get a warning before the input line, it should work properly')
     
-    password = str(input('Please introduce your remote machine password (careful, it is visible): '))
+    password = getpass('Please introduce your remote machine password: ')
     
     host = paramiko.SSHClient()
     host.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -1791,3 +2441,4 @@ def run_simulation_SGE(shell_remote_paths, server = 'mastercr1.igfae.usc.es', no
 #         L += prec
         
 #     return np.array(dist)
+

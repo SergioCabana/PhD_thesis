@@ -232,6 +232,125 @@ tables = np.array([[1001, 1301, 1501, 2001, 2301, 2501, 2801, 3001, 5001, 6001,\
        [9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 6296, 6496,\
         6796, 9999, 9999, 9999, 9999]])
     
+# ZHAireS output files columns
+
+dict_cols_ZHSt = {'0' : 'Shower Number',
+                  '1' : 'Antenna Number',
+                  '2' : 'Antenna X [m]',
+                  '3' : 'Antenna Y [m]',
+                  '4' : 'Antenna Z [m]',
+                  '5' : 't [ns]',
+                  '6' : 'A [V/m]',
+                  '7' : 'Ax [V/m]',
+                  '8' : 'Ay [V/m]',
+                  '9' : 'Az [V/m]',
+                  '10': 'E [V/m]',
+                  '11': 'Ex [V/m]',
+                  '12': 'Ey [V/m]',
+                  '13': 'Ez [V/m]'}
+
+dict_vars_ZHSt = {'t' : 5,
+                  'x' : 2,
+                  'y' : 3,
+                  'z' : 4,
+                  'A'  : 6,
+                  'Ax' : 7,
+                  'Ay' : 8,
+                  'Az' : 9,
+                  'E'  : 10,
+                  'Ex' : 11,
+                  'Ey' : 12,
+                  'Ez' : 13,
+                  'EF' : 14,
+                  'EFx': 15,
+                  'EFy': 16,
+                  'EFz': 17}
+
+dict_labs_ZHSt_tex = {'x' : r'Antenna $X$ [$\mathrm{m}$]',
+                      'y' : r'Antenna $Y$ [$\mathrm{m}$]',
+                      'z' : r'Antenna $Z$ [$\mathrm{m}$]',
+                      't' : r'$t$ [$\mathrm{ns}$]',
+                      'f' : r'Frequency [$\mathrm{MHz}$]',
+                      'A' : r'$\left|A\right|$ [$\mathrm{V/m}$]',
+                      'Ax' : r'$A_x$ [$\mathrm{V/m}$]',
+                      'Ay' : r'$A_y$ [$\mathrm{V/m}$]',
+                      'Az' : r'$A_z$ [$\mathrm{V/m}$]',
+                      'E': r'$\left|E\right|$ [$\mathrm{V/m}$]',
+                      'Ex': r'$E_x$ [$\mathrm{V/m}$]',
+                      'Ey': r'$E_y$ [$\mathrm{V/m}$]',
+                      'Ez': r'$E_z$ [$\mathrm{V/m}$]',
+                      'EF': r'Energy Fluence [$\mathrm{eV/m^2}$]',
+                      'EFx': r'Energy Fluence (x) [$\mathrm{eV/m^2}$]',
+                      'EFy': r'Energy Fluence (y) [$\mathrm{eV/m^2}$]',
+                      'EFz': r'Energy Fluence (z) [$\mathrm{eV/m^2}$]'}
+
+dict_labs_ZHSt_tex_2 = {'x' : r'$X$',
+                      'y' : r'$Y$',
+                      'z' : r'$Z$',
+                      't' : r'f#',
+                      'f' : r'$f$',
+                      'A' : r'$\left|A\right|$',
+                      'Ax' : r'$A_x$',
+                      'Ay' : r'$A_y$',
+                      'Az' : r'$A_z$',
+                      'E': r'$\left|E\right|$',
+                      'Ex': r'$E_x$',
+                      'Ey': r'$E_y$',
+                      'Ez': r'$E_z$',
+                      'EF': r'Egy. Fl.',
+                      'EFx': r'Egy. Fl. (x)',
+                      'EFy': r'Egy. Fl. (y)',
+                      'EFz': r'Egy. Fl. (z)'}
+
+dict_cols_ZHSf = {'0' : 'Shower Number',
+                  '1' : 'Antenna Number',
+                  '2' : 'Antenna X [m]',
+                  '3' : 'Antenna Y [m]',
+                  '4' : 'Antenna Z [m]',
+                  '5' : 'Frequency #',
+                  '6' : 'Frequency [MHz]',
+                  '7' : 'E [V/m/MHz]',
+                  '8' : 'Ex [V/m/MHz]',
+                  '9' : 'Ey [V/m/MHz]',
+                  '10': 'Ez [V/m/MHz]'}
+
+dict_vars_ZHSf = {'f' : 6,
+                  'x' : 2,
+                  'y' : 3,
+                  'z' : 4,
+                  'E' : 7,
+                  'Ex': 8,
+                  'Ey': 9,
+                  'Ez': 10}
+
+dict_labs_ZHSf_tex = {'x' : r'Antenna $X$ [$\mathrm{m}$]',
+                      'y' : r'Antenna $Y$ [$\mathrm{m}$]',
+                      'z' : r'Antenna $Z$ [$\mathrm{m}$]',
+                      'f' : r'Frequency [$\mathrm{MHz}$]',
+                      'E' : r'$\left|E\right|$ [$\mathrm{V/m/MHz}$]',
+                      'Ex' : r'$E_x$ [$\mathrm{V/m/MHz}$]',
+                      'Ey' : r'$E_y$ [$\mathrm{V/m/MHz}$]',
+                      'Ez': r'$E_z$ [$\mathrm{V/m/MHz}$]'}
+
+dict_labs_ZHSf_tex_2 = {'x' : r'$X$',
+                      'y' : r'$Y$',
+                      'z' : r'$Z$',
+                      'f' : r'f',
+                      'E' : r'$\left|E\right|$',
+                      'Ex' : r'$E_x$',
+                      'Ey' : r'$E_y$',
+                      'Ez': r'$E_z$'}
+
+# valid variables for ZHAireS_data
+
+valid_vars_t = ['t', 'f', 'x', 'y', 'z', 'xy', 'xz', 'yz']
+valid_vars_f = ['f', 'x', 'y', 'z', 'xy', 'xz', 'yz']
+valid_mag_t = ['A', 'Ax', 'Ay', 'Az', 'E', 'Ex', 'Ey', 'Ez', 'EF', 'EFx', 'EFy', 'EFz']
+valid_mag_f = ['E', 'Ex', 'Ey', 'Ez']
+
+dict_dirs_ZHS = {'x': 'N-S',
+                 'y': 'E-W',
+                 'z': 'Vert.'}
 
 # IDL DIRECTIVES, USED BY INPUT MAKER FUNCTIONS
 # Only the most basic ones

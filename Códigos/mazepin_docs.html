@@ -1,0 +1,663 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module mazepin</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>mazepin</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Ccaban%5Cdocuments%5Cphd_thesis_local%5Cmazepin.py">c:\users\caban\documents\phd_thesis_local\mazepin.py</a></font></td></tr></table>
+    <p><tt>Welcome&nbsp;to&nbsp;MAZEPIN&nbsp;(Module&nbsp;for&nbsp;an&nbsp;Aires&nbsp;and&nbsp;Zhaires&nbsp;Environment&nbsp;in&nbsp;PythoN)<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;will&nbsp;be&nbsp;developed&nbsp;in&nbsp;order&nbsp;to&nbsp;have&nbsp;an&nbsp;useful&nbsp;library&nbsp;of&nbsp;Python<br>
+functions&nbsp;to&nbsp;work&nbsp;with&nbsp;AIRES&nbsp;and&nbsp;ZHAireS.&nbsp;The&nbsp;current&nbsp;versions&nbsp;(11/2022)&nbsp;<br>
+of&nbsp;these&nbsp;programs&nbsp;are&nbsp;AIRES&nbsp;19.04.08&nbsp;and&nbsp;ZHAireS&nbsp;1.0.30a&nbsp;(I&nbsp;will&nbsp;also&nbsp;<br>
+include&nbsp;some&nbsp;utilities&nbsp;to&nbsp;work&nbsp;with&nbsp;RASPASS)<br>
+&nbsp;<br>
+Some&nbsp;of&nbsp;this&nbsp;code&nbsp;will&nbsp;be&nbsp;based&nbsp;on&nbsp;previous&nbsp;programs&nbsp;that&nbsp;I&nbsp;wrote&nbsp;for<br>
+my&nbsp;Master&nbsp;thesis,&nbsp;designed&nbsp;to&nbsp;produce&nbsp;fast&nbsp;graphs&nbsp;and&nbsp;results&nbsp;from<br>
+direct&nbsp;outputs&nbsp;of&nbsp;AIRES&nbsp;and&nbsp;ZHAireS&nbsp;(though&nbsp;it&nbsp;was&nbsp;quite&nbsp;a&nbsp;mess).<br>
+&nbsp;<br>
+The&nbsp;main&nbsp;goal&nbsp;of&nbsp;this&nbsp;module&nbsp;is&nbsp;to&nbsp;have&nbsp;tools&nbsp;in&nbsp;Python&nbsp;to&nbsp;deal&nbsp;with&nbsp;the&nbsp;<br>
+output&nbsp;files,&nbsp;and&nbsp;also&nbsp;to&nbsp;provide&nbsp;the&nbsp;user&nbsp;with&nbsp;a&nbsp;way&nbsp;of&nbsp;producing<br>
+quickly&nbsp;the&nbsp;most&nbsp;relevant&nbsp;plots.&nbsp;Also,&nbsp;I&nbsp;have&nbsp;included&nbsp;a&nbsp;set&nbsp;of&nbsp;functions<br>
+to&nbsp;write&nbsp;input&nbsp;files&nbsp;and&nbsp;preparing&nbsp;simulations&nbsp;to&nbsp;run&nbsp;in&nbsp;remote&nbsp;machines<br>
+with&nbsp;a&nbsp;SGE&nbsp;management&nbsp;system.&nbsp;I&nbsp;would&nbsp;like&nbsp;to&nbsp;include&nbsp;also&nbsp;their&nbsp;adaptation<br>
+to&nbsp;HTCondor.<br>
+&nbsp;<br>
+Updates&nbsp;to&nbsp;this&nbsp;module&nbsp;will&nbsp;be&nbsp;uploaded&nbsp;to&nbsp;my&nbsp;PhD_thesis&nbsp;GitHub&nbsp;repository<br>
+(<a href="https://github.com/SergioCabana/PhD_thesis">https://github.com/SergioCabana/PhD_thesis</a>)&nbsp;.&nbsp;There&nbsp;you&nbsp;will&nbsp;also&nbsp;find&nbsp;a<br>
+script&nbsp;with&nbsp;examples&nbsp;on&nbsp;how&nbsp;to&nbsp;use&nbsp;the&nbsp;most&nbsp;important&nbsp;functions.<br>
+&nbsp;<br>
+Disclaimer:&nbsp;This&nbsp;is&nbsp;not&nbsp;a&nbsp;"formal"&nbsp;module,&nbsp;I&nbsp;would&nbsp;rather&nbsp;call&nbsp;it&nbsp;a&nbsp;script<br>
+with&nbsp;a&nbsp;bunch&nbsp;of&nbsp;definitions.&nbsp;To&nbsp;use&nbsp;them&nbsp;fast,&nbsp;the&nbsp;most&nbsp;important&nbsp;thing&nbsp;up&nbsp;to<br>
+now&nbsp;is&nbsp;copy-pasting&nbsp;a&nbsp;huge&nbsp;number&nbsp;of&nbsp;lists&nbsp;with&nbsp;inputs.&nbsp;There&nbsp;are&nbsp;no&nbsp;definitions<br>
+of&nbsp;objects&nbsp;or&nbsp;a&nbsp;well&nbsp;defined&nbsp;structure.&nbsp;Basically,&nbsp;a&nbsp;huge&nbsp;mess&nbsp;that&nbsp;does&nbsp;the&nbsp;work.<br>
+&nbsp;<br>
+Sergio&nbsp;Cabana&nbsp;Freire.&nbsp;16/11/2022.<br>
+&nbsp;<br>
+P.S.:&nbsp;Replacing&nbsp;a&nbsp;more&nbsp;reasonable&nbsp;'Y'&nbsp;with&nbsp;an&nbsp;'I'&nbsp;in&nbsp;MAZEPIN&nbsp;is&nbsp;<br>
+absolutely&nbsp;necessary&nbsp;for&nbsp;the&nbsp;joke,&nbsp;though&nbsp;it&nbsp;might&nbsp;go&nbsp;unnoticed&nbsp;if&nbsp;you&nbsp;are&nbsp;<br>
+not&nbsp;into&nbsp;F1.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="matplotlib.html">matplotlib</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="os.html">os</a><br>
+<a href="paramiko.html">paramiko</a><br>
+</td><td width="25%" valign=top><a href="pandas.html">pandas</a><br>
+<a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-Aires_Plot"><strong>Aires_Plot</strong></a>(input_data, error_type='sigma', UG=False, slant=False, RASPASS=False, Distance=False, first_int=True, trajects=[], xlim=[], ylim=[], xscale='linear', yscale='linear', graph_type='step', size=12, legend=True, title='', loc_leg='best', fmt='-', marker='o', linewidth=2.0, alpha=0.7, figsize=(7, 5))</dt><dd><tt>Plots&nbsp;AIRES&nbsp;outputs,&nbsp;preprocessed&nbsp;using&nbsp;pathfinder&nbsp;and&nbsp;Aires_data<br>
+&nbsp;<br>
+====================================================================<br>
+&nbsp;<br>
+input_data&nbsp;:&nbsp;output&nbsp;of&nbsp;pathfinder.&nbsp;The&nbsp;selection&nbsp;of&nbsp;graphs&nbsp;is&nbsp;done&nbsp;there<br>
+&nbsp;<br>
+Allows&nbsp;to&nbsp;plot&nbsp;different&nbsp;tables&nbsp;in&nbsp;the&nbsp;same&nbsp;canvas,&nbsp;as&nbsp;long&nbsp;as&nbsp;it&nbsp;is&nbsp;possible<br>
+(i.e.,&nbsp;same&nbsp;X_axis&nbsp;coordinate)<br>
+&nbsp;<br>
+error_type,&nbsp;UG,&nbsp;slant,&nbsp;RASPASS,&nbsp;Distance,&nbsp;first_int,&nbsp;trajects<br>
+are&nbsp;Aires_data&nbsp;options<br>
+&nbsp;<br>
+If&nbsp;traject&nbsp;is&nbsp;not&nbsp;needed,&nbsp;place&nbsp;an&nbsp;empty&nbsp;list&nbsp;[]&nbsp;for&nbsp;each&nbsp;plot<br>
+&nbsp;<br>
+xlim,&nbsp;ylim&nbsp;(list):&nbsp;limits&nbsp;for&nbsp;axes<br>
+&nbsp;<br>
+xscale,&nbsp;yscale&nbsp;("linear",&nbsp;"log"):&nbsp;scales&nbsp;for&nbsp;axes<br>
+&nbsp;<br>
+graph_type:&nbsp;Valid&nbsp;types&nbsp;are&nbsp;"step",&nbsp;"errorbar"&nbsp;or&nbsp;"fill"<br>
+&nbsp;<br>
+size&nbsp;:&nbsp;size&nbsp;of&nbsp;text<br>
+&nbsp;<br>
+legend&nbsp;(bool):&nbsp;sets&nbsp;legend&nbsp;in&nbsp;graph<br>
+&nbsp;<br>
+title&nbsp;(str):&nbsp;title&nbsp;of&nbsp;graph<br>
+&nbsp;<br>
+loc_leg&nbsp;:&nbsp;position&nbsp;of&nbsp;legend<br>
+&nbsp;<br>
+fmt&nbsp;:&nbsp;if&nbsp;graph_style&nbsp;==&nbsp;errorbar,&nbsp;format&nbsp;of&nbsp;plot<br>
+&nbsp;<br>
+marker&nbsp;:&nbsp;if&nbsp;graph_style&nbsp;==&nbsp;errorbar,&nbsp;marker&nbsp;of&nbsp;points<br>
+&nbsp;<br>
+linewidth&nbsp;:&nbsp;for&nbsp;both&nbsp;types&nbsp;of&nbsp;graphs<br>
+&nbsp;<br>
+alpha&nbsp;:&nbsp;opacity&nbsp;of&nbsp;filling&nbsp;color,&nbsp;only&nbsp;for&nbsp;graph_type&nbsp;=&nbsp;"fill"<br>
+&nbsp;<br>
+figsize:&nbsp;typical&nbsp;option&nbsp;of&nbsp;matplotlib.pyplot.figure<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+=====================================================================<br>
+&nbsp;<br>
+Automatically&nbsp;sets&nbsp;labels&nbsp;and&nbsp;legends&nbsp;in&nbsp;the&nbsp;plot&nbsp;(If&nbsp;legend&nbsp;=&nbsp;True).<br>
+If&nbsp;you&nbsp;want&nbsp;to&nbsp;change&nbsp;labels&nbsp;or&nbsp;remove&nbsp;the&nbsp;legend&nbsp;after&nbsp;calling&nbsp;the4<br>
+function,&nbsp;use&nbsp;returned&nbsp;axes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;axes.legend(['Label&nbsp;for&nbsp;curve&nbsp;1',&nbsp;'Label&nbsp;for&nbsp;curve&nbsp;2',&nbsp;...])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;axes.get_legend.remove()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+For&nbsp;the&nbsp;last&nbsp;operation,&nbsp;you&nbsp;might&nbsp;get&nbsp;AttributeError,&nbsp;just&nbsp;handle&nbsp;the&nbsp;exception:<br>
+&nbsp;<br>
+for&nbsp;a&nbsp;in&nbsp;axes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;try:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a.get_legend().remove()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;except&nbsp;AttributeError:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continue</tt></dd></dl>
+ <dl><dt><a name="-Aires_data"><strong>Aires_data</strong></a>(data, error_type='sigma', UG=False, slant=False, RASPASS=False, Distance=False, first_int=True, traject=[])</dt><dd><tt>Returns&nbsp;data&nbsp;to&nbsp;be&nbsp;plotted,&nbsp;and&nbsp;a&nbsp;collection&nbsp;of&nbsp;suitable&nbsp;labels<br>
+&nbsp;<br>
+===================================================================<br>
+&nbsp;<br>
+data&nbsp;is&nbsp;a&nbsp;single&nbsp;instance&nbsp;of&nbsp;the&nbsp;output&nbsp;of&nbsp;maz.pathfinder,&nbsp;i.e.,<br>
+[tab,&nbsp;part,&nbsp;sep,&nbsp;path]<br>
+&nbsp;<br>
+error_type&nbsp;(sigma,&nbsp;RMS):&nbsp;which&nbsp;error&nbsp;to&nbsp;return<br>
+&nbsp;<br>
+UG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;Adapts&nbsp;x_axis&nbsp;data&nbsp;for&nbsp;upgoing&nbsp;showers&nbsp;(basically&nbsp;turns&nbsp;it)<br>
+&nbsp;<br>
+slant&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;True&nbsp;if&nbsp;we&nbsp;are&nbsp;using&nbsp;slant&nbsp;depth&nbsp;option&nbsp;for&nbsp;export&nbsp;tables<br>
+&nbsp;<br>
+RASPASS&nbsp;&nbsp;&nbsp;:&nbsp;Adapts&nbsp;x_axis&nbsp;data&nbsp;for&nbsp;RASPASS&nbsp;trajectories<br>
+&nbsp;<br>
+Distance&nbsp;&nbsp;:&nbsp;Turns&nbsp;x_axis&nbsp;data&nbsp;to&nbsp;distance&nbsp;measured&nbsp;along&nbsp;axis<br>
+&nbsp;<br>
+first_int&nbsp;:&nbsp;Offset&nbsp;in&nbsp;x_axis&nbsp;for&nbsp;different&nbsp;injection&nbsp;heights<br>
+&nbsp;<br>
+traject&nbsp;&nbsp;&nbsp;:&nbsp;trajectory&nbsp;parameters.&nbsp;[inj_h,&nbsp;theta&nbsp;(0-90)]&nbsp;(not&nbsp;RASPASS),&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[RDistance,&nbsp;RHeight,&nbsp;theta]&nbsp;(RASPASS)<br>
+&nbsp;<br>
+===================================================================<br>
+&nbsp;<br>
+Output:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+[xdata,&nbsp;ydata,&nbsp;error,&nbsp;label],&nbsp;x_axis_label,&nbsp;y_axis_label<br>
+&nbsp;<br>
+**WARNING**&nbsp;Table&nbsp;5001&nbsp;is&nbsp;not&nbsp;implemented</tt></dd></dl>
+ <dl><dt><a name="-CerenkovRing"><strong>CerenkovRing</strong></a>(Xmax, ground, theta, UseSlant=True)</dt><dd><tt>Returns&nbsp;parameters&nbsp;of&nbsp;the&nbsp;Cerenkov&nbsp;elipse&nbsp;at&nbsp;ground&nbsp;level<br>
+Xmax&nbsp;-&gt;&nbsp;Depth&nbsp;of&nbsp;the&nbsp;shower&nbsp;maximum&nbsp;in&nbsp;g/cm2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UseSlant&nbsp;True&nbsp;&nbsp;-&gt;&nbsp;Value&nbsp;measured&nbsp;along&nbsp;shower&nbsp;axis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UseSlant&nbsp;False&nbsp;-&gt;&nbsp;Value&nbsp;measured&nbsp;in&nbsp;the&nbsp;vertical&nbsp;direction<br>
+ground&nbsp;-&gt;&nbsp;Height&nbsp;of&nbsp;ground&nbsp;a.s.l&nbsp;in&nbsp;m<br>
+theta&nbsp;-&gt;&nbsp;Zenith&nbsp;angle&nbsp;in&nbsp;deg<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;was&nbsp;adapted&nbsp;from&nbsp;a&nbsp;C++&nbsp;implementation&nbsp;by&nbsp;<br>
+Washington&nbsp;Carvalho</tt></dd></dl>
+ <dl><dt><a name="-RAS_Dist"><strong>RAS_Dist</strong></a>(h, theta, RH=0)</dt><dd><tt>Returns&nbsp;the&nbsp;appropriate&nbsp;RASPASSDistance&nbsp;for&nbsp;a&nbsp;shower<br>
+with&nbsp;injecton&nbsp;height&nbsp;h&nbsp;[km]&nbsp;and&nbsp;zenith&nbsp;theta&nbsp;[deg]<br>
+In&nbsp;normal&nbsp;cases,&nbsp;RASPASSHeight&nbsp;=&nbsp;0&nbsp;km,&nbsp;but&nbsp;you&nbsp;can&nbsp;set&nbsp;it<br>
+to&nbsp;whichever&nbsp;value&nbsp;you&nbsp;need&nbsp;[km]</tt></dd></dl>
+ <dl><dt><a name="-Xs_to_dist"><strong>Xs_to_dist</strong></a>(X, RD, RH, theta, atmos_height=100)</dt><dd><tt>Converts&nbsp;slanted&nbsp;depth&nbsp;[g/cm2]&nbsp;to&nbsp;distance&nbsp;covered&nbsp;along&nbsp;shower&nbsp;axis,<br>
+for&nbsp;a&nbsp;RASPASS&nbsp;trajectory.&nbsp;VERY&nbsp;approximate&nbsp;result&nbsp;<br>
+(rough&nbsp;and&nbsp;easy&nbsp;numerical&nbsp;integration).&nbsp;Inverts&nbsp;previous&nbsp;function.<br>
+&nbsp;<br>
+Interpolation&nbsp;may&nbsp;not&nbsp;be&nbsp;reliable&nbsp;at&nbsp;all,&nbsp;use&nbsp;with&nbsp;caution<br>
+&nbsp;<br>
+================================================================<br>
+&nbsp;<br>
+X:&nbsp;values&nbsp;of&nbsp;slanted&nbsp;depth&nbsp;[g/cm2]&nbsp;(numpy.ndarray)<br>
+&nbsp;<br>
+RD:&nbsp;RASPASSDistance&nbsp;[km]<br>
+&nbsp;<br>
+RH:&nbsp;RASPASSHeight&nbsp;[km]<br>
+&nbsp;<br>
+theta:&nbsp;PrimaryZenAngle&nbsp;[deg]<br>
+&nbsp;<br>
+=================================================================</tt></dd></dl>
+ <dl><dt><a name="-ZHAireS_data"><strong>ZHAireS_data</strong></a>(data, ant_data, i_ant, plot_request, freq=[], time_data=True, freq_request=[])</dt><dd><tt>Returns&nbsp;dataset&nbsp;and&nbsp;labels&nbsp;suitable&nbsp;for&nbsp;plotting.&nbsp;Only&nbsp;one&nbsp;request&nbsp;per&nbsp;call<br>
+&nbsp;<br>
+===========================================================================<br>
+&nbsp;<br>
+data,&nbsp;ant_data,&nbsp;i_ant,&nbsp;freq:&nbsp;Output&nbsp;of&nbsp;ZHAireS_setup<br>
+&nbsp;<br>
+plot_request&nbsp;(list):&nbsp;Element&nbsp;of&nbsp;the&nbsp;form&nbsp;[magnitude,&nbsp;variable,&nbsp;[list&nbsp;of&nbsp;requested&nbsp;antenna&nbsp;indices]]<br>
+&nbsp;<br>
+time_data&nbsp;(bool)&nbsp;:&nbsp;True&nbsp;(False)&nbsp;if&nbsp;TimeFresnel&nbsp;(FreqFresnel)&nbsp;dataset<br>
+&nbsp;<br>
+freq_request&nbsp;(list):&nbsp;if&nbsp;not&nbsp;time_data,&nbsp;list&nbsp;of&nbsp;frequency&nbsp;compinents&nbsp;to&nbsp;plot&nbsp;if&nbsp;it&nbsp;is&nbsp;the&nbsp;case</tt></dd></dl>
+ <dl><dt><a name="-ZHAireS_file_mixer"><strong>ZHAireS_file_mixer</strong></a>(file, rootdir='', domain='t')</dt><dd><tt>Combines&nbsp;ZHAireS&nbsp;output&nbsp;files&nbsp;in&nbsp;a&nbsp;single&nbsp;one,&nbsp;in&nbsp;the&nbsp;case&nbsp;that<br>
+several&nbsp;runs&nbsp;with&nbsp;different&nbsp;set&nbsp;of&nbsp;antennas&nbsp;were&nbsp;needed<br>
+&nbsp;<br>
+================================================================<br>
+&nbsp;<br>
+files&nbsp;(list)&nbsp;:&nbsp;List&nbsp;of&nbsp;file&nbsp;paths&nbsp;to&nbsp;datasets&nbsp;that&nbsp;we&nbsp;want&nbsp;to&nbsp;join<br>
+&nbsp;<br>
+rootdir&nbsp;(str)&nbsp;:&nbsp;Main&nbsp;directory,&nbsp;where&nbsp;the&nbsp;new&nbsp;file&nbsp;will&nbsp;be&nbsp;saved.&nbsp;By&nbsp;default&nbsp;takes&nbsp;execution&nbsp;directory<br>
+&nbsp;<br>
+domain&nbsp;(str)&nbsp;:&nbsp;Type&nbsp;of&nbsp;output&nbsp;file&nbsp;("t"&nbsp;for&nbsp;TimeFresnel&nbsp;or&nbsp;"f"&nbsp;for&nbsp;FreqFresnel)<br>
+&nbsp;<br>
+==================================================================</tt></dd></dl>
+ <dl><dt><a name="-ZHAireS_plot"><strong>ZHAireS_plot</strong></a>(data, ant_data, i_ant, plots, freqs=[], freq_request=[], mix_plot=True, time_data=True, lims_cmap=[], fmt='-', marker='o', linewidth=2.0, size=12, legend=True, loc_leg='best', figsize=(7, 5))</dt><dd><tt>Represents&nbsp;requested&nbsp;plots<br>
+&nbsp;<br>
+=============================================================================================<br>
+&nbsp;<br>
+data,&nbsp;ant_data,&nbsp;i_ant,&nbsp;freqs:&nbsp;output&nbsp;of&nbsp;ZHAireS_setup<br>
+&nbsp;<br>
+plots&nbsp;(list)&nbsp;:&nbsp;list&nbsp;of&nbsp;elements&nbsp;like&nbsp;[mag,&nbsp;var,&nbsp;[list&nbsp;of&nbsp;antenna&nbsp;indices]]<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Valid&nbsp;magnitudes&nbsp;are:&nbsp;'A',&nbsp;'Ax',&nbsp;'Ay',&nbsp;'Az',&nbsp;'E',&nbsp;'Ex',&nbsp;'Ey',&nbsp;'Ez',&nbsp;'EF',&nbsp;'EFx',&nbsp;'EFy',&nbsp;'EFz'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Valid&nbsp;variables&nbsp;are&nbsp;:&nbsp;'t',&nbsp;'f',&nbsp;'x',&nbsp;'y',&nbsp;'z',&nbsp;'xy',&nbsp;'xz',&nbsp;'yz'<br>
+&nbsp;<br>
+mix_plot&nbsp;(bool)&nbsp;:&nbsp;If&nbsp;False,&nbsp;each&nbsp;requested&nbsp;plot&nbsp;goes&nbsp;into&nbsp;a&nbsp;different&nbsp;canvas<br>
+&nbsp;<br>
+time_data&nbsp;(bool)&nbsp;:&nbsp;True&nbsp;(False)&nbsp;if&nbsp;we&nbsp;are&nbsp;using&nbsp;TimeFresnel&nbsp;(FreqFresnel)&nbsp;outputs<br>
+&nbsp;<br>
+freq_request&nbsp;(list)&nbsp;:&nbsp;If&nbsp;time_data&nbsp;=&nbsp;False,&nbsp;list&nbsp;of&nbsp;frequency&nbsp;components&nbsp;to&nbsp;plot<br>
+&nbsp;<br>
+lims_cmap&nbsp;(list)&nbsp;:&nbsp;lower&nbsp;and&nbsp;upper&nbsp;limit&nbsp;for&nbsp;cmap&nbsp;(only&nbsp;for&nbsp;plots&nbsp;against&nbsp;2&nbsp;coordinates)<br>
+&nbsp;<br>
+fmt,&nbsp;marker,&nbsp;linewidth&nbsp;:&nbsp;usual&nbsp;specifications&nbsp;for&nbsp;plotting<br>
+&nbsp;<br>
+size&nbsp;:&nbsp;fontsize<br>
+&nbsp;<br>
+legend&nbsp;(bool)&nbsp;:&nbsp;Whether&nbsp;to&nbsp;set&nbsp;or&nbsp;not&nbsp;a&nbsp;legend<br>
+&nbsp;<br>
+loc_leg:&nbsp;placing&nbsp;of&nbsp;legend,&nbsp;typical&nbsp;matplotlib&nbsp;options<br>
+&nbsp;<br>
+figsize&nbsp;(tuple)&nbsp;:&nbsp;size&nbsp;of&nbsp;canvas&nbsp;<br>
+============================================================================================<br>
+&nbsp;<br>
+Automatically&nbsp;sets&nbsp;labels&nbsp;and&nbsp;legends&nbsp;in&nbsp;the&nbsp;plot&nbsp;(If&nbsp;legend&nbsp;=&nbsp;True).<br>
+If&nbsp;you&nbsp;want&nbsp;to&nbsp;change&nbsp;labels&nbsp;or&nbsp;remove&nbsp;the&nbsp;legend&nbsp;after&nbsp;calling&nbsp;the4<br>
+function,&nbsp;use&nbsp;returned&nbsp;axes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;axes.legend(['Label&nbsp;for&nbsp;curve&nbsp;1',&nbsp;'Label&nbsp;for&nbsp;curve&nbsp;2',&nbsp;...])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;axes.get_legend.remove()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+For&nbsp;the&nbsp;last&nbsp;operation,&nbsp;you&nbsp;might&nbsp;get&nbsp;AttributeError,&nbsp;just&nbsp;handle&nbsp;the&nbsp;exception:<br>
+&nbsp;<br>
+for&nbsp;a&nbsp;in&nbsp;axes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;try:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a.get_legend().remove()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;except&nbsp;AttributeError:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continue<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+Energy&nbsp;fluence&nbsp;plots&nbsp;are&nbsp;not&nbsp;implemented.<br>
+I&nbsp;would&nbsp;like&nbsp;to&nbsp;include&nbsp;also&nbsp;plots&nbsp;of&nbsp;the&nbsp;Fourier&nbsp;transformed&nbsp;time&nbsp;signal&nbsp;against<br>
+coordinates,&nbsp;for&nbsp;a&nbsp;continuous&nbsp;range&nbsp;of&nbsp;frequency</tt></dd></dl>
+ <dl><dt><a name="-ZHAireS_setup"><strong>ZHAireS_setup</strong></a>(file, time_data=True, plot=False, step_antenna=5)</dt><dd><tt>Returns:<br>
+&nbsp;<br>
+numpy.ndarray&nbsp;of&nbsp;data<br>
+A&nbsp;list&nbsp;of&nbsp;antenna&nbsp;labels&nbsp;and&nbsp;positions&nbsp;(AIRES&nbsp;coord&nbsp;system)<br>
+A&nbsp;list&nbsp;of&nbsp;indexes,&nbsp;each&nbsp;one&nbsp;indicates&nbsp;where&nbsp;the&nbsp;data&nbsp;of&nbsp;one&nbsp;antenna&nbsp;starts<br>
+A&nbsp;list&nbsp;of&nbsp;frequencies,&nbsp;if&nbsp;it&nbsp;is&nbsp;the&nbsp;case<br>
+&nbsp;<br>
+Plots&nbsp;the&nbsp;position&nbsp;of&nbsp;antennas&nbsp;with&nbsp;their&nbsp;label&nbsp;if&nbsp;Plot&nbsp;=&nbsp;True<br>
+&nbsp;<br>
+===================================================================<br>
+&nbsp;<br>
+file&nbsp;(str):&nbsp;path&nbsp;to&nbsp;the&nbsp;ZHAireS&nbsp;output&nbsp;file<br>
+&nbsp;<br>
+time_data&nbsp;(bool):&nbsp;True&nbsp;if&nbsp;TimeFresnel&nbsp;output,&nbsp;False&nbsp;if&nbsp;FreqFresnel&nbsp;Output<br>
+&nbsp;<br>
+plot&nbsp;(bool):&nbsp;whether&nbsp;to&nbsp;plot&nbsp;or&nbsp;not&nbsp;the&nbsp;antenna&nbsp;positions<br>
+&nbsp;<br>
+step_antenna&nbsp;(int):&nbsp;Number&nbsp;of&nbsp;antennas&nbsp;to&nbsp;skip&nbsp;when&nbsp;plotting.&nbsp;For&nbsp;example,<br>
+with&nbsp;step_atenna&nbsp;=&nbsp;5,&nbsp;will&nbsp;plot&nbsp;antennas&nbsp;5,&nbsp;10,&nbsp;15,&nbsp;20,&nbsp;...<br>
+&nbsp;<br>
+===================================================================</tt></dd></dl>
+ <dl><dt><a name="-atmos_size"><strong>atmos_size</strong></a>(RH, theta, atmos_height=100, stop='atmos')</dt><dd><tt>Returns&nbsp;total&nbsp;distance&nbsp;and&nbsp;traversed&nbsp;matter&nbsp;for&nbsp;a&nbsp;RASPASS&nbsp;trajectory<br>
+starting&nbsp;at&nbsp;the&nbsp;top&nbsp;ot&nbsp;the&nbsp;atmosphere&nbsp;(fixes&nbsp;RASPASSDistance&nbsp;so&nbsp;that&nbsp;<br>
+happens)<br>
+&nbsp;<br>
+====================================================================<br>
+&nbsp;<br>
+RH&nbsp;:&nbsp;RASPASSHeight&nbsp;[km]<br>
+&nbsp;<br>
+theta&nbsp;:&nbsp;PrimaryZenAngle&nbsp;[deg]<br>
+&nbsp;<br>
+atmos_height&nbsp;:&nbsp;height&nbsp;of&nbsp;the&nbsp;atmosphere&nbsp;[km]&nbsp;and&nbsp;starting<br>
+&nbsp;&nbsp;&nbsp;&nbsp;point&nbsp;of&nbsp;the&nbsp;trajectory&nbsp;(default&nbsp;100&nbsp;km)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+stop&nbsp;:&nbsp;point&nbsp;up&nbsp;to&nbsp;which&nbsp;we&nbsp;measure&nbsp;distance&nbsp;and&nbsp;traversed&nbsp;matter<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'atmos'&nbsp;:&nbsp;top&nbsp;of&nbsp;the&nbsp;atmosphere<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'zaxis'&nbsp;:&nbsp;crossing&nbsp;of&nbsp;shower&nbsp;axis&nbsp;with&nbsp;the&nbsp;vertical&nbsp;of&nbsp;observer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'hmin'&nbsp;&nbsp;:&nbsp;minimum&nbsp;height&nbsp;reached&nbsp;in&nbsp;the&nbsp;atmosphere<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+===================================================================</tt></dd></dl>
+ <dl><dt><a name="-codes"><strong>codes</strong></a>()</dt><dd><tt>Returns&nbsp;codes&nbsp;(in&nbsp;mazepin)&nbsp;for&nbsp;AIRES&nbsp;tables&nbsp;and&nbsp;particles</tt></dd></dl>
+ <dl><dt><a name="-cos_localtheta"><strong>cos_localtheta</strong></a>(h, theta, RASPASSHeight=0.0)</dt><dd><tt>Cosine&nbsp;of&nbsp;trajectory's&nbsp;local&nbsp;zenith&nbsp;angle&nbsp;at&nbsp;height&nbsp;h&nbsp;[km]<br>
+&nbsp;<br>
+theta&nbsp;is&nbsp;PrimaryZenAngle&nbsp;in&nbsp;AIRES&nbsp;(deg)<br>
+&nbsp;<br>
+Accepts&nbsp;RASPASS&nbsp;trajectories</tt></dd></dl>
+ <dl><dt><a name="-dist_to_Xs"><strong>dist_to_Xs</strong></a>(dist, RD, RH, theta, step=0.025)</dt><dd><tt>Converts&nbsp;distance&nbsp;[km]&nbsp;to&nbsp;slanted&nbsp;depth&nbsp;[g/cm2]&nbsp;covered&nbsp;along&nbsp;shower&nbsp;<br>
+axis,&nbsp;for&nbsp;a&nbsp;RASPASS&nbsp;trajectory.&nbsp;VERY&nbsp;approximate&nbsp;result&nbsp;<br>
+(rough&nbsp;and&nbsp;easy&nbsp;numerical&nbsp;integration)<br>
+&nbsp;<br>
+========================================================================<br>
+&nbsp;<br>
+d:&nbsp;values&nbsp;of&nbsp;distance&nbsp;[km]&nbsp;(numpy.ndarray)<br>
+&nbsp;<br>
+RD:&nbsp;RASPASSDistance&nbsp;[km]<br>
+&nbsp;<br>
+RH:&nbsp;RASPASSHeight&nbsp;[km]<br>
+&nbsp;<br>
+theta:&nbsp;PrimaryZenAngle&nbsp;[deg]<br>
+&nbsp;<br>
+step:&nbsp;Step&nbsp;of&nbsp;integration.&nbsp;Default&nbsp;25&nbsp;m<br>
+&nbsp;<br>
+========================================================================</tt></dd></dl>
+ <dl><dt><a name="-gcm2toh"><strong>gcm2toh</strong></a>(t)</dt><dd><tt>Converts&nbsp;vertical&nbsp;depth&nbsp;t&nbsp;(g/cm2)&nbsp;to&nbsp;heights&nbsp;in&nbsp;km<br>
+Utilises&nbsp;Linsley&nbsp;parametrization<br>
+h1km,&nbsp;h2km&nbsp;are&nbsp;the&nbsp;inverses&nbsp;of&nbsp;that&nbsp;parametrization<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;was&nbsp;adapted&nbsp;from&nbsp;a&nbsp;C++&nbsp;implementation&nbsp;by&nbsp;<br>
+Washington&nbsp;Carvalho</tt></dd></dl>
+ <dl><dt><a name="-h_IP"><strong>h_IP</strong></a>(RD, RH, theta)</dt><dd><tt>Returns&nbsp;height&nbsp;of&nbsp;injection&nbsp;point&nbsp;[km]&nbsp;in&nbsp;a&nbsp;RASPASS&nbsp;trajectory<br>
+&nbsp;<br>
+==============================================================<br>
+&nbsp;<br>
+RD:&nbsp;RASPASSDistance&nbsp;[km]<br>
+&nbsp;<br>
+RH:&nbsp;RASSPASSHeight&nbsp;&nbsp;[km]<br>
+&nbsp;<br>
+theta:&nbsp;PrimaryZenAngle&nbsp;(deg)<br>
+&nbsp;<br>
+==============================================================</tt></dd></dl>
+ <dl><dt><a name="-h_RAS"><strong>h_RAS</strong></a>(L, RD, RH, theta)</dt><dd><tt>Returns&nbsp;height&nbsp;in&nbsp;the&nbsp;atmosphere&nbsp;[km]&nbsp;of&nbsp;the&nbsp;point&nbsp;of&nbsp;the&nbsp;shower&nbsp;axis<br>
+that&nbsp;is&nbsp;a&nbsp;distance&nbsp;L&nbsp;[km]&nbsp;away&nbsp;from&nbsp;the&nbsp;IP&nbsp;(converts&nbsp;traversed&nbsp;<br>
+distance&nbsp;to&nbsp;height)<br>
+&nbsp;<br>
+====================================================================<br>
+&nbsp;<br>
+L:&nbsp;traversed&nbsp;distance&nbsp;from&nbsp;IP&nbsp;[km]<br>
+&nbsp;<br>
+RD:&nbsp;RASPASSDistance&nbsp;[km]<br>
+&nbsp;<br>
+RH:&nbsp;RASPASSHeight&nbsp;[km]<br>
+&nbsp;<br>
+theta:&nbsp;PrimaryZenAngle&nbsp;[deg]<br>
+&nbsp;<br>
+====================================================================</tt></dd></dl>
+ <dl><dt><a name="-htogcm2"><strong>htogcm2</strong></a>(h)</dt><dd><tt>Converts&nbsp;height&nbsp;in&nbsp;km&nbsp;to&nbsp;vertical&nbsp;depth&nbsp;t&nbsp;(g/cm2)<br>
+Utilises&nbsp;Linsley&nbsp;parametrization,&nbsp;t1&nbsp;y&nbsp;t2<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;was&nbsp;adapted&nbsp;from&nbsp;a&nbsp;C++&nbsp;implementation&nbsp;by&nbsp;<br>
+Washington&nbsp;Carvalho</tt></dd></dl>
+ <dl><dt><a name="-input_file"><strong>input_file</strong></a>(task_name, basic, trajectory, sim_control, RASPASS=False, upgoing=False, ZHAireS=False, ZHAireS_control=[], exports=[], extra=[], set_date=False, save_path='')</dt><dd><tt>Creates&nbsp;an&nbsp;AIRES/ZHAireS&nbsp;input&nbsp;file<br>
+&nbsp;<br>
+==============================================================================<br>
+&nbsp;<br>
+task_name&nbsp;(str):&nbsp;name&nbsp;of&nbsp;task&nbsp;(without&nbsp;.inp&nbsp;extension)<br>
+&nbsp;<br>
+basic&nbsp;(list&nbsp;of&nbsp;str):&nbsp;list&nbsp;of&nbsp;key&nbsp;simulation&nbsp;parameters<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[primary,&nbsp;energy&nbsp;(in&nbsp;eV),&nbsp;GeomagneticField,&nbsp;PropagatePrimary,&nbsp;Site,&nbsp;Ground]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+trajectory&nbsp;(list&nbsp;of&nbsp;str):&nbsp;depend&nbsp;on&nbsp;primary<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[inj_h&nbsp;(in&nbsp;km),&nbsp;theta&nbsp;(in&nbsp;deg),&nbsp;phi&nbsp;(in&nbsp;deg)]&nbsp;for&nbsp;normal&nbsp;AIRES<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[ALTITUDE&nbsp;(in&nbsp;km),&nbsp;theta&nbsp;(in&nbsp;deg),&nbsp;phi&nbsp;(in&nbsp;deg)]&nbsp;for&nbsp;upgoing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[RASPASSDistance&nbsp;(in&nbsp;m),&nbsp;RASPASSHeight&nbsp;(in&nbsp;m),&nbsp;RASPASSTimeShift&nbsp;(in&nbsp;ns),&nbsp;theta&nbsp;(in&nbsp;deg),&nbsp;phi&nbsp;(in&nbsp;deg)]&nbsp;for&nbsp;RASPASS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+sim_control&nbsp;(list&nbsp;of&nbsp;str):&nbsp;parameters&nbsp;to&nbsp;control&nbsp;the&nbsp;simulation&nbsp;(default&nbsp;options&nbsp;in&nbsp;mazepin_aux):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+[TotalShowers,&nbsp;RunsPerProcess,&nbsp;ShowerPerRun,&nbsp;RandomSeed,&nbsp;ObsLevels,&nbsp;ThinningEnergy,&nbsp;ThinnningWFactor,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SaveInFile's,&nbsp;electron&nbsp;cuts,&nbsp;gamma&nbsp;cuts,&nbsp;PerShowerData,&nbsp;ExportPerShower]<br>
+&nbsp;<br>
+RASPASS,&nbsp;upgoing&nbsp;(bool):&nbsp;Control&nbsp;of&nbsp;special&nbsp;primaries<br>
+&nbsp;<br>
+ZHAireS:&nbsp;Calculation&nbsp;of&nbsp;radio&nbsp;emission&nbsp;on&nbsp;or&nbsp;off<br>
+&nbsp;<br>
+ZHAireS_control&nbsp;(list&nbsp;of&nbsp;str):&nbsp;ZHAireS&nbsp;instructions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[FresnelTime&nbsp;(On/Off),&nbsp;FresnelFreq&nbsp;(On/Off),&nbsp;list_of_antenna_coord&nbsp;(list&nbsp;of&nbsp;[x&nbsp;y&nbsp;z]&nbsp;in&nbsp;m),&nbsp;list_of_freq&nbsp;(list&nbsp;of&nbsp;numbers)&nbsp;in&nbsp;MHz,&nbsp;direct_instructs&nbsp;(list&nbsp;of&nbsp;str)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+exports&nbsp;(list):&nbsp;tables&nbsp;to&nbsp;export.&nbsp;Format&nbsp;is&nbsp;[tab,&nbsp;part,&nbsp;options&nbsp;(str)]&nbsp;with&nbsp;mazepin&nbsp;codes&nbsp;(maz.<a href="#-codes">codes</a>())<br>
+&nbsp;<br>
+set_date&nbsp;(bool):&nbsp;If&nbsp;True,&nbsp;no&nbsp;Date&nbsp;will&nbsp;be&nbsp;specified.&nbsp;This&nbsp;function&nbsp;uses&nbsp;2010&nbsp;7&nbsp;11&nbsp;as&nbsp;default&nbsp;date,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;if&nbsp;set_date&nbsp;=&nbsp;False&nbsp;then&nbsp;no&nbsp;directive&nbsp;will&nbsp;be&nbsp;included&nbsp;(unless&nbsp;given&nbsp;in&nbsp;extras)<br>
+save_path:&nbsp;directory&nbsp;to&nbsp;save&nbsp;input&nbsp;file<br>
+&nbsp;<br>
+============================================================================</tt></dd></dl>
+ <dl><dt><a name="-pathfinder"><strong>pathfinder</strong></a>(rootdir, tabs, part, sim=[''], sep=[], out=[], verbose=False)</dt><dd><tt>Returns&nbsp;the&nbsp;list&nbsp;of&nbsp;paths&nbsp;inside&nbsp;rootdir&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;requested<br>
+tables.<br>
+&nbsp;<br>
+===================================================================<br>
+&nbsp;<br>
+tabs&nbsp;(list&nbsp;of&nbsp;int):&nbsp;types&nbsp;of&nbsp;tables.&nbsp;See&nbsp;mazepin.<a href="#-table_finder">table_finder</a>()&nbsp;.<br>
+&nbsp;<br>
+part&nbsp;(list&nbsp;of&nbsp;int):&nbsp;types&nbsp;of&nbsp;particles.&nbsp;See&nbsp;mazepin.<a href="#-table_finder">table_finder</a>()&nbsp;.<br>
+&nbsp;<br>
+sim&nbsp;(list&nbsp;of&nbsp;str):&nbsp;constraints&nbsp;for&nbsp;file&nbsp;names&nbsp;(all&nbsp;selected&nbsp;files&nbsp;must&nbsp;<br>
+these&nbsp;strings).&nbsp;Default&nbsp;'',&nbsp;all&nbsp;files&nbsp;with&nbsp;the&nbsp;right&nbsp;extension&nbsp;are&nbsp;kept.<br>
+I&nbsp;am&nbsp;using&nbsp;my&nbsp;rules&nbsp;for&nbsp;naming&nbsp;files&nbsp;(see&nbsp;notes&nbsp;at&nbsp;GitHub&nbsp;repo).&nbsp;<br>
+&nbsp;<br>
+sep&nbsp;(list&nbsp;of&nbsp;lists&nbsp;of&nbsp;str):&nbsp;Distinctions.&nbsp;Output&nbsp;will&nbsp;indicate&nbsp;which&nbsp;files,<br>
+among&nbsp;the&nbsp;selected&nbsp;with&nbsp;sim,&nbsp;contain&nbsp;these&nbsp;special&nbsp;strings.&nbsp;<br>
+Default&nbsp;[],&nbsp;all&nbsp;files&nbsp;with&nbsp;the&nbsp;constraint&nbsp;and&nbsp;right&nbsp;extension&nbsp;are&nbsp;kept<br>
+&nbsp;<br>
+out&nbsp;(list&nbsp;of&nbsp;str):&nbsp;Strings&nbsp;that&nbsp;we&nbsp;do&nbsp;not&nbsp;want&nbsp;our&nbsp;files&nbsp;to&nbsp;have<br>
+Might&nbsp;be&nbsp;useful&nbsp;when&nbsp;we&nbsp;have&nbsp;avergaed&nbsp;tables&nbsp;and&nbsp;individual&nbsp;shower&nbsp;tables,<br>
+that&nbsp;will&nbsp;have&nbsp;and&nbsp;extra&nbsp;"s00..."&nbsp;by&nbsp;default<br>
+Default&nbsp;[],&nbsp;no&nbsp;strings&nbsp;are&nbsp;excluded<br>
+&nbsp;<br>
+===================================================================<br>
+&nbsp;<br>
+Output&nbsp;(with&nbsp;separators&nbsp;sep&nbsp;=&nbsp;[['s1',&nbsp;'s2'],&nbsp;['s3',&nbsp;'s4']]):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+[[tab1,&nbsp;part1,&nbsp;'s1,&nbsp;s2',&nbsp;path1],&nbsp;[tab1,&nbsp;part1,&nbsp;'s3,&nbsp;s4',&nbsp;path2],&nbsp;<br>
+&nbsp;[tab1,&nbsp;part2,&nbsp;'s1,&nbsp;s2',&nbsp;path3],&nbsp;[tab1,&nbsp;part2,&nbsp;'s3,&nbsp;s4',&nbsp;path4],<br>
+&nbsp;[tab2,&nbsp;part1,&nbsp;'s1,&nbsp;s2',&nbsp;path5],&nbsp;...]<br>
+&nbsp;<br>
+**&nbsp;sorry&nbsp;for&nbsp;the&nbsp;spaghetti,&nbsp;I&nbsp;know&nbsp;it&nbsp;is&nbsp;a&nbsp;huge&nbsp;mess&nbsp;:_(&nbsp;**</tt></dd></dl>
+ <dl><dt><a name="-readfile"><strong>readfile</strong></a>(filename)</dt><dd><tt>Reads&nbsp;the&nbsp;AIRES&nbsp;output&nbsp;given.&nbsp;If&nbsp;ground&nbsp;position&nbsp;is&nbsp;specified&nbsp;in&nbsp;<br>
+the&nbsp;file&nbsp;comments,&nbsp;returns&nbsp;it</tt></dd></dl>
+ <dl><dt><a name="-run_simulation_SGE"><strong>run_simulation_SGE</strong></a>(shell_remote_paths, server='mastercr1.igfae.usc.es', node='nodo014', username='sergio.cabana', fake_time=3.0, mail=True)</dt><dd><tt>Submits&nbsp;to&nbsp;SGE&nbsp;queue&nbsp;system&nbsp;the&nbsp;shell_scripts&nbsp;prepared&nbsp;with&nbsp;mazepin.<a href="#-setup_simulation_SGE">setup_simulation_SGE</a>()<br>
+&nbsp;<br>
+==================================================================================<br>
+&nbsp;<br>
+shell_remote_paths&nbsp;(list&nbsp;of&nbsp;str):&nbsp;list&nbsp;of&nbsp;paths&nbsp;to&nbsp;shell&nbsp;scripts&nbsp;inside&nbsp;remote&nbsp;machine.&nbsp;Output&nbsp;of&nbsp;setup_simulation_SGE<br>
+&nbsp;<br>
+server,&nbsp;node,&nbsp;username&nbsp;(str):&nbsp;same&nbsp;as&nbsp;in&nbsp;setup_simulation_SGE<br>
+&nbsp;<br>
+fake_time&nbsp;(float):&nbsp;Time&nbsp;to&nbsp;wait&nbsp;between&nbsp;submits<br>
+&nbsp;<br>
+mail&nbsp;(bool):&nbsp;if&nbsp;True,&nbsp;asks&nbsp;for&nbsp;an&nbsp;email&nbsp;address&nbsp;to&nbsp;send&nbsp;notification&nbsp;when&nbsp;jobs&nbsp;are&nbsp;completed</tt></dd></dl>
+ <dl><dt><a name="-setup_simulation_SGE"><strong>setup_simulation_SGE</strong></a>(task_names, basics, trajects, sim_controls, exports, extras, jobID, RASPASS=False, upgoing=False, ZHAireS=False, ZHAireS_control=[], remote_main='/home2/', user='sergio.cabana/', remote_dir='', exe=['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary', 'SpecialPrimaries/uprimary'], program='ZHAireSRASPASS', autorename=True, local_savepath='', eco=False, server='mastercr1.igfae.usc.es', node='nodo014', username='sergio.cabana')</dt><dd><tt>Creates&nbsp;all&nbsp;the&nbsp;files&nbsp;(.inp,&nbsp;.sh)&nbsp;needed&nbsp;to&nbsp;run&nbsp;simulations&nbsp;inside&nbsp;a&nbsp;SGE&nbsp;system,<br>
+and&nbsp;uploads&nbsp;them&nbsp;to&nbsp;your&nbsp;remote&nbsp;machine<br>
+&nbsp;<br>
+============================================================================<br>
+&nbsp;<br>
+task_names&nbsp;(list):&nbsp;names&nbsp;of&nbsp;tasks&nbsp;(max&nbsp;64&nbsp;char),&nbsp;one&nbsp;per&nbsp;each&nbsp;input&nbsp;file&nbsp;required<br>
+&nbsp;<br>
+basics&nbsp;(list):&nbsp;set&nbsp;of&nbsp;basic&nbsp;parameters&nbsp;(arg&nbsp;of&nbsp;mazepin.<a href="#-input_file">input_file</a>()).&nbsp;one&nbsp;per&nbsp;each&nbsp;input&nbsp;file<br>
+&nbsp;<br>
+trajects&nbsp;(list):&nbsp;set&nbsp;of&nbsp;trajectory&nbsp;params&nbsp;(arg&nbsp;of&nbsp;mazepin.<a href="#-input_file">input_file</a>()).&nbsp;one&nbsp;per&nbsp;each&nbsp;input&nbsp;file<br>
+&nbsp;<br>
+sim_control&nbsp;(list):&nbsp;set&nbsp;of&nbsp;parameters&nbsp;to&nbsp;control&nbsp;simulation&nbsp;(arg&nbsp;of&nbsp;mazepin.<a href="#-input_file">input_file</a>()).&nbsp;Default&nbsp;options&nbsp;at&nbsp;mazepin_aux.&nbsp;one&nbsp;per&nbsp;each&nbsp;input&nbsp;file<br>
+&nbsp;<br>
+exports&nbsp;(list):&nbsp;lists&nbsp;of&nbsp;[tab,&nbsp;part,&nbsp;option]&nbsp;to&nbsp;export&nbsp;in&nbsp;each&nbsp;input&nbsp;(arg&nbsp;of&nbsp;mazepin.<a href="#-input_file">input_file</a>()).&nbsp;one&nbsp;per&nbsp;each&nbsp;input&nbsp;file.<br>
+&nbsp;<br>
+extras&nbsp;(list):&nbsp;lists&nbsp;of&nbsp;extra&nbsp;instructions&nbsp;to&nbsp;include&nbsp;in&nbsp;each&nbsp;input&nbsp;file&nbsp;(arg&nbsp;of&nbsp;mazepin.<a href="#-input_file">input_file</a>()).&nbsp;one&nbsp;per&nbsp;each&nbsp;input&nbsp;file.<br>
+&nbsp;<br>
+jobID&nbsp;(str):&nbsp;Identifier&nbsp;of&nbsp;remote&nbsp;job&nbsp;(qsub)<br>
+&nbsp;<br>
+RASPASS,&nbsp;upgoing&nbsp;(bool):&nbsp;Special&nbsp;particle&nbsp;options<br>
+&nbsp;<br>
+ZHAireS&nbsp;(bool):&nbsp;input&nbsp;files&nbsp;include&nbsp;radio&nbsp;emission&nbsp;calculations<br>
+&nbsp;<br>
+ZHAireS_control:&nbsp;(list):&nbsp;set&nbsp;of&nbsp;parameters&nbsp;to&nbsp;run&nbsp;ZHAireS.&nbsp;(arg&nbsp;of&nbsp;mazepin.<a href="#-input_file">input_file</a>()).<br>
+&nbsp;<br>
+remote_main&nbsp;(str,&nbsp;ends&nbsp;with&nbsp;/):&nbsp;root&nbsp;directory&nbsp;in&nbsp;remote&nbsp;machine<br>
+&nbsp;<br>
+user&nbsp;(str,&nbsp;edns&nbsp;with&nbsp;/):&nbsp;remote&nbsp;machine&nbsp;user.&nbsp;All&nbsp;directories&nbsp;in&nbsp;remote&nbsp;machine&nbsp;should&nbsp;be&nbsp;like&nbsp;/remote_dir/user/something<br>
+&nbsp;<br>
+remote_dir&nbsp;(str,&nbsp;ends&nbsp;with&nbsp;/):&nbsp;directory&nbsp;inside&nbsp;remote_dir/user/&nbsp;to&nbsp;upload&nbsp;files&nbsp;and&nbsp;store&nbsp;outputs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+exe&nbsp;(list&nbsp;of&nbsp;str):&nbsp;list&nbsp;of&nbsp;paths&nbsp;inside&nbsp;remote_dir/user/&nbsp;where&nbsp;required&nbsp;executables&nbsp;are<br>
+&nbsp;<br>
+program:&nbsp;name&nbsp;of&nbsp;executable&nbsp;that&nbsp;runs&nbsp;the&nbsp;simulations<br>
+&nbsp;<br>
+autorename:&nbsp;bool&nbsp;to&nbsp;include&nbsp;loops&nbsp;in&nbsp;shell&nbsp;script&nbsp;to&nbsp;rename&nbsp;tables&nbsp;with&nbsp;Opt&nbsp;a<br>
+&nbsp;<br>
+local_savepath&nbsp;(str):&nbsp;directory&nbsp;to&nbsp;save&nbsp;created&nbsp;files<br>
+&nbsp;<br>
+eco&nbsp;(bool):&nbsp;True&nbsp;to&nbsp;send&nbsp;only&nbsp;one&nbsp;shell&nbsp;script&nbsp;to&nbsp;remote&nbsp;(otherwise,&nbsp;one&nbsp;per&nbsp;input&nbsp;file&nbsp;to&nbsp;parallelize)<br>
+&nbsp;<br>
+server:&nbsp;host&nbsp;remote&nbsp;machine<br>
+&nbsp;<br>
+node&nbsp;:&nbsp;where&nbsp;to&nbsp;ssh&nbsp;to&nbsp;from&nbsp;remote&nbsp;server<br>
+&nbsp;<br>
+username:&nbsp;name&nbsp;of&nbsp;remote&nbsp;user<br>
+&nbsp;<br>
+===========================================================================================<br>
+&nbsp;<br>
+Returns&nbsp;the&nbsp;list&nbsp;of&nbsp;paths&nbsp;to&nbsp;uploaded&nbsp;shell&nbsp;scripts&nbsp;inside&nbsp;the&nbsp;remote&nbsp;machine</tt></dd></dl>
+ <dl><dt><a name="-shell_script_SGE"><strong>shell_script_SGE</strong></a>(job_name, input_file_dir, input_files, local_dir='', main='/home2/', user='sergio.cabana/', exe=['aires/bin/ZHAireSRASPASS', 'SpecialPrimaries/RASPASSprimary'], program='ZHAireSRASPASS', autorename=True)</dt><dd><tt>Creates&nbsp;a&nbsp;shell&nbsp;script&nbsp;(.sh&nbsp;extension)&nbsp;that&nbsp;can&nbsp;be&nbsp;submitted&nbsp;to&nbsp;SGE&nbsp;queue&nbsp;<br>
+systems&nbsp;(at&nbsp;least&nbsp;inside&nbsp;IGFAE&nbsp;nodes,&nbsp;with&nbsp;scratch).&nbsp;<br>
+It&nbsp;is&nbsp;adapted&nbsp;for&nbsp;the&nbsp;cluster&nbsp;I&nbsp;use&nbsp;but&nbsp;easy&nbsp;to&nbsp;modify<br>
+&nbsp;<br>
+=====================================================================<br>
+&nbsp;<br>
+job_name:&nbsp;job&nbsp;ID&nbsp;for&nbsp;queue&nbsp;system<br>
+&nbsp;<br>
+local_dir:&nbsp;directory&nbsp;to&nbsp;save&nbsp;the&nbsp;created&nbsp;.sh&nbsp;file<br>
+&nbsp;<br>
+input_file_dir:&nbsp;directory&nbsp;of&nbsp;input&nbsp;files&nbsp;(inside&nbsp;main/user/).&nbsp;Ends&nbsp;with&nbsp;/<br>
+&nbsp;<br>
+input_files&nbsp;:&nbsp;list&nbsp;of&nbsp;names&nbsp;of&nbsp;input&nbsp;files<br>
+&nbsp;<br>
+main&nbsp;:&nbsp;default&nbsp;root&nbsp;directory<br>
+&nbsp;<br>
+user&nbsp;:&nbsp;directory&nbsp;of&nbsp;current&nbsp;user<br>
+&nbsp;<br>
+exe&nbsp;&nbsp;:&nbsp;paths&nbsp;(inside&nbsp;main)&nbsp;to&nbsp;executable&nbsp;binaries&nbsp;to&nbsp;import&nbsp;and&nbsp;use<br>
+&nbsp;<br>
+program&nbsp;:&nbsp;name&nbsp;of&nbsp;binary&nbsp;executable&nbsp;to&nbsp;run&nbsp;the&nbsp;input&nbsp;files<br>
+&nbsp;<br>
+autorename:&nbsp;bool&nbsp;to&nbsp;rename&nbsp;exported&nbsp;tables&nbsp;with&nbsp;opt&nbsp;a.&nbsp;Use&nbsp;carefully,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;only&nbsp;works&nbsp;for&nbsp;two&nbsp;different&nbsp;export&nbsp;options,&nbsp;namely&nbsp;default&nbsp;and&nbsp;Opt&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(or&nbsp;Opt&nbsp;p&nbsp;and&nbsp;Opt&nbsp;ap&nbsp;for&nbsp;RASPASS)<br>
+&nbsp;<br>
+=======================================================================</tt></dd></dl>
+ <dl><dt><a name="-table_finder"><strong>table_finder</strong></a>(tab, part, verbose=False)</dt><dd><tt>Returns&nbsp;the&nbsp;extension&nbsp;corresponding&nbsp;to&nbsp;each&nbsp;table&nbsp;and&nbsp;particle<br>
+&nbsp;<br>
+==============================================================<br>
+&nbsp;<br>
+tab:&nbsp;type&nbsp;of&nbsp;table&nbsp;(from&nbsp;0&nbsp;to&nbsp;15)<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;:&nbsp;Longitudinal&nbsp;development<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;:&nbsp;Unweighted&nbsp;longitudinal&nbsp;development<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;:&nbsp;Energy&nbsp;longitudinal&nbsp;development<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;:&nbsp;Lateral&nbsp;distribution<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;:&nbsp;Unweighted&nbsp;lateral&nbsp;distribution<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;:&nbsp;Energy&nbsp;distribution&nbsp;at&nbsp;ground<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;:&nbsp;Unweighted&nbsp;energy&nbsp;distribution<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;:&nbsp;Mean&nbsp;arrival&nbsp;time&nbsp;distribution<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;:&nbsp;Number&nbsp;and&nbsp;energy&nbsp;of&nbsp;particles&nbsp;at&nbsp;ground&nbsp;vs&nbsp;shower&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;9&nbsp;:&nbsp;Number&nbsp;of&nbsp;created&nbsp;particles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;10:&nbsp;Number&nbsp;of&nbsp;created&nbsp;entries<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;11:&nbsp;Energy&nbsp;of&nbsp;created&nbsp;particles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;12:&nbsp;Longitudinal&nbsp;development&nbsp;of&nbsp;low&nbsp;energy&nbsp;particles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;13:&nbsp;Unweighted&nbsp;longitudinal&nbsp;development&nbsp;of&nbsp;low&nbsp;energy&nbsp;particles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;14:&nbsp;Energy&nbsp;longitudinal&nbsp;development&nbsp;of&nbsp;low&nbsp;energy&nbsp;particles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;15:&nbsp;Longitudinal&nbsp;development&nbsp;of&nbsp;deposited&nbsp;energy<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;16:&nbsp;Energy&nbsp;(per&nbsp;particle)&nbsp;longitudinal&nbsp;development<br>
+&nbsp;<br>
+part:&nbsp;type&nbsp;of&nbsp;particle&nbsp;(from&nbsp;0&nbsp;to&nbsp;22)<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;:&nbsp;gammas<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;:&nbsp;electrons<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;:&nbsp;positrons<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;:&nbsp;muons&nbsp;(+)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;4&nbsp;:&nbsp;muons&nbsp;(-)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;5&nbsp;:&nbsp;pions&nbsp;(+)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;6&nbsp;:&nbsp;pions&nbsp;(-)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;7&nbsp;:&nbsp;kaons&nbsp;(+)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;8&nbsp;:&nbsp;kaons&nbsp;(-)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;9&nbsp;:&nbsp;neutrons<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;10:&nbsp;protons<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;11:&nbsp;antiprotons<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;12:&nbsp;nuclei<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;13:&nbsp;Other&nbsp;charged&nbsp;particles&nbsp;(excluding&nbsp;p&nbsp;and&nbsp;antip)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;14:&nbsp;Other&nbsp;neutral&nbsp;particles&nbsp;(excluding&nbsp;neutrons)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;15:&nbsp;e+e-<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;16:&nbsp;mu+mu-<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;17:&nbsp;pi+pi-<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;18:&nbsp;K+K-<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;19:&nbsp;All&nbsp;charged&nbsp;particles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;20:&nbsp;All&nbsp;neutral&nbsp;particles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;21:&nbsp;All&nbsp;particles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;22:&nbsp;All&nbsp;neutrinos<br>
+&nbsp;<br>
+====================================================================<br>
+&nbsp;<br>
+There&nbsp;are&nbsp;some&nbsp;special&nbsp;tables,&nbsp;these&nbsp;are:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;0100&nbsp;:&nbsp;Atmospheric&nbsp;profile<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;5501&nbsp;:&nbsp;Xmax&nbsp;and&nbsp;Nmax&nbsp;(charged&nbsp;particles)&nbsp;vs&nbsp;shower&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;5511&nbsp;:&nbsp;First&nbsp;interaction&nbsp;depth&nbsp;and&nbsp;primary&nbsp;energy&nbsp;vs&nbsp;shower&nbsp;number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;5513&nbsp;:&nbsp;Zenith&nbsp;and&nbsp;azimuth&nbsp;vs&nbsp;shower&nbsp;number</tt></dd></dl>
+ <dl><dt><a name="-traject_finder"><strong>traject_finder</strong></a>(files, RASPASS=False, UG=False)</dt><dd><tt>Returns&nbsp;trajecory&nbsp;parameters&nbsp;given&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;file<br>
+**WARNING**&nbsp;It&nbsp;uses&nbsp;my&nbsp;personal&nbsp;conventions&nbsp;for&nbsp;naming&nbsp;files<br>
+&nbsp;<br>
+=================================================================<br>
+&nbsp;<br>
+files:&nbsp;output&nbsp;of&nbsp;pathfinder<br>
+&nbsp;<br>
+===================================================================</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>RT</strong> = 6357.0<br>
+<strong>b1</strong> = 1222.6562<br>
+<strong>b2</strong> = 1144.9069<br>
+<strong>b3</strong> = 1305.5948<br>
+<strong>b4</strong> = 540.1778<br>
+<strong>b5</strong> = 1<br>
+<strong>basic_units</strong> = {'0': '', '1': ' eV', '2': '', '3': '', '4': '', '5': ''}<br>
+<strong>c1</strong> = 994186.38<br>
+<strong>c2</strong> = 878153.55<br>
+<strong>c3</strong> = 636143.04<br>
+<strong>c4</strong> = 772170.16<br>
+<strong>c5</strong> = 1000000000.0<br>
+<strong>colors</strong> = ['k', 'royalblue', 'r', 'gold', 'limegreen', 'navy', 'crimson', 'turquoise', 'darkorange', 'darkgreen']<br>
+<strong>default_sim_control</strong> = ['1', 'Infinite', '1', '0.123456', '350', '1e-6 Relative', '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV', 'Full', 'Off']<br>
+<strong>default_sim_control_ZHS</strong> = ['1', 'Infinite', '1', '0.123456', '350', '1e-4 Relative', '0.06', 'All', 'All', '80 keV', '80 keV', '80 keV', '80 keV', 'Full', 'Off']<br>
+<strong>dict_basic_IDL</strong> = {'0': 'PrimaryParticle', '1': 'PrimaryEnergy', '2': 'GeomagneticField', '3': 'PropagatePrimary', '4': 'Site', '5': 'GroundAltitude'}<br>
+<strong>dict_cols_ZHSf</strong> = {'0': 'Shower Number', '1': 'Antenna Number', '10': 'Ez [V/m/MHz]', '2': 'Antenna X [m]', '3': 'Antenna Y [m]', '4': 'Antenna Z [m]', '5': 'Frequency #', '6': 'Frequency [MHz]', '7': 'E [V/m/MHz]', '8': 'Ex [V/m/MHz]', ...}<br>
+<strong>dict_cols_ZHSt</strong> = {'0': 'Shower Number', '1': 'Antenna Number', '10': 'E [V/m]', '11': 'Ex [V/m]', '12': 'Ey [V/m]', '13': 'Ez [V/m]', '2': 'Antenna X [m]', '3': 'Antenna Y [m]', '4': 'Antenna Z [m]', '5': 't [ns]', ...}<br>
+<strong>dict_control_IDL</strong> = {'0': 'TotalShowers', '1': 'RunsPerProcess', '10': 'ElectronRoughCut', '11': 'GammaCutEnergy', '12': 'GammaRoughCut', '13': 'PerShowerData', '14': 'ExportPerShower', '2': 'ShowersPerRun', '3': 'RandomSeed', '4': 'ObservingLevels', ...}<br>
+<strong>dict_dirs_ZHS</strong> = {'x': 'N-S', 'y': 'E-W', 'z': 'Vert.'}<br>
+<strong>dict_labs_ZHSf_tex</strong> = {'E': r'$\left|E\right|$ [$\mathrm{V/m/MHz}$]', 'Ex': r'$E_x$ [$\mathrm{V/m/MHz}$]', 'Ey': r'$E_y$ [$\mathrm{V/m/MHz}$]', 'Ez': r'$E_z$ [$\mathrm{V/m/MHz}$]', 'f': r'Frequency [$\mathrm{MHz}$]', 'x': r'Antenna $X$ [$\mathrm{m}$]', 'y': r'Antenna $Y$ [$\mathrm{m}$]', 'z': r'Antenna $Z$ [$\mathrm{m}$]'}<br>
+<strong>dict_labs_ZHSf_tex_2</strong> = {'E': r'$\left|E\right|$', 'Ex': '$E_x$', 'Ey': '$E_y$', 'Ez': '$E_z$', 'f': 'f', 'x': '$X$', 'y': '$Y$', 'z': '$Z$'}<br>
+<strong>dict_labs_ZHSt_tex</strong> = {'A': r'$\left|A\right|$ [$\mathrm{V/m}$]', 'Ax': r'$A_x$ [$\mathrm{V/m}$]', 'Ay': r'$A_y$ [$\mathrm{V/m}$]', 'Az': r'$A_z$ [$\mathrm{V/m}$]', 'E': r'$\left|E\right|$ [$\mathrm{V/m}$]', 'EF': r'Energy Fluence [$\mathrm{eV/m^2}$]', 'EFx': r'Energy Fluence (x) [$\mathrm{eV/m^2}$]', 'EFy': r'Energy Fluence (y) [$\mathrm{eV/m^2}$]', 'EFz': r'Energy Fluence (z) [$\mathrm{eV/m^2}$]', 'Ex': r'$E_x$ [$\mathrm{V/m}$]', ...}<br>
+<strong>dict_labs_ZHSt_tex_2</strong> = {'A': r'$\left|A\right|$', 'Ax': '$A_x$', 'Ay': '$A_y$', 'Az': '$A_z$', 'E': r'$\left|E\right|$', 'EF': 'Egy. Fl.', 'EFx': 'Egy. Fl. (x)', 'EFy': 'Egy. Fl. (y)', 'EFz': 'Egy. Fl. (z)', 'Ex': '$E_x$', ...}<br>
+<strong>dict_part</strong> = {'0': 'gammas', '1': 'e-', '10': 'p', '11': 'anti-p', '12': 'Nuclei', '13': 'Other charged pcles.', '14': 'Other neutral pcles.', '15': 'e+e-', '16': 'mu+mu-', '17': 'pi+pi-', ...}<br>
+<strong>dict_part_tex</strong> = {'0': r'$\gamma$', '1': '$e^-$', '10': '$p$', '11': r'$\bar{p}$', '12': 'Nuclei', '13': 'Other charged pcles.', '14': 'Other neutral pcles.', '15': '$e^+e^-$', '16': r'$\mu^+\mu^-$', '17': r'$\pi^+\pi^-$', ...}<br>
+<strong>dict_tab</strong> = {'0': 'Longitudinal development', '1': 'Unweighted longitudinal development', '10': 'Number of created entries', '11': 'Energy of created particles', '12': 'Longitudinal development of low energy particles', '13': 'Unweighted longitudinal development of low energy particles', '14': 'Energy longitudinal development of low energy particles', '15': 'Longitudinal development of deposited energy', '16': 'Energy (per particle) longitudinal development', '2': 'Energy longitudinal development', ...}<br>
+<strong>dict_tab_xlab</strong> = {'0': r'$X_v$ [$\mathrm{g/cm^2}$]', '1': r'$X_v$ [$\mathrm{g/cm^2}$]', '10': r'$X_v$ [$\mathrm{g/cm^2}$]', '11': r'$X_v$ [$\mathrm{g/cm^2}$]', '12': r'$X_v$ [$\mathrm{g/cm^2}$]', '13': r'$X_v$ [$\mathrm{g/cm^2}$]', '14': r'$X_v$ [$\mathrm{g/cm^2}$]', '15': r'$X_v$ [$\mathrm{g/cm^2}$]', '16': r'$X_v$ [$\mathrm{g/cm^2}$]', '2': r'$X_v$ [$\mathrm{g/cm^2}$]', ...}<br>
+<strong>dict_tab_ylab</strong> = {'0': 'Number of particles', '1': 'Number of particles', '10': 'Number of created entries', '11': r'$E$ of created particles [$\mathrm{GeV}$]', '12': 'Number of low $E$ particles', '13': 'Number of low $E$ particles', '14': r'$E$ of low $E$ particles [$\mathrm{GeV}$]', '15': r'Deposited energy [$\mathrm{GeV}$]', '16': r'$E$ (per particle) [$\mathrm{GeV}$]', '2': r'$E$ [$\mathrm{GeV}$]', ...}<br>
+<strong>dict_tab_yleg</strong> = {'0': '#', '1': '#', '10': '# (entries)', '11': '$E$ (created)', '12': '# (low E)', '13': '# (low E)', '14': '$E$ (low $E$)', '15': 'Dep. $E$', '16': '$E$ (per part.)', '2': '$E$', ...}<br>
+<strong>dict_vars_ZHSf</strong> = {'E': 7, 'Ex': 8, 'Ey': 9, 'Ez': 10, 'f': 6, 'x': 2, 'y': 3, 'z': 4}<br>
+<strong>dict_vars_ZHSt</strong> = {'A': 6, 'Ax': 7, 'Ay': 8, 'Az': 9, 'E': 10, 'EF': 14, 'EFx': 15, 'EFy': 16, 'EFz': 17, 'Ex': 11, ...}<br>
+<strong>rename1</strong> = 'for f in *.t*; do if [ "${f: -1}" = "b" ]; then ..."; else mv "$f" "${f%.*}_vert.${f##*.}"; fi; done'<br>
+<strong>rename2</strong> = 'for f in *b; do mv "$f" "${f%?}"; done'<br>
+<strong>tables</strong> = array([[1001, 1301, 1501, 2001, 2301, 2501, 2801...96, 6496,
+        6796, 9999, 9999, 9999, 9999]])<br>
+<strong>tabs_x_core</strong> = ['3', '4', '7']<br>
+<strong>tabs_x_depth</strong> = ['0', '1', '2', '9', '10', '11', '12', '13', '14', '15', '16']<br>
+<strong>tabs_x_ener</strong> = ['5', '6']<br>
+<strong>valid_mag_f</strong> = ['E', 'Ex', 'Ey', 'Ez']<br>
+<strong>valid_mag_t</strong> = ['A', 'Ax', 'Ay', 'Az', 'E', 'Ex', 'Ey', 'Ez', 'EF', 'EFx', 'EFy', 'EFz']<br>
+<strong>valid_vars_f</strong> = ['f', 'x', 'y', 'z', 'xy', 'xz', 'yz']<br>
+<strong>valid_vars_t</strong> = ['t', 'f', 'x', 'y', 'z', 'xy', 'xz', 'yz']</td></tr></table>
+</body></html>
