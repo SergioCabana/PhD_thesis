@@ -2065,7 +2065,7 @@ def setup_simulation_SGE(task_names, basics, trajects, sim_controls, exports, ex
     # we connect to our remote host
     
     print('PASSWORD INPUT: Be careful, it might be visible in some terminals')
-    print('If you do not get a warning before the input line, it should work properly')
+    print('If you did not get a warning before this, it should work properly')
     
     password = getpass('Please introduce your remote machine password: ')
     
@@ -2127,7 +2127,7 @@ def setup_simulation_SGE(task_names, basics, trajects, sim_controls, exports, ex
 
 
 def run_simulation_SGE(shell_remote_paths, server = 'mastercr1.igfae.usc.es', node = 'nodo014', \
-                       username = 'sergio.cabana', fake_time = 3., mail = True):
+                       username = 'sergio.cabana', manual = True):
     
     ''' Submits to SGE queue system the shell_scripts prepared with mazepin.setup_simulation_SGE()
     
@@ -2137,15 +2137,13 @@ def run_simulation_SGE(shell_remote_paths, server = 'mastercr1.igfae.usc.es', no
         
         server, node, username (str): same as in setup_simulation_SGE
         
-        fake_time (float): Time to wait between submits
-        
-        mail (bool): if True, asks for an email address to send notification when jobs are completed
+        manual (bool): If True, asks for confirmation to submit every script
     
     '''
     
     # we connect to our remote host
     print('PASSWORD INPUT: Be careful, it might be visible in some terminals')
-    print('If you do not get a warning before the input line, it should work properly')
+    print('If you did not get a warning before this, it should work properly')
     
     password = getpass('Please introduce your remote machine password: ')
     
@@ -2165,16 +2163,14 @@ def run_simulation_SGE(shell_remote_paths, server = 'mastercr1.igfae.usc.es', no
     nodehost.connect(node, username=username, password=password, sock=hostchannel)
     
     # now we submit to queque system:
-    submit_cmd = 'qsub '
-    
-    if mail:
-        address = str(input('Please introduce your email for notification: '))
-        submit_cmd += '-me -M ' + address + ' '
-        
+    i = 0
     for shell_path in shell_remote_paths:
-        time.sleep(fake_time)
-        stdin, stdout, stderr = nodehost.exec_command(submit_cmd + shell_path)
-    
+        if manual:
+            i += 1
+            input(f'Press Enter to submit bash script {i}: ')
+            print('Done')
+        stdin, stdout, stderr = nodehost.exec_command('qsub ' + shell_path)
+        
     # we check that everything is working
     
     print('Everything should be submitted by now. Let\'s see what qstat returns (Wait for 5 secs):')

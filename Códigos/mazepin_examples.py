@@ -441,4 +441,4 @@ axes = maz.ZHAireS_plot(data, ant_data, i_ant, freqs = freqs, plots = plots, \
     
 
 # maz.run_simulation_SGE(shell_remote_paths = shells, server = server, node = node,\
-#                        username = username, mail = False)
+#                        username = username, manual = True)
